@@ -167,7 +167,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         } catch (Exception ex) {
-            DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
+            DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder, NOT SIGMA!!!!!!", ex.getStackTrace());
         }
     }
 
@@ -213,6 +213,25 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
     private void startSimThread() {
