@@ -6,19 +6,15 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.commands.joystickDrive;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Drive;
-import frc.robot.subsystems.Telemetry;
+import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -35,16 +31,26 @@ public class RobotContainer {
 
 
     public Joystick driverController = new Joystick(0);
-
     private final Telemetry logger = new Telemetry(MaxSpeed);
-
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
+    public final Elevator elevatorSubsystem = new Elevator();
+
+    public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
+    public final Trigger driverB = new Trigger(() -> driverController.getRawButton(2));
+    public final Trigger driverStart = new Trigger(() -> driverController.getRawButton(8));
 
     public RobotContainer() {
+        configureDefaultCommands();
         configureBindings();
     }
 
     public void configureBindings() {
+        driverA.whileTrue(elevatorSubsystem.setElevatorGoal(4));
+        driverB.whileTrue(elevatorSubsystem.setElevatorGoal(0));
+        driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
+    }
+
+    public void configureDefaultCommands() {
         driveSubsystem.setDefaultCommand(
             new joystickDrive(
                 driveSubsystem,
@@ -53,6 +59,11 @@ public class RobotContainer {
                 () -> driverController.getRawAxis(4)
             )
         );
+        elevatorSubsystem.setDefaultCommand(
+            elevatorSubsystem.moveElevator()
+        );
+        
+
     }
 
     public Command getAutonomousCommand() {
