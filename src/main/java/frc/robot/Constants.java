@@ -27,10 +27,11 @@ public class Constants {
         }
 
         public static double maxElevatorHeight = 28; //inches
-        public static double gearCircumference = 5.53; //inches
+        public static double gearCircumference = 5.50093*2; //inches
+        public static double ChassisElevationOffset = 1.25;
         public static double gearRatio = 25;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.1044921875;//0.198739;
+        public static double encoderOffset = 0.26708;
         public static int leaderMotorID = 21;
         public static int followMotorID = 22;
     }

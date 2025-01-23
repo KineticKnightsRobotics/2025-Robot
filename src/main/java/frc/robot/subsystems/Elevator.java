@@ -2,7 +2,9 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -28,6 +30,7 @@ public class Elevator extends SubsystemBase {
     private SparkMaxConfig followMotorConfig;
 
     private CANcoder elevatorEncoder;
+    private CANcoderConfiguration elevatorEncoderConfig;
 
     private ProfiledPIDController elevatorController;
 
@@ -41,53 +44,66 @@ public class Elevator extends SubsystemBase {
         elevatorEncoder = new CANcoder(ElevatorConstants.encoderID);
 
         elevatorController = new ProfiledPIDController(
-            0.001,
+            0.15,
             0,
-            0,
+            0.01,
             new TrapezoidProfile.Constraints(
-                1,
-                1
+                0.3,
+                0.1
             )
         );
 
+        configureDevices();
 
-        configureMotors();
-
-        elevatorEncoder.setPosition(elevatorEncoder.getAbsolutePosition().getValueAsDouble() - ElevatorConstants.encoderOffset);
-        goalPosition = getElevatorPosition(); //Initialize the goal position to wherever we started.
+        goalPosition = 5.0;//getElevatorPosition(); //Initialize the goal position to wherever we started.
+        elevatorController.setGoal(goalPosition);
+        
+        elevatorEncoder.setPosition(elevatorEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
-    public void configureMotors() {
-        //try {
+    public void configureDevices() {
+        try {
             leadMotorConfig = new SparkMaxConfig();
             leadMotorConfig
                 .inverted(false)                                                                                            //Inverts the motor
-                .smartCurrentLimit(60)                                                                                    //Limits # of amps going to the motor
+                .smartCurrentLimit(30)                                                                                    //Limits # of amps going to the motor
                 .closedLoopRampRate(0.01);                                                                                      //Ammount of time for the voltage to ramp i.e it will take 0.01 seconds for the input voltage to go from 1V to 2V
             leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             followMotorConfig = new SparkMaxConfig();
             followMotorConfig
                 .inverted(true)
-                .smartCurrentLimit(60)
-                .closedLoopRampRate(0.01)
-                .follow(ElevatorConstants.leaderMotorID);
+                .smartCurrentLimit(30)
+                .closedLoopRampRate(0.01);
+                //.follow(ElevatorConstants.leaderMotorID);
             followElevatorMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        //}
-        //catch (Exception ex){
-        //    DriverStation.reportError("Failed to configure Elevator Subsystem", ex.getStackTrace());
-        //}
+
+            elevatorEncoderConfig = new CANcoderConfiguration();
+            elevatorEncoder.getConfigurator().apply(
+                elevatorEncoderConfig.MagnetSensor
+                    .withAbsoluteSensorDiscontinuityPoint(1)
+                    .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
+                    .withMagnetOffset(-ElevatorConstants.encoderOffset)
+                );
+
+
+        }
+        catch (Exception ex){
+            DriverStation.reportError("Failed to configure Elevator Subsystem", ex.getStackTrace());
+        }
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
         SmartDashboard.putNumber("Elevator Goal", getElevatorGoal());
+        SmartDashboard.putNumber("Elevator Absolute Value", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("Elevator Relative Value", elevatorEncoder.getPosition().getValueAsDouble());
         SmartDashboard.putData(this);
     }
 
     public double getElevatorPosition() {
-        return elevatorEncoder.getPosition().getValueAsDouble() * ElevatorConstants.gearCircumference;
+        return elevatorEncoder.getPosition().getValueAsDouble() * ElevatorConstants.gearCircumference + ElevatorConstants.ChassisElevationOffset;
     }
     
     public double getElevatorGoal(){
@@ -108,17 +124,30 @@ public class Elevator extends SubsystemBase {
     }
     
     public Command moveElevator() {
-        return Commands.run(
+        return Commands
+        .runOnce(
             () -> {
-                if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxElevatorHeight) {
-                    leaderElevatorMotor.set(
-                        elevatorController.calculate(getElevatorPosition())
-                    );
-                }
+                leaderElevatorMotor.set(0.0); followElevatorMotor.set(0.0);
             },
             this
-        )
-        .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+        ).andThen(
+            Commands.run(
+                () -> {
+                    double newOutput = elevatorController.calculate(getElevatorPosition());
+                    if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxElevatorHeight) {
+                        SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
+                        leaderElevatorMotor.set(
+                            newOutput
+                        );
+                        followElevatorMotor.set(
+                            newOutput
+                        );
+                    }
+                },
+                this
+            )
+        .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+        );
     }
 
     public Command zeroElevatorPosition() {

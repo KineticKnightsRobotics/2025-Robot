@@ -48,6 +48,8 @@ public class RobotContainer {
         driverA.whileTrue(elevatorSubsystem.setElevatorGoal(4));
         driverB.whileTrue(elevatorSubsystem.setElevatorGoal(0));
         driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
+
+        SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));
     }
 
     public void configureDefaultCommands() {
