@@ -20,6 +20,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+
 import frc.robot.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
@@ -32,7 +35,8 @@ public class Elevator extends SubsystemBase {
     private CANcoder elevatorEncoder;
     private CANcoderConfiguration elevatorEncoderConfig;
 
-    private ProfiledPIDController elevatorController;
+    //private ProfiledPIDController elevatorController;
+    private PIDController elevatorController;
 
     private double goalPosition;
 
@@ -43,22 +47,30 @@ public class Elevator extends SubsystemBase {
         followElevatorMotor = new SparkMax(ElevatorConstants.followMotorID, MotorType.kBrushless);
         elevatorEncoder = new CANcoder(ElevatorConstants.encoderID);
 
-        elevatorController = new ProfiledPIDController(
-            0.15,
+
+        elevatorController = new PIDController(
+            ElevatorConstants.ElevatorProfiledPID.P,
+            ElevatorConstants.ElevatorProfiledPID.I,
+            ElevatorConstants.ElevatorProfiledPID.D
+            );
+
+
+        /*elevatorController = new ProfiledPIDController(
+            10.0,
             0,
-            0.01,
+            0.00,
             new TrapezoidProfile.Constraints(
                 0.3,
                 0.1
             )
-        );
+        ); */
 
         configureDevices();
 
         goalPosition = 5.0;//getElevatorPosition(); //Initialize the goal position to wherever we started.
-        elevatorController.setGoal(goalPosition);
+        //elevatorController.setGoal(goalPosition);
         
-        elevatorEncoder.setPosition(elevatorEncoder.getAbsolutePosition().getValueAsDouble());
+        elevatorEncoder.setPosition(0.0);//elevatorEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
     public void configureDevices() {
@@ -115,11 +127,11 @@ public class Elevator extends SubsystemBase {
         .runOnce(
             () -> {
                 goalPosition = position;
-                elevatorController.setGoal(position);   
+                //elevatorController.setGoal(position);   
             },
             this
         ).unless(
-           () ->(position < ElevatorConstants.maxElevatorHeight)
+           () ->(position > ElevatorConstants.maxElevatorHeight)
         );
     }
     
@@ -133,14 +145,22 @@ public class Elevator extends SubsystemBase {
         ).andThen(
             Commands.run(
                 () -> {
-                    double newOutput = elevatorController.calculate(getElevatorPosition());
+                    //double newOutput = elevatorController.calculate(getElevatorPosition());
                     if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxElevatorHeight) {
                         SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
                         leaderElevatorMotor.set(
-                            newOutput
+                            MathUtil.clamp(
+                            elevatorController.calculate(getElevatorPosition(), goalPosition),
+                            -0.3,
+                            0.3
+                            )
                         );
                         followElevatorMotor.set(
-                            newOutput
+                            MathUtil.clamp(
+                            elevatorController.calculate(getElevatorPosition(), goalPosition),
+                            -0.3,
+                            0.3
+                            )
                         );
                     }
                 },

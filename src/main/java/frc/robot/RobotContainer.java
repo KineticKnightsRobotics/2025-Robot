@@ -45,7 +45,7 @@ public class RobotContainer {
     }
 
     public void configureBindings() {
-        driverA.whileTrue(elevatorSubsystem.setElevatorGoal(4));
+        driverA.whileTrue(elevatorSubsystem.setElevatorGoal(10));
         driverB.whileTrue(elevatorSubsystem.setElevatorGoal(0));
         driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
 

@@ -19,7 +19,7 @@ public class Constants {
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.001;
+            public static double P = 0.1;
             public static double I = 0;
             public static double D = 0;
             public static double MaxVelocity = 0;
