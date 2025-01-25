@@ -37,6 +37,8 @@ public class RobotContainer {
 
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
     public final Trigger driverB = new Trigger(() -> driverController.getRawButton(2));
+    public final Trigger driverX = new Trigger(() -> driverController.getRawButton(3));
+    public final Trigger driverY = new Trigger(() -> driverController.getRawButton(4));
     public final Trigger driverStart = new Trigger(() -> driverController.getRawButton(8));
 
     public RobotContainer() {
@@ -45,8 +47,10 @@ public class RobotContainer {
     }
 
     public void configureBindings() {
-        driverA.whileTrue(elevatorSubsystem.setElevatorGoal(10));
-        driverB.whileTrue(elevatorSubsystem.setElevatorGoal(0));
+        driverA.onTrue(elevatorSubsystem.setElevatorGoal(15));
+        driverB.onTrue(elevatorSubsystem.setElevatorGoal(0));
+        driverX.onTrue(elevatorSubsystem.setElevatorGoal(50));
+        driverY.onTrue(elevatorSubsystem.setElevatorGoal(30));
         driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
 
         SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));

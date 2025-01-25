@@ -67,7 +67,7 @@ public class Elevator extends SubsystemBase {
 
         configureDevices();
 
-        goalPosition = 5.0;//getElevatorPosition(); //Initialize the goal position to wherever we started.
+        goalPosition = 5.0;//ElevatorConstants.ChassisElevationOffset+0.1;//getElevatorPosition(); //Initialize the goal position to wherever we started.
         //elevatorController.setGoal(goalPosition);
         
         elevatorEncoder.setPosition(0.0);//elevatorEncoder.getAbsolutePosition().getValueAsDouble());
@@ -79,15 +79,32 @@ public class Elevator extends SubsystemBase {
             leadMotorConfig
                 .inverted(false)                                                                                            //Inverts the motor
                 .smartCurrentLimit(30)                                                                                    //Limits # of amps going to the motor
-                .closedLoopRampRate(0.01);                                                                                      //Ammount of time for the voltage to ramp i.e it will take 0.01 seconds for the input voltage to go from 1V to 2V
+                .closedLoopRampRate(0.01);
+            /*
+            leadMotorConfig                                                                                                  //Ammount of time for the voltage to ramp i.e it will take 0.01 seconds for the input voltage to go from 1V to 2V
+                .encoder
+                    .positionConversionFactor(ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio);
+            leadMotorConfig
+                .softLimit
+                    .reverseSoftLimit(ElevatorConstants.ChassisElevationOffset-1)
+                    .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
             leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+            */
 
             followMotorConfig = new SparkMaxConfig();
             followMotorConfig
                 .inverted(true)
                 .smartCurrentLimit(30)
                 .closedLoopRampRate(0.01);
-                //.follow(ElevatorConstants.leaderMotorID);
+            /*
+            followMotorConfig
+                .encoder
+                    .positionConversionFactor(ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio);
+            followMotorConfig
+                .softLimit
+                    .reverseSoftLimit(ElevatorConstants.maxChassisHeight-1)
+                    .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
+            */
             followElevatorMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             elevatorEncoderConfig = new CANcoderConfiguration();
@@ -111,6 +128,7 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("Elevator Goal", getElevatorGoal());
         SmartDashboard.putNumber("Elevator Absolute Value", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("Elevator Relative Value", elevatorEncoder.getPosition().getValueAsDouble());
+
         SmartDashboard.putData(this);
     }
 
@@ -126,12 +144,12 @@ public class Elevator extends SubsystemBase {
         return Commands
         .runOnce(
             () -> {
-                goalPosition = position;
+                goalPosition = MathUtil.clamp(position, ElevatorConstants.ChassisElevationOffset+0.1, ElevatorConstants.maxChassisHeight-0.1);
                 //elevatorController.setGoal(position);   
             },
             this
         ).unless(
-           () ->(position > ElevatorConstants.maxElevatorHeight)
+           () ->(position > ElevatorConstants.maxChassisHeight)
         );
     }
     
@@ -146,20 +164,20 @@ public class Elevator extends SubsystemBase {
             Commands.run(
                 () -> {
                     //double newOutput = elevatorController.calculate(getElevatorPosition());
-                    if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxElevatorHeight) {
+                    if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
                         SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
                         leaderElevatorMotor.set(
                             MathUtil.clamp(
                             elevatorController.calculate(getElevatorPosition(), goalPosition),
-                            -0.3,
-                            0.3
+                            -1.0,
+                            1.0
                             )
                         );
                         followElevatorMotor.set(
                             MathUtil.clamp(
                             elevatorController.calculate(getElevatorPosition(), goalPosition),
-                            -0.3,
-                            0.3
+                            -1.0,
+                            1.0
                             )
                         );
                     }
@@ -168,6 +186,21 @@ public class Elevator extends SubsystemBase {
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
+    }
+
+    public Command setElevatorSpeed(double speed) {
+        return Commands.run(
+            () -> {
+                leaderElevatorMotor.set(speed);
+                followElevatorMotor.set(speed);
+            }, 
+            this)
+            .finallyDo(
+                () -> {
+                    leaderElevatorMotor.set(0.0);
+                    followElevatorMotor.set(0.0);
+                }
+            );
     }
 
     public Command zeroElevatorPosition() {
