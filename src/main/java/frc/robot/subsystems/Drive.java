@@ -53,7 +53,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     public Vision kLimelight = new Vision("limelight", this);
 
-    //private AprilTagFieldLayout kFieldLayout = AprilTagFields.
+    private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
 
     //auto objects
@@ -216,10 +216,27 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
-    public Translation2d getTranslationRelative(int apriltagID) {
-        return
-            getPose().getTranslation().getDistance();
-            
+    public Translation2d getTagPose(int AprilTagID) {
+        return kFieldLayout.getTagPose(AprilTagID).get().getTranslation().toTranslation2d();
+    }
+
+
+    public Translation2d getTranslationRelative(int apriltagID) { //Repurposed 2024 code
+        return 
+        getPose().getTranslation()
+        .minus(
+            kFieldLayout.getTagPose(apriltagID).get().getTranslation().toTranslation2d()
+        );
+    }
+
+    public Rotation2d getRotationRelative(int apriltagID) { //Taken from 2024 code.
+        return 
+        getPose().getTranslation()
+        .minus(
+            getTagPose(apriltagID)
+        )
+        .unaryMinus()
+        .getAngle(); 
     }
 
 
