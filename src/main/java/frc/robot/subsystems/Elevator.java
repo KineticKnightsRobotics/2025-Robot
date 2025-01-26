@@ -67,7 +67,7 @@ public class Elevator extends SubsystemBase {
 
         configureDevices();
 
-        goalPosition = 5.0;//ElevatorConstants.ChassisElevationOffset+0.1;//getElevatorPosition(); //Initialize the goal position to wherever we started.
+        goalPosition = ElevatorConstants.ChassisElevationOffset+0.1;
         //elevatorController.setGoal(goalPosition);
         
         elevatorEncoder.setPosition(0.0);//elevatorEncoder.getAbsolutePosition().getValueAsDouble());
@@ -88,8 +88,8 @@ public class Elevator extends SubsystemBase {
                 .softLimit
                     .reverseSoftLimit(ElevatorConstants.ChassisElevationOffset-1)
                     .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
-            leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             */
+            leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             followMotorConfig = new SparkMaxConfig();
             followMotorConfig
@@ -183,6 +183,8 @@ public class Elevator extends SubsystemBase {
                     }
                 },
                 this
+            ).until(
+                () -> false
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );

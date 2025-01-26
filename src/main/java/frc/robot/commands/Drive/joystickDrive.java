@@ -52,8 +52,8 @@ public class joystickDrive extends Command {
     public void execute() {
         driveSubsystem.setControl(
             speedBuilder
-                .withVelocityX(xSupplier.getAsDouble()*-maxSpeed*0.2)
-                .withVelocityY(ySupplier.getAsDouble()*-maxSpeed*0.2)
+                .withVelocityX(-ySupplier.getAsDouble()*maxSpeed*0.2)
+                .withVelocityY(-xSupplier.getAsDouble()*maxSpeed*0.2)
                 .withRotationalRate(zSupplier.getAsDouble()*-maxAngularRate*0.2)
         );
     }

@@ -4,6 +4,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
@@ -25,7 +26,11 @@ public class Vision {
     }
 
     public Pose2d getEstimatedRoboPose() {
-        return LimelightHelpers.getBotPose2d_wpiBlue("limelight");
+        return LimelightHelpers.getBotPose2d_wpiBlue(deviceName);
+    }
+
+    public Pose3d getRobotTagRelativePose() {
+        return LimelightHelpers.getBotPose3d_TargetSpace(deviceName);
     }
 
     public Matrix<N3,N1> getStandardDeviations(){   //Borrowed all this from 3161

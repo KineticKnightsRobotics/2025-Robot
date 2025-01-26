@@ -15,9 +15,12 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,7 +51,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    private Vision kLimelight = new Vision("limelight", this);
+    public Vision kLimelight = new Vision("limelight", this);
+
+    //private AprilTagFieldLayout kFieldLayout = AprilTagFields.
 
 
     //auto objects
@@ -211,7 +216,16 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
+    public Translation2d getTranslationRelative(int apriltagID) {
+        return
+            getPose().getTranslation().getDistance();
+            
+    }
 
+
+    //public double getTranslationRelativeToSpeaker(){
+    //    return Math.abs(getPose().getTranslation().getDistance(getSpeakerPose().get().getTranslation().toTranslation2d()));
+    //}
 
 
 
