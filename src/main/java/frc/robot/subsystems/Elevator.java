@@ -88,8 +88,8 @@ public class Elevator extends SubsystemBase {
                 .softLimit
                     .reverseSoftLimit(ElevatorConstants.ChassisElevationOffset-1)
                     .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
-            leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             */
+            leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             followMotorConfig = new SparkMaxConfig();
             followMotorConfig
