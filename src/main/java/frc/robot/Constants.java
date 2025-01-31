@@ -51,6 +51,23 @@ public class Constants {
         public static int followMotorID = 22;
     }
 
+    public final static class ArmConstants {
+        public static class ArmProfiledPID {
+            public static double P = 0.0;
+            public static double I = 0.0;
+            public static double D = 0.0;
+            public static double MaxVelocity = 0;
+            public static double MaxAcceleration = 0;
+        }
 
+        public static double maxPivotPos = 0.0;
+        public static double minPivotPos = 0.0;
+        public static double idlePosition = 0.0;
+        public static int encoderID;
+        public static double encoderOffset = 0.26708;
+        public static int leaderMotorID = 31;
+        public static int followMotorID = 32;
+        public static int effectorMotorID = 33;
+    }
 
 }
