@@ -51,7 +51,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    public Vision kLimelight = new Vision("limelight", this);
+    public Vision kLimelight = new Vision("limelight-dignan", this);
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
@@ -198,8 +198,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             });
         }
 
+        SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV()) {
-            this.addVisionMeasurement(
+            addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),
                 kLimelight.getTimestamp(),
                 kLimelight.getStandardDeviations()

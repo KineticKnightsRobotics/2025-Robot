@@ -6,13 +6,15 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.commands.*;
+//import frc.robot.commands.*;
+import frc.robot.commands.Drive.allignApriltag;
 import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
 
@@ -39,6 +41,7 @@ public class RobotContainer {
 
     
         //driverA.onTrue(elevatorSubsystem.setElevatorGoal(15));
+        driverA.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0, -1), 1));
         driverB.onTrue(elevatorSubsystem.setElevatorGoal(0));
         driverX.onTrue(elevatorSubsystem.setElevatorGoal(50));
         driverY.onTrue(elevatorSubsystem.setElevatorGoal(30));

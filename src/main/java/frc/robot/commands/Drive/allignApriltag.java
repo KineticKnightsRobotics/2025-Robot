@@ -11,7 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.VisionConstants.AlignmentController.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drive;
@@ -81,16 +81,20 @@ public class allignApriltag extends Command {
             );
 
 
+        SmartDashboard.putNumber("apriltag X output", outputX);
 
         driveSubsystem.setControl(
             speedBuilder
-                .withVelocityX(0.0)
+                .withVelocityX(outputX)
                 .withVelocityY(0.0)
                 .withRotationalRate(0.0)
         );
     }
 
-
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 
 
 }

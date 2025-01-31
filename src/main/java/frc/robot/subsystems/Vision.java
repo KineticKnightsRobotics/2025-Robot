@@ -34,7 +34,7 @@ public class Vision {
     }
 
     public Matrix<N3,N1> getStandardDeviations(){   //Borrowed all this from 3161
-        LimelightHelpers.PoseEstimate limelightPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        LimelightHelpers.PoseEstimate limelightPose = LimelightHelpers.getBotPoseEstimate_wpiBlue(deviceName);
         //Get tag count and average position...
         int tagCount = limelightPose.tagCount; //number of tags seen
         double avgDist = limelightPose.avgTagDist; //average distance across all tags seen
@@ -47,12 +47,12 @@ public class Vision {
             return VecBuilder.fill(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE);
         }
         else {
-            //SmartDashboard.putNumberArray("Vision STD", defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30)).getData());
+            SmartDashboard.putNumberArray("Vision STD", defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30)).getData());
             return defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30));
         }
     }
     public double getTimestamp() {
-        return Timer.getFPGATimestamp() - LimelightHelpers.getLatency_Capture(deviceName)/1000 - LimelightHelpers.getLatency_Pipeline("limelight")/1000;
+        return Timer.getFPGATimestamp() - LimelightHelpers.getLatency_Capture(deviceName)/1000 - LimelightHelpers.getLatency_Pipeline(deviceName)/1000;
     }
 
     public boolean getTV() {
