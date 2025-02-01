@@ -61,10 +61,23 @@ public class Constants {
         }
 
         // Encoder reading * 360 = degrees
-        public static double maxPivotPos = 0.0 * 360;
-        public static double minPivotPos = 0.0 * 360;
-        public static double idlePosition = 0.0* 360;
-        
+        public static double maxPivotPos = 0.0;
+        public static double minPivotPos = 0.0;
+
+        // Idle and closed position
+        public static double idlePosition = 0.0;
+
+        // Open position
+        public static double openPosition = 0.0;
+
+        // Score position
+        public static double scorePosition = 0.0;
+
+        // Safe pivot position; the elevator can move
+        public static double intakeSafePosition = 150;
+
+        public static double intakeSpeed = 0.05;
+
         public static int encoderID = 34;
         public static double encoderOffset = 0.0;
         public static int leaderMotorID = 31;

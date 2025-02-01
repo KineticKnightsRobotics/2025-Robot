@@ -126,12 +126,12 @@ public class Arm extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Pivot Position", getPivotEncoderPosition());
         SmartDashboard.putNumber("Pivot Goal", getPivotGoal());
-        SmartDashboard.putBoolean("Arm Has Gamepiece", hasGampiece());
+        SmartDashboard.putBoolean("Arm Has Gamepiece", hasGamepiece());
 
         SmartDashboard.putData(this);
     }
 
-    public boolean hasGampiece() {
+    public boolean hasGamepiece() {
         return endAffectorBeamBreak.get();
     }
 
@@ -190,17 +190,34 @@ public class Arm extends SubsystemBase {
         );
     }
 
-    // Run end effector
-    public Command runEffector(double speed) {
-        // Set the speed of the effector motor > 0 to run it
+    // Load a game piece into the robot
+    public Command loadGamePiece(double speed) {
+        // Set the speed of the affector motor > 0 to run it
         return Commands.runOnce(
-            () -> {
-                affectorMotor.set(speed);
-            },
-            this
-        )
-        // Once the command is to be finished, stop the effector motor
-        .finallyDo(
+            () -> affectorMotor.set(speed)
+
+        // End condition of linebreak true (piece is in)
+        ).until(
+            () -> hasGamepiece()
+
+        // Once the command is to be finished, stop the affector motor
+        ).finallyDo(
+            () -> affectorMotor.set(0.0)
+        );
+    }
+
+    // Spit out the game piece
+    public Command outtakeGamePiece(double speed) {
+        // Set the speed of the affector motor > 0 to run it
+        return Commands.runOnce(
+            () -> affectorMotor.set(speed)
+
+        // End condition of linebreak true (piece is in)
+        ).until(
+            () -> !hasGamepiece()
+
+        // Once the command is to be finished, stop the affector motor
+        ).finallyDo(
             () -> affectorMotor.set(0.0)
         );
     }
