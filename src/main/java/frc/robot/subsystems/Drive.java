@@ -200,20 +200,22 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV()) {
+            setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
             addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),
-                kLimelight.getTimestamp(),
+                Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),//kLimelight.getTimestamp(),
                 kLimelight.getStandardDeviations()
             );
         }
 
-        SmartDashboard.putData(field);
-        field.setRobotPose(getPose());
+
+        SmartDashboard.putData("field2d", this.field);
+        this.field.setRobotPose(getPose());
     }
 
     public Pose2d getPose() {
         //return null;
-        return this.getState().Pose;
+        return getState().Pose;
     }
 
 

@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +41,8 @@ public class Arm extends SubsystemBase {
 
     private PIDController pivotController;
 
+    private DigitalInput endAffectorBeamBreak;
+
     private double goalPosition;
 
     public Arm() {
@@ -60,6 +63,8 @@ public class Arm extends SubsystemBase {
             ArmConstants.ArmProfiledPID.I, 
             ArmConstants.ArmProfiledPID.D
             );
+
+        endAffectorBeamBreak = new DigitalInput(ArmConstants.beamBreakPort);
         
         // Apply motor/encoder configs
         configureDevices();
@@ -121,8 +126,13 @@ public class Arm extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Pivot Position", getPivotEncoderPosition());
         SmartDashboard.putNumber("Pivot Goal", getPivotGoal());
+        SmartDashboard.putBoolean("Arm Has Gamepiece", hasGampiece());
 
         SmartDashboard.putData(this);
+    }
+
+    public boolean hasGampiece() {
+        return endAffectorBeamBreak.get();
     }
 
     // Get the position of the pivotEncoder
@@ -186,10 +196,11 @@ public class Arm extends SubsystemBase {
         return Commands.runOnce(
             () -> {
                 effectorMotor.set(speed);
-            }, this
-
+            },
+            this
+        )
         // Once the command is to be finished, stop the effector motor
-        ).finallyDo(
+        .finallyDo(
             () -> effectorMotor.set(0.0)
         );
     }

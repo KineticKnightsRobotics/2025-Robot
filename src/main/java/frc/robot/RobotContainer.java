@@ -25,6 +25,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
+    public final Arm armSubsystem = new Arm();
 
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
     public final Trigger driverB = new Trigger(() -> driverController.getRawButton(2));
@@ -64,6 +65,10 @@ public class RobotContainer {
         elevatorSubsystem.setDefaultCommand(
             elevatorSubsystem.moveElevator()
         );
+        armSubsystem.setDefaultCommand(
+            armSubsystem.pivotArm()
+        );
+
         
 
     }
