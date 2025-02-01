@@ -60,14 +60,16 @@ public class Constants {
             public static double MaxAcceleration = 0;
         }
 
-        public static double maxPivotPos = 0.0;
-        public static double minPivotPos = 0.0;
-        public static double idlePosition = 0.0;
+        // Encoder reading * 360 = degrees
+        public static double maxPivotPos = 0.0 * 360;
+        public static double minPivotPos = 0.0 * 360;
+        public static double idlePosition = 0.0* 360;
+        
         public static int encoderID = 34;
         public static double encoderOffset = 0.0;
         public static int leaderMotorID = 31;
         public static int followMotorID = 32;
-        public static int effectorMotorID = 33;
+        public static int affectorMotorID = 33;
         public static int beamBreakPort = 0;
     }
 

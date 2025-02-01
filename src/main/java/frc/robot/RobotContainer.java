@@ -42,11 +42,15 @@ public class RobotContainer {
 
     
         //driverA.onTrue(elevatorSubsystem.setElevatorGoal(15));
-        driverA.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0, -1), 1));
-        driverB.onTrue(elevatorSubsystem.setElevatorGoal(0));
-        driverX.onTrue(elevatorSubsystem.setElevatorGoal(50));
-        driverY.onTrue(elevatorSubsystem.setElevatorGoal(30));
-        //driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
+        //driverA.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0, -1), 1));
+        //driverB.onTrue(elevatorSubsystem.setElevatorGoal(0));
+        //driverX.onTrue(elevatorSubsystem.setElevatorGoal(50));
+        //driverY.onTrue(elevatorSubsystem.setElevatorGoal(30));
+        driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
+        driverA.onTrue(elevatorSubsystem.setElevatorGoal(0));
+        driverB.onTrue(armSubsystem.setPivotGoal(0));
+        driverX.onTrue(armSubsystem.setPivotGoal(50));
+        driverY.onTrue(armSubsystem.setPivotGoal(Constants.ArmConstants.idlePosition));
 
 
 

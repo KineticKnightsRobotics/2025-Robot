@@ -33,8 +33,8 @@ public class Arm extends SubsystemBase {
      * Pivot motors pivot the arm
      * Effector motor drives the end effector
      */
-    private SparkMax leaderPivotMotor, followPivotMotor, effectorMotor;
-    private SparkMaxConfig leadMotorConfig, followMotorConfig, effectorMotorConfig;
+    private SparkMax leaderPivotMotor, followPivotMotor,affectorMotor;
+    private SparkMaxConfig leadMotorConfig, followMotorConfig, affectorMotorConfig;
 
     private CANcoder pivotEncoder;
     private CANcoderConfiguration pivotCANcoderConfig;
@@ -52,7 +52,7 @@ public class Arm extends SubsystemBase {
         followPivotMotor = new SparkMax(ArmConstants.followMotorID, MotorType.kBrushless);
 
         // Config effector motor
-        effectorMotor = new SparkMax(ArmConstants.effectorMotorID, MotorType.kBrushless);
+        affectorMotor = new SparkMax(ArmConstants.affectorMotorID, MotorType.kBrushless);
 
         // Config pivot encoder
         pivotEncoder = new CANcoder(ArmConstants.encoderID);
@@ -98,13 +98,13 @@ public class Arm extends SubsystemBase {
             followPivotMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             // Effector motor
-            effectorMotorConfig = new SparkMaxConfig();
-            effectorMotorConfig
+            affectorMotorConfig = new SparkMaxConfig();
+            affectorMotorConfig
                 .inverted(false)
                 .smartCurrentLimit(30)
                 .closedLoopRampRate(0.01);
 
-            effectorMotor.configure(effectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+            affectorMotor.configure(affectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             
             // Pivot CANcoder
             pivotCANcoderConfig = new CANcoderConfiguration();
@@ -135,9 +135,9 @@ public class Arm extends SubsystemBase {
         return endAffectorBeamBreak.get();
     }
 
-    // Get the position of the pivotEncoder
+    // Get the position of the pivotEncoder in degrees
     public double getPivotEncoderPosition() {
-        return pivotEncoder.getPosition().getValueAsDouble();
+        return pivotEncoder.getPosition().getValueAsDouble() * 360;
     }
 
     // Get the pivot goal of the PID
@@ -195,22 +195,14 @@ public class Arm extends SubsystemBase {
         // Set the speed of the effector motor > 0 to run it
         return Commands.runOnce(
             () -> {
-                effectorMotor.set(speed);
+                affectorMotor.set(speed);
             },
             this
         )
         // Once the command is to be finished, stop the effector motor
         .finallyDo(
-            () -> effectorMotor.set(0.0)
+            () -> affectorMotor.set(0.0)
         );
     }
-
-    // Puts the arm to idle position
-    public Command idleArm() {
-        return setPivotGoal(ArmConstants.idlePosition).andThen(pivotArm());
-    }
-
-
-
 
 }
