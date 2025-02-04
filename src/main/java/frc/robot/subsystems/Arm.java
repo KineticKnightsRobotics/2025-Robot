@@ -5,15 +5,14 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import com.revrobotics.RelativeEncoder;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,7 +32,7 @@ public class Arm extends SubsystemBase {
      * Pivot motors pivot the arm
      * Effector motor drives the end effector
      */
-    private SparkMax leaderPivotMotor, followPivotMotor,affectorMotor;
+    private SparkMax leaderPivotMotor, followPivotMotor, affectorMotor;
     private SparkMaxConfig leadMotorConfig, followMotorConfig, affectorMotorConfig;
 
     private CANcoder pivotEncoder;
@@ -70,10 +69,10 @@ public class Arm extends SubsystemBase {
         configureDevices();
 
         // Set goal to idle position
-        goalPosition = ArmConstants.idlePosition;
+        goalPosition = 0.5;
 
         // Set encoder to 0
-        pivotEncoder.setPosition(0.0);
+        pivotEncoder.setPosition(pivotEncoder.getAbsolutePosition().getValueAsDouble());// - ArmConstants.encoderOffset);
     }
 
     // Set current limits, config motors and encoders
@@ -82,18 +81,19 @@ public class Arm extends SubsystemBase {
             // Lead pivot motor
             leadMotorConfig = new SparkMaxConfig();
             leadMotorConfig
-                .inverted(false)
+                .inverted(true)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01);
+                .closedLoopRampRate(0.01)
+                .idleMode(IdleMode.kBrake);
 
             leaderPivotMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
             // Follow pivot motor
             followMotorConfig = new SparkMaxConfig();
             followMotorConfig
-                .inverted(true)
+                .inverted(false)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01);
+                .closedLoopRampRate(0.01)
+                .idleMode(IdleMode.kBrake);
 
             followPivotMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -112,7 +112,7 @@ public class Arm extends SubsystemBase {
                 pivotCANcoderConfig.MagnetSensor
                     .withAbsoluteSensorDiscontinuityPoint(1)
                     .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                    .withMagnetOffset(-ArmConstants.encoderOffset)
+                    //.withMagnetOffset(0.0)
             );
 
         } catch (Exception ex) {
@@ -124,20 +124,21 @@ public class Arm extends SubsystemBase {
     // Post pivot position and goal to SmartDashboard
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Pivot Position", getPivotEncoderPosition());
-        SmartDashboard.putNumber("Pivot Goal", getPivotGoal());
+        SmartDashboard.putNumber("Arm Absolute Poistion", pivotEncoder.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putNumber("Arm Pivot Position", getPivotEncoderPosition());
+        SmartDashboard.putNumber("Arm Pivot Goal", getPivotGoal());
         SmartDashboard.putBoolean("Arm Has Gamepiece", hasGamepiece());
 
         SmartDashboard.putData(this);
     }
 
     public boolean hasGamepiece() {
-        return endAffectorBeamBreak.get();
+        return !endAffectorBeamBreak.get();
     }
 
     // Get the position of the pivotEncoder in degrees
     public double getPivotEncoderPosition() {
-        return pivotEncoder.getPosition().getValueAsDouble() * 360;
+        return (pivotEncoder.getAbsolutePosition().getValueAsDouble() - ArmConstants.encoderOffset) * 360;
     }
 
     // Get the pivot goal of the PID
@@ -184,7 +185,7 @@ public class Arm extends SubsystemBase {
 
             // run until the goal position is met
             ).until(
-                () -> false
+                () -> Math.abs(getPivotEncoderPosition() - goalPosition) < 0.5
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
@@ -207,7 +208,7 @@ public class Arm extends SubsystemBase {
     }
 
     // Spit out the game piece
-    public Command outtakeGamePiece(double speed) {
+    public Command spitThatShitOut(double speed) {
         // Set the speed of the affector motor > 0 to run it
         return Commands.runOnce(
             () -> affectorMotor.set(speed)

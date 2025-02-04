@@ -53,16 +53,16 @@ public class Constants {
 
     public final static class ArmConstants {
         public static class ArmProfiledPID {
-            public static double P = 0.0001;
+            public static double P = 0.01;
             public static double I = 0.0;
-            public static double D = 0.0;
+            public static double D = 0.03;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
 
         // Encoder reading * 360 = degrees
-        public static double maxPivotPos = 0.0;
-        public static double minPivotPos = 0.0;
+        public static double maxPivotPos = 96;
+        public static double minPivotPos = -0.1;
 
         // Idle and closed position
         public static double idlePosition = 0.0;
@@ -79,7 +79,7 @@ public class Constants {
         public static double intakeSpeed = 0.05;
 
         public static int encoderID = 34;
-        public static double encoderOffset = 0.0;
+        public static double encoderOffset = 0.209;
         public static int leaderMotorID = 31;
         public static int followMotorID = 32;
         public static int affectorMotorID = 33;

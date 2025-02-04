@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.ArmConstants;
 //import frc.robot.commands.*;
@@ -86,8 +87,24 @@ public class RobotContainer {
         driverY.onTrue(armSubsystem.setPivotGoal(Constants.ArmConstants.idlePosition));
         rightBumper.whileTrue(armSubsystem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
 
-        op1.onTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 0.0, 0.0));
-        leftBumper.whileTrue(armSubsystem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
+
+
+        //op1.onTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 0.0, 0.0));
+        //leftBumper.whileTrue(armSubsystem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
+
+
+        op1.onTrue(armSubsystem.setPivotGoal(1.0));
+        op2.onTrue(armSubsystem.setPivotGoal(15.0));
+        op3.onTrue(armSubsystem.setPivotGoal(30.0));
+        op6.onTrue(armSubsystem.setPivotGoal(45.0));
+        op7.onTrue(armSubsystem.setPivotGoal(70));
+        op8.onTrue(armSubsystem.setPivotGoal(90.0));
+
+
+        op17.whileTrue(armSubsystem.loadGamePiece(0.2));
+        op18.whileTrue(armSubsystem.spitThatShitOut(0.2));
+
+
 
         //SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));
     }
@@ -105,7 +122,7 @@ public class RobotContainer {
             elevatorSubsystem.moveElevator()
         );
         armSubsystem.setDefaultCommand(
-            armSubsystem.pivotArm()
+            armSubsystem.pivotArm().withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
 
         
