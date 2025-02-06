@@ -10,6 +10,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.VisionConstants.AlignmentController.*;
@@ -64,6 +66,8 @@ public class allignApriltag extends Command {
 
     @Override
     public void execute() {
+
+        Pose2d goalPose = new Pose2d(targetCoordinate, new Rotation2d(0.0));
 
         double outputX = xController.calculate(
                 driveSubsystem.getTranslationRelative(targetApriltag).getX(),

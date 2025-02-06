@@ -127,7 +127,7 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
         SmartDashboard.putNumber("Elevator Goal", getElevatorGoal());
         SmartDashboard.putNumber("Elevator Absolute Value", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
-        SmartDashboard.putNumber("Elevator Relative Value", elevatorEncoder.getPosition().getValueAsDouble());
+        //SmartDashboard.putNumber("Elevator Relative Value", elevatorEncoder.getPosition().getValueAsDouble());
 
         SmartDashboard.putData(this);
     }
@@ -165,21 +165,16 @@ public class Elevator extends SubsystemBase {
                 () -> {
                     //double newOutput = elevatorController.calculate(getElevatorPosition());
                     if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
-                        SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
-                        leaderElevatorMotor.set(
-                            MathUtil.clamp(
-                            elevatorController.calculate(getElevatorPosition(), goalPosition),
-                            -1.0,
-                            1.0
-                            )
-                        );
-                        followElevatorMotor.set(
-                            MathUtil.clamp(
-                            elevatorController.calculate(getElevatorPosition(), goalPosition),
-                            -1.0,
-                            1.0
-                            )
-                        );
+                        //SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
+
+                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
+
+                        if (getElevatorPosition() < 5 || getElevatorGoal() > 50) {
+                            MathUtil.clamp(output, -0.1, 0.1);
+                        }
+
+                        leaderElevatorMotor.set(output);
+                        followElevatorMotor.set(output);
                     }
                 },
                 this

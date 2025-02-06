@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 //import frc.robot.commands.*;
 import frc.robot.commands.Drive.allignApriltag;
 import frc.robot.commands.Drive.joystickDrive;
@@ -31,6 +32,7 @@ public class RobotContainer {
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
     public final Arm armSubsystem = new Arm();
+    public final EndAffector endAffectorSubsytem = new EndAffector();
 
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
@@ -83,9 +85,9 @@ public class RobotContainer {
         driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
         driverA.onTrue(elevatorSubsystem.setElevatorGoal(0));
         driverB.onTrue(armSubsystem.setPivotGoal(0));
-        driverX.onTrue(armSubsystem.setPivotGoal(50));
+        driverX.onTrue(armSubsystem.setPivotGoal(56));
         driverY.onTrue(armSubsystem.setPivotGoal(Constants.ArmConstants.idlePosition));
-        rightBumper.whileTrue(armSubsystem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
+        rightBumper.whileTrue(endAffectorSubsytem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
 
 
 
@@ -95,16 +97,25 @@ public class RobotContainer {
 
         op1.onTrue(armSubsystem.setPivotGoal(1.0));
         op2.onTrue(armSubsystem.setPivotGoal(15.0));
-        op3.onTrue(armSubsystem.setPivotGoal(30.0));
+        op3.onTrue(armSubsystem.setPivotGoal(50.0));
         op6.onTrue(armSubsystem.setPivotGoal(45.0));
         op7.onTrue(armSubsystem.setPivotGoal(70));
-        op8.onTrue(armSubsystem.setPivotGoal(90.0));
+        op8.onTrue(armSubsystem.setPivotGoal(96.0));
+
+        op17.whileTrue(endAffectorSubsytem.loadGamePiece(-0.5));
+        op18.whileTrue(endAffectorSubsytem.spitThatShitOut(-1.0));
+        op19.whileTrue(endAffectorSubsytem.loadGamePiece(0.5));
 
 
-        op17.whileTrue(armSubsystem.loadGamePiece(0.2));
-        op18.whileTrue(armSubsystem.spitThatShitOut(0.2));
+        op11.whileTrue(elevatorSubsystem.setElevatorGoal(1.5));
+        op12.whileTrue(elevatorSubsystem.setElevatorGoal(40));
+        op13.whileTrue(elevatorSubsystem.setElevatorGoal(15));
+        op15.whileTrue(elevatorSubsystem.setElevatorGoal(52));
+        op14.whileTrue(elevatorSubsystem.setElevatorGoal(30));
 
 
+        op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));
+        op5.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, ElevatorConstants.ChassisElevationOffset, 90));
 
         //SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));
     }

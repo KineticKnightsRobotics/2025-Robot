@@ -34,9 +34,9 @@ public class Constants {
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.075;
+            public static double P = 0.06;
             public static double I = 0;
-            public static double D = 0.75;
+            public static double D = 1.25;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
@@ -53,9 +53,9 @@ public class Constants {
 
     public final static class ArmConstants {
         public static class ArmProfiledPID {
-            public static double P = 0.01;
+            public static double P = 0.009;
             public static double I = 0.0;
-            public static double D = 0.03;
+            public static double D = 0.0009;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
@@ -79,11 +79,14 @@ public class Constants {
         public static double intakeSpeed = 0.05;
 
         public static int encoderID = 34;
-        public static double encoderOffset = 0.209;
+        public static double encoderOffset = 0.725;
         public static int leaderMotorID = 31;
         public static int followMotorID = 32;
+
+    }
+
+    public final class EndAffectorConstants {
         public static int affectorMotorID = 33;
         public static int beamBreakPort = 0;
     }
-
 }

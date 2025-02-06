@@ -51,7 +51,6 @@ public class Arm extends SubsystemBase {
         followPivotMotor = new SparkMax(ArmConstants.followMotorID, MotorType.kBrushless);
 
         // Config effector motor
-        affectorMotor = new SparkMax(ArmConstants.affectorMotorID, MotorType.kBrushless);
 
         // Config pivot encoder
         pivotEncoder = new CANcoder(ArmConstants.encoderID);
@@ -63,16 +62,16 @@ public class Arm extends SubsystemBase {
             ArmConstants.ArmProfiledPID.D
             );
 
-        endAffectorBeamBreak = new DigitalInput(ArmConstants.beamBreakPort);
+
         
         // Apply motor/encoder configs
         configureDevices();
 
         // Set goal to idle position
-        goalPosition = 0.5;
+        goalPosition = getPivotEncoderPosition();
 
         // Set encoder to 0
-        pivotEncoder.setPosition(pivotEncoder.getAbsolutePosition().getValueAsDouble());// - ArmConstants.encoderOffset);
+        //pivotEncoder.setPosition(pivotEncoder.getAbsolutePosition().getValueAsDouble());// - ArmConstants.encoderOffset);
     }
 
     // Set current limits, config motors and encoders
@@ -83,7 +82,7 @@ public class Arm extends SubsystemBase {
             leadMotorConfig
                 .inverted(true)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01)
+                .closedLoopRampRate(1)
                 .idleMode(IdleMode.kBrake);
 
             leaderPivotMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -92,19 +91,11 @@ public class Arm extends SubsystemBase {
             followMotorConfig
                 .inverted(false)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01)
+                .closedLoopRampRate(1)
                 .idleMode(IdleMode.kBrake);
 
             followPivotMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-            // Effector motor
-            affectorMotorConfig = new SparkMaxConfig();
-            affectorMotorConfig
-                .inverted(false)
-                .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01);
-
-            affectorMotor.configure(affectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             
             // Pivot CANcoder
             pivotCANcoderConfig = new CANcoderConfiguration();
@@ -127,13 +118,8 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putNumber("Arm Absolute Poistion", pivotEncoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putNumber("Arm Pivot Position", getPivotEncoderPosition());
         SmartDashboard.putNumber("Arm Pivot Goal", getPivotGoal());
-        SmartDashboard.putBoolean("Arm Has Gamepiece", hasGamepiece());
 
         SmartDashboard.putData(this);
-    }
-
-    public boolean hasGamepiece() {
-        return !endAffectorBeamBreak.get();
     }
 
     // Get the position of the pivotEncoder in degrees
@@ -177,49 +163,16 @@ public class Arm extends SubsystemBase {
                 () -> {
                     // If the encoder position is within the rotation bounds, pivot the arm to the goal
                     if ((getPivotEncoderPosition() < ArmConstants.maxPivotPos) && (getPivotEncoderPosition() > ArmConstants.minPivotPos)) {
-                        SmartDashboard.putNumber("Pivot PID Output", pivotController.calculate(getPivotEncoderPosition()));
+                        //SmartDashboard.putNumber("Pivot PID Output", pivotController.calculate(getPivotEncoderPosition()));
                         leaderPivotMotor.set(MathUtil.clamp(pivotController.calculate(getPivotEncoderPosition(), goalPosition), -1.0, 1.0));
                         followPivotMotor.set(MathUtil.clamp(pivotController.calculate(getPivotEncoderPosition(), goalPosition), -1.0, 1.0));
                     }
                 }, this
-
             // run until the goal position is met
             ).until(
                 () -> Math.abs(getPivotEncoderPosition() - goalPosition) < 0.5
             )
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
-        );
-    }
-
-    // Load a game piece into the robot
-    public Command loadGamePiece(double speed) {
-        // Set the speed of the affector motor > 0 to run it
-        return Commands.runOnce(
-            () -> affectorMotor.set(speed)
-
-        // End condition of linebreak true (piece is in)
-        ).until(
-            () -> hasGamepiece()
-
-        // Once the command is to be finished, stop the affector motor
-        ).finallyDo(
-            () -> affectorMotor.set(0.0)
-        );
-    }
-
-    // Spit out the game piece
-    public Command spitThatShitOut(double speed) {
-        // Set the speed of the affector motor > 0 to run it
-        return Commands.runOnce(
-            () -> affectorMotor.set(speed)
-
-        // End condition of linebreak true (piece is in)
-        ).until(
-            () -> !hasGamepiece()
-
-        // Once the command is to be finished, stop the affector motor
-        ).finallyDo(
-            () -> affectorMotor.set(0.0)
         );
     }
 
