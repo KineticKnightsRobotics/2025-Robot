@@ -20,11 +20,13 @@ public class EndAffector extends SubsystemBase {
     SparkMax affectorMotor;
     SparkMaxConfig affectorMotorConfig;
     DigitalInput endAffectorBeamBreak;
+    DigitalInput endAffectorRangeSensor;
 
 
     public EndAffector() {
         affectorMotor = new SparkMax(EndAffectorConstants.affectorMotorID, MotorType.kBrushless);
         endAffectorBeamBreak = new DigitalInput(EndAffectorConstants.beamBreakPort);
+        endAffectorRangeSensor = new DigitalInput(EndAffectorConstants.rangeSensorPort);
     }
 
 
@@ -42,22 +44,26 @@ public class EndAffector extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Arm Has Gamepiece", hasGamepiece());
+        SmartDashboard.putBoolean("Arm Has Gamepiece", hasCoral());
     }
 
-    public boolean hasGamepiece() {
+    public boolean hasCoral() {
         return !endAffectorBeamBreak.get();
     }
 
+    public boolean hasAlgae() {
+        return endAffectorRangeSensor.get();
+    }
+
     // Load a game piece into the robot
-    public Command loadGamePiece(double speed) {
+    public Command loadCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> affectorMotor.set(speed),
+            () -> affectorMotor.set(-0.5),
             this
         // End condition of linebreak true (piece is in)
         ).until(
-            () -> hasGamepiece()
+            () -> hasCoral()
 
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
@@ -65,17 +71,31 @@ public class EndAffector extends SubsystemBase {
         );
     }
     // Spit out the game piece
-    public Command spitThatShitOut(double speed) {
+    public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> affectorMotor.set(speed)
+            () -> affectorMotor.set(-1.0)
 
         // End condition of linebreak true (piece is in)
         ).until(
-            () -> !hasGamepiece()
+            () -> !hasCoral()
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
             () -> affectorMotor.set(0.0)
+        );
+    }
+
+    public Command loadAlgae() {
+        return Commands.run(
+            () -> affectorMotor.set(0.5),
+            this
+        );
+    }
+
+    public Command spitAlgae() {
+        return Commands.run(
+            () -> affectorMotor.set(-0.5),
+            this
         );
     }
 }

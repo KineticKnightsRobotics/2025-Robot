@@ -67,10 +67,11 @@ public class Elevator extends SubsystemBase {
 
         configureDevices();
 
-        goalPosition = ElevatorConstants.ChassisElevationOffset+0.1;
+        goalPosition = ElevatorConstants.ChassisElevationOffset+1;
         //elevatorController.setGoal(goalPosition);
         
-        elevatorEncoder.setPosition(0.0);//elevatorEncoder.getAbsolutePosition().getValueAsDouble());
+        elevatorEncoder.setPosition(elevatorEncoder.getAbsolutePosition().getValueAsDouble());
+        //elevatorEncoder.setPosition();
     }
 
     public void configureDevices() {
@@ -165,13 +166,15 @@ public class Elevator extends SubsystemBase {
                 () -> {
                     //double newOutput = elevatorController.calculate(getElevatorPosition());
                     if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
-                        //SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
+                        SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
 
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
 
                         if (getElevatorPosition() < 5 || getElevatorGoal() > 50) {
                             MathUtil.clamp(output, -0.1, 0.1);
                         }
+
+                        SmartDashboard.putNumber("Elevator output", output);
 
                         leaderElevatorMotor.set(output);
                         followElevatorMotor.set(output);

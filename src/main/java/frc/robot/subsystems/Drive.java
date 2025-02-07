@@ -18,11 +18,13 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -34,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.util.Vision;
+import frc.robot.util.Quest;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -52,6 +56,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private boolean m_hasAppliedOperatorPerspective = false;
 
     public Vision kLimelight = new Vision("limelight-dignan", this);
+
+    public Quest quest = new Quest();
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
@@ -200,7 +206,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV()) {
-            setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
+            //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
             addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),
                 Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),//kLimelight.getTimestamp(),
@@ -208,9 +214,20 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             );
         }
 
+        addVisionMeasurement(
+            quest.getPose(),
+            Utils.fpgaToCurrentTime(quest.timestamp()),
+            VecBuilder.fill(1/100, 1/100, 1/100)
+        );
+
 
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
+
+        SmartDashboard.putBoolean("Quest Connected", quest.connected());
+        double[] questnavPose = {quest.getPose().getMeasureX().baseUnitMagnitude(),quest.getPose().getMeasureY().baseUnitMagnitude()};
+        SmartDashboard.putNumberArray("QuestNav Pose", questnavPose);
+        SmartDashboard.putNumber("Quest Battery", quest.getBatteryPercent());
     }
 
     public Pose2d getPose() {

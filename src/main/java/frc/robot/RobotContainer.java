@@ -75,47 +75,28 @@ public class RobotContainer {
     }
 
     public void configureBindings() {
-
-    
-        //driverA.onTrue(elevatorSubsystem.setElevatorGoal(15));
-        //driverA.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0, -1), 1));
-        //driverB.onTrue(elevatorSubsystem.setElevatorGoal(0));
-        //driverX.onTrue(elevatorSubsystem.setElevatorGoal(50));
-        //driverY.onTrue(elevatorSubsystem.setElevatorGoal(30));
-        driverStart.onTrue(elevatorSubsystem.zeroElevatorPosition());
-        driverA.onTrue(elevatorSubsystem.setElevatorGoal(0));
-        driverB.onTrue(armSubsystem.setPivotGoal(0));
-        driverX.onTrue(armSubsystem.setPivotGoal(56));
-        driverY.onTrue(armSubsystem.setPivotGoal(Constants.ArmConstants.idlePosition));
-        rightBumper.whileTrue(endAffectorSubsytem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
-
-
-
-        //op1.onTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 0.0, 0.0));
-        //leftBumper.whileTrue(armSubsystem.loadGamePiece(Constants.ArmConstants.intakeSpeed));
-
-
+        //arm
         op1.onTrue(armSubsystem.setPivotGoal(1.0));
         op2.onTrue(armSubsystem.setPivotGoal(15.0));
         op3.onTrue(armSubsystem.setPivotGoal(50.0));
         op6.onTrue(armSubsystem.setPivotGoal(45.0));
         op7.onTrue(armSubsystem.setPivotGoal(70));
         op8.onTrue(armSubsystem.setPivotGoal(96.0));
-
-        op17.whileTrue(endAffectorSubsytem.loadGamePiece(-0.5));
-        op18.whileTrue(endAffectorSubsytem.spitThatShitOut(-1.0));
-        op19.whileTrue(endAffectorSubsytem.loadGamePiece(0.5));
-
-
+        //elevator
         op11.whileTrue(elevatorSubsystem.setElevatorGoal(1.5));
         op12.whileTrue(elevatorSubsystem.setElevatorGoal(40));
         op13.whileTrue(elevatorSubsystem.setElevatorGoal(15));
         op15.whileTrue(elevatorSubsystem.setElevatorGoal(52));
         op14.whileTrue(elevatorSubsystem.setElevatorGoal(30));
+        //end affector
+        op17.whileTrue(endAffectorSubsytem.loadCoral());
+        op18.whileTrue(endAffectorSubsytem.spitCoral());
+        op19.whileTrue(endAffectorSubsytem.loadAlgae());
+        op20.whileTrue(endAffectorSubsytem.spitAlgae());
 
-
-        op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));
-        op5.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, ElevatorConstants.ChassisElevationOffset, 90));
+        //not working yet
+        //op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));
+        //op5.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, ElevatorConstants.ChassisElevationOffset, 90));
 
         //SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));
     }

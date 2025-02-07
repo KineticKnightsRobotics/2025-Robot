@@ -46,7 +46,7 @@ public class Constants {
         public static double ChassisElevationOffset = 1.25;
         public static double gearRatio = 15;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.26708;
+        public static double encoderOffset = 0.2514;
         public static int leaderMotorID = 21;
         public static int followMotorID = 22;
     }
@@ -88,5 +88,6 @@ public class Constants {
     public final class EndAffectorConstants {
         public static int affectorMotorID = 33;
         public static int beamBreakPort = 0;
+        public static int rangeSensorPort = 1;
     }
 }
