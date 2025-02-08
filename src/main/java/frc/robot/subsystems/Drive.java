@@ -263,8 +263,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
-    public Translation2d getTagPose(int AprilTagID) {
-        return kFieldLayout.getTagPose(AprilTagID).get().getTranslation().toTranslation2d();
+    public Pose2d getTagPose(int AprilTagID) {
+        return kFieldLayout.getTagPose(AprilTagID).get().toPose2d();
     }
 
 
@@ -280,7 +280,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return 
         getPose().getTranslation()
         .minus(
-            getTagPose(apriltagID)
+            getTagPose(apriltagID).getTranslation()
         )
         .unaryMinus()
         .getAngle(); 
