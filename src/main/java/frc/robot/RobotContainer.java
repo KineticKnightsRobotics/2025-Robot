@@ -79,7 +79,7 @@ public class RobotContainer {
         op1.onTrue(armSubsystem.setPivotGoal(1.0));
         op2.onTrue(armSubsystem.setPivotGoal(15.0));
         op3.onTrue(armSubsystem.setPivotGoal(50.0));
-        op6.onTrue(armSubsystem.setPivotGoal(45.0));
+        op6.onTrue(armSubsystem.setPivotGoal(47.67));
         op7.onTrue(armSubsystem.setPivotGoal(70));
         op8.onTrue(armSubsystem.setPivotGoal(96.0));
         //elevator
@@ -93,6 +93,8 @@ public class RobotContainer {
         op18.whileTrue(endAffectorSubsytem.spitCoral());
         op19.whileTrue(endAffectorSubsytem.loadAlgae());
         op20.whileTrue(endAffectorSubsytem.spitAlgae());
+
+        op21.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0,1), 1));
 
         //not working yet
         //op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));

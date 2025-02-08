@@ -85,12 +85,15 @@ public class allignApriltag extends Command {
             );
 
 
+        SmartDashboard.putNumber("Allignment X Relative", driveSubsystem.getTranslationRelative(targetApriltag).getX());
+        SmartDashboard.putNumber("Allignment Y Relative", driveSubsystem.getTranslationRelative(targetApriltag).getY());
+
         SmartDashboard.putNumber("apriltag X output", outputX);
 
         driveSubsystem.setControl(
             speedBuilder
                 .withVelocityX(outputX)
-                .withVelocityY(0.0)
+                .withVelocityY(outputY)
                 .withRotationalRate(0.0)
         );
     }

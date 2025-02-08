@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class Constants {
     
@@ -15,26 +16,29 @@ public class Constants {
 
         public static class AlignmentController {
             public static class StrafeXController {
-                public static double P = 0.01;
+                public static double P = 0.001;
                 public static double I = 0.0;
                 public static double D = 0.0;
             }
             public static class StrafeYController {
-                public static double P = 0.01;
+                public static double P = 0.001;
                 public static double I = 0.0;
                 public static double D = 0.0;
             }
             public static class RotationController {
-                public static double P = 0.01;
+                public static double P = 0.001;
                 public static double I = 0.0;
                 public static double D = 0.0;
             }
         }
     }
+    public final static class QuestConstants {
+        public Translation2d headsetRobotPose = new Translation2d(0,37);
+    }
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.06;
+            public static double P = 0.07;
             public static double I = 0;
             public static double D = 1.25;
             public static double MaxVelocity = 0;
@@ -46,14 +50,14 @@ public class Constants {
         public static double ChassisElevationOffset = 1.25;
         public static double gearRatio = 15;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.2514;
+        public static double encoderOffset = 0.832519312;
         public static int leaderMotorID = 21;
         public static int followMotorID = 22;
     }
 
     public final static class ArmConstants {
         public static class ArmProfiledPID {
-            public static double P = 0.009;
+            public static double P = 0.005;
             public static double I = 0.0;
             public static double D = 0.0009;
             public static double MaxVelocity = 0;

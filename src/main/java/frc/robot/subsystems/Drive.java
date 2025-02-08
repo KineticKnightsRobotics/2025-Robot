@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -55,9 +56,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    public Vision kLimelight = new Vision("limelight-dignan", this);
+    private Vision kLimelight = new Vision("limelight-dignan", this);
 
-    public Quest quest = new Quest();
+    private Quest quest = new Quest();
+    private boolean hasQuestInitialized = false;
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
@@ -89,6 +91,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -114,6 +119,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -147,6 +154,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -214,20 +223,38 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             );
         }
 
-        addVisionMeasurement(
-            quest.getPose(),
-            Utils.fpgaToCurrentTime(quest.timestamp()),
-            VecBuilder.fill(1/100, 1/100, 1/100)
-        );
-
-
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
 
+        if (hasQuestInitialized) {
+            addVisionMeasurement(
+                quest.getRobotPose(),
+                Utils.fpgaToCurrentTime(quest.getTimestamp()),
+                VecBuilder.fill(1/10,1/10,1/10)
+            );
+        }
+
+        quest.cleanUpQuestNavMessages();
+
+
+
+        SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
+        SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
+        SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
+        double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
+        SmartDashboard.putNumberArray("Quest Pose", questPose);
+
+        //SmartDashboard.putNumberArray("Quest Pose", new double[] {quest.getRobotPose().getMeasureX().baseUnitMagnitude(),quest.getRobotPose().getMeasureY().baseUnitMagnitude()});
+        /*
         SmartDashboard.putBoolean("Quest Connected", quest.connected());
         double[] questnavPose = {quest.getPose().getMeasureX().baseUnitMagnitude(),quest.getPose().getMeasureY().baseUnitMagnitude()};
         SmartDashboard.putNumberArray("QuestNav Pose", questnavPose);
         SmartDashboard.putNumber("Quest Battery", quest.getBatteryPercent());
+        */
+        //if (DriverStation.isEnabled()) {
+            //SmartDashboard.putString("Drive Current Command",this.getCurrentCommand().toString());
+        //}
+        
     }
 
     public Pose2d getPose() {
@@ -257,6 +284,27 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         )
         .unaryMinus()
         .getAngle(); 
+    }
+
+    /*
+     * Resets the questnav field offset
+     * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
+     */
+    public void resetQuestPose() {
+        quest.resetPose(this.getPose());
+        hasQuestInitialized = true;
+    }
+
+    public Command seedQuestPose() {
+        return Commands.runOnce(
+            () -> {resetQuestPose();}
+        );
+    }
+
+    public Command disableQuest() {
+        return Commands.runOnce(
+            () -> {hasQuestInitialized = false;}
+        );
     }
 
 

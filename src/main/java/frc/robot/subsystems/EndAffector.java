@@ -4,6 +4,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -37,14 +38,17 @@ public class EndAffector extends SubsystemBase {
         affectorMotorConfig
             .inverted(true)
             .smartCurrentLimit(30)
-            .closedLoopRampRate(0.01);
+            .closedLoopRampRate(0.01)
+            .idleMode(IdleMode.kBrake);
+
         affectorMotor.configure(affectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Arm Has Gamepiece", hasCoral());
+        SmartDashboard.putBoolean("Arm Has Coral", hasCoral());
+        SmartDashboard.putBoolean("Arm Has Algae", hasAlgae());
     }
 
     public boolean hasCoral() {
@@ -89,6 +93,11 @@ public class EndAffector extends SubsystemBase {
         return Commands.run(
             () -> affectorMotor.set(0.5),
             this
+        ).until(()->hasAlgae())
+        .finallyDo(
+            () -> {
+                affectorMotor.set(0.1);
+            }
         );
     }
 
@@ -96,6 +105,11 @@ public class EndAffector extends SubsystemBase {
         return Commands.run(
             () -> affectorMotor.set(-0.5),
             this
+        ).until(()-> !hasAlgae())
+        .finallyDo(
+            () -> {
+                affectorMotor.set(0.0);
+            }
         );
     }
 }

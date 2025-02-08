@@ -68,10 +68,6 @@ public class Elevator extends SubsystemBase {
         configureDevices();
 
         goalPosition = ElevatorConstants.ChassisElevationOffset+1;
-        //elevatorController.setGoal(goalPosition);
-        
-        elevatorEncoder.setPosition(elevatorEncoder.getAbsolutePosition().getValueAsDouble());
-        //elevatorEncoder.setPosition();
     }
 
     public void configureDevices() {
@@ -113,7 +109,7 @@ public class Elevator extends SubsystemBase {
                 elevatorEncoderConfig.MagnetSensor
                     .withAbsoluteSensorDiscontinuityPoint(1)
                     .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                    .withMagnetOffset(-ElevatorConstants.encoderOffset)
+                    //.withMagnetOffset(-ElevatorConstants.encoderOffset)
                 );
 
 
@@ -134,7 +130,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public double getElevatorPosition() {
-        return elevatorEncoder.getPosition().getValueAsDouble() * ElevatorConstants.gearCircumference + ElevatorConstants.ChassisElevationOffset;
+        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.ChassisElevationOffset;
     }
     
     public double getElevatorGoal(){
