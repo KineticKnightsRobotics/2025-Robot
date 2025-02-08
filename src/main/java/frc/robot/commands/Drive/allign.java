@@ -28,17 +28,11 @@ public class allign extends Command {
 
     private Translation2d displacement;
     private int targetApriltag;
-    private Pose2d coordinate;
-
-
+    private Pose2d fieldCoordinate;
 
     private PIDController xController = new PIDController(StrafeXController.P,StrafeXController.I,StrafeXController.D);
-
     private PIDController yController = new PIDController(StrafeYController.P,StrafeYController.I,StrafeYController.D);
-
     private PIDController rController = new PIDController(RotationController.P,RotationController.I,RotationController.D);
-
-
 
     private final SwerveRequest.FieldCentric speedBuilder = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
@@ -60,7 +54,7 @@ public class allign extends Command {
     public void initialize() {
         Pose2d tagPose = driveSubsystem.getTagPose(targetApriltag);
         Translation2d displacementRotated = displacement.rotateBy(tagPose.getRotation());
-        coordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation());
+        fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation());
 
     }
 
@@ -68,15 +62,19 @@ public class allign extends Command {
     public void execute() {
 
         double outputX = xController.calculate(
-            driveSubsystem.getPose().getX(), coordinate.getX()
+            driveSubsystem.getPose().getX(), fieldCoordinate.getX()
         );
         double outputY = yController.calculate(
-            driveSubsystem.getPose().getY(), coordinate.getY()
+            driveSubsystem.getPose().getY(), fieldCoordinate.getY()
         );
         double outputR = rController.calculate(
-            driveSubsystem.getPose().getRotation().getDegrees(), coordinate.getRotation().getDegrees()
+            driveSubsystem.getPose().getRotation().getDegrees(), fieldCoordinate.getRotation().getDegrees()
         );
 
+
+
+        double[] AllignmentOutput = {outputX, outputY, outputR};
+        SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
 
         driveSubsystem.setControl(
             speedBuilder
@@ -90,17 +88,4 @@ public class allign extends Command {
     public boolean isFinished() {
         return false;
     }
-
-    
-
-
-
-
-
-
-
-
-
-
-
 }

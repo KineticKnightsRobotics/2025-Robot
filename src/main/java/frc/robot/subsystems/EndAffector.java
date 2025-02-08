@@ -38,7 +38,7 @@ public class EndAffector extends SubsystemBase {
         affectorMotorConfig
             .inverted(true)
             .smartCurrentLimit(30)
-            .closedLoopRampRate(0.01)
+            .closedLoopRampRate(0.000001)
             .idleMode(IdleMode.kBrake);
 
         affectorMotor.configure(affectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -63,7 +63,7 @@ public class EndAffector extends SubsystemBase {
     public Command loadCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> affectorMotor.set(-0.5),
+            () -> affectorMotor.set(-0.3),
             this
         // End condition of linebreak true (piece is in)
         ).until(

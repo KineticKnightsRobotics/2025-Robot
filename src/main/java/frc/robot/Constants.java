@@ -16,12 +16,12 @@ public class Constants {
 
         public static class AlignmentController {
             public static class StrafeXController {
-                public static double P = 0.001;
+                public static double P = 1.0;
                 public static double I = 0.0;
                 public static double D = 0.0;
             }
             public static class StrafeYController {
-                public static double P = 0.001;
+                public static double P = 1.0;
                 public static double I = 0.0;
                 public static double D = 0.0;
             }

@@ -17,7 +17,8 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 //import frc.robot.commands.*;
-import frc.robot.commands.Drive.allignApriltag;
+import frc.robot.commands.Drive.allign;
+import frc.robot.commands.Drive.elevatorSysIDCommand;
 import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.commands.Drive.scorePosition;
 import frc.robot.subsystems.*;
@@ -68,6 +69,9 @@ public class RobotContainer {
     public final Trigger op19 = new Trigger(() -> opPanel.getRawButton(19));
     public final Trigger op20 = new Trigger(() -> opPanel.getRawButton(20));
     public final Trigger op21 = new Trigger(() -> opPanel.getRawButton(21));
+    public final Trigger op22 = new Trigger(() -> opPanel.getRawButton(22));
+    public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
+
 
     public RobotContainer() {
         configureDefaultCommands();
@@ -94,7 +98,9 @@ public class RobotContainer {
         op19.whileTrue(endAffectorSubsytem.loadAlgae());
         op20.whileTrue(endAffectorSubsytem.spitAlgae());
 
-        op21.whileTrue(new allignApriltag(driveSubsystem, new Translation2d(0,1), 1));
+        op21.whileTrue(new allign(driveSubsystem, new Translation2d(1,0), 1));
+        op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
+        op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
 
         //not working yet
         //op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));

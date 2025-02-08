@@ -40,6 +40,8 @@ public class Elevator extends SubsystemBase {
 
     private double goalPosition;
 
+    private double sysIDVoltage = 0.0;
+
     public Elevator() {
 
         //Configure the leader motor
@@ -125,6 +127,8 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber("Elevator Goal", getElevatorGoal());
         SmartDashboard.putNumber("Elevator Absolute Value", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
         //SmartDashboard.putNumber("Elevator Relative Value", elevatorEncoder.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Elevator Velocity", elevatorEncoder.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Elevator Voltage", leaderElevatorMotor.getBusVoltage());
 
         SmartDashboard.putData(this);
     }
@@ -136,6 +140,12 @@ public class Elevator extends SubsystemBase {
     public double getElevatorGoal(){
         return goalPosition;
     }
+
+    
+public void setElevatorVoltage(double voltage){
+    sysIDVoltage = voltage;
+    leaderElevatorMotor.setVoltage(sysIDVoltage);
+}
 
     public Command setElevatorGoal(double position) {
         return Commands
