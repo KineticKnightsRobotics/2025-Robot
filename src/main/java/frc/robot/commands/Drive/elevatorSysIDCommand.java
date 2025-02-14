@@ -36,7 +36,7 @@ public class elevatorSysIDCommand extends Command {
   @Override
   public void execute() {
     elevatorSubsystem.setElevatorVoltage(voltage);
-voltage += voltage;
+    voltage += voltage;
   }
 
   // Called once the command ends or is interrupted.

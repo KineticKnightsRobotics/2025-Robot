@@ -34,6 +34,7 @@ public class RobotContainer {
     public final Elevator elevatorSubsystem = new Elevator();
     public final Arm armSubsystem = new Arm();
     public final EndAffector endAffectorSubsytem = new EndAffector();
+    public final Climber climberSubsystem = new Climber();
 
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
@@ -90,7 +91,7 @@ public class RobotContainer {
         op11.whileTrue(elevatorSubsystem.setElevatorGoal(1.5));
         op12.whileTrue(elevatorSubsystem.setElevatorGoal(40));
         op13.whileTrue(elevatorSubsystem.setElevatorGoal(15));
-        op15.whileTrue(elevatorSubsystem.setElevatorGoal(52));
+        op15.whileTrue(elevatorSubsystem.setElevatorGoal(56));
         op14.whileTrue(elevatorSubsystem.setElevatorGoal(30));
         //end affector
         op17.whileTrue(endAffectorSubsytem.loadCoral());
@@ -99,8 +100,17 @@ public class RobotContainer {
         op20.whileTrue(endAffectorSubsytem.spitAlgae());
 
         op21.whileTrue(new allign(driveSubsystem, new Translation2d(1,0), 1));
-        op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
-        op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
+
+        //climber
+        op4.whileTrue(climberSubsystem.setClimberSpeed(1.0));
+        op5.whileTrue(climberSubsystem.setClimberSpeed(-1.0));
+
+
+
+
+
+        //op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
+        //op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
 
         //not working yet
         //op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));

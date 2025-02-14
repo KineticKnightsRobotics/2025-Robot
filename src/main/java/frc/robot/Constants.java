@@ -48,7 +48,7 @@ public class Constants {
         public static double maxChassisHeight = 56.5; //inches
         public static double gearCircumference = 5.50093*2; //inches
         public static double ChassisElevationOffset = 1.25;
-        public static double gearRatio = 15;
+        public static double gearRatio = 1/9;
         public static int encoderID = 20;
         public static double encoderOffset = 0.832519312;
         public static int leaderMotorID = 21;
@@ -83,7 +83,7 @@ public class Constants {
         public static double intakeSpeed = 0.05;
 
         public static int encoderID = 34;
-        public static double encoderOffset = 0.725;
+        public static double encoderOffset = 0.87866;
         public static int leaderMotorID = 31;
         public static int followMotorID = 32;
 
@@ -93,5 +93,10 @@ public class Constants {
         public static int affectorMotorID = 33;
         public static int beamBreakPort = 0;
         public static int rangeSensorPort = 1;
+    }
+
+    public final class ClimberConstants {
+        public static int leaderMotorID = 51;
+        public static int followMotorID = 52;
     }
 }

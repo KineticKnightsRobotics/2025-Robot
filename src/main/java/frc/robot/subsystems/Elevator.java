@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -29,6 +30,7 @@ public class Elevator extends SubsystemBase {
 
     private SparkMax leaderElevatorMotor;
     private SparkMaxConfig leadMotorConfig;
+    private RelativeEncoder leaderEncoder;
     private SparkMax followElevatorMotor;
     private SparkMaxConfig followMotorConfig;
 
@@ -46,6 +48,7 @@ public class Elevator extends SubsystemBase {
 
         //Configure the leader motor
         leaderElevatorMotor = new SparkMax(ElevatorConstants.leaderMotorID, MotorType.kBrushless);
+        leaderEncoder = leaderElevatorMotor.getEncoder();
         followElevatorMotor = new SparkMax(ElevatorConstants.followMotorID, MotorType.kBrushless);
         elevatorEncoder = new CANcoder(ElevatorConstants.encoderID);
 
@@ -70,6 +73,7 @@ public class Elevator extends SubsystemBase {
         configureDevices();
 
         goalPosition = ElevatorConstants.ChassisElevationOffset+1;
+        elevatorEncoder.setPosition(ElevatorConstants.ChassisElevationOffset);
     }
 
     public void configureDevices() {
@@ -77,8 +81,12 @@ public class Elevator extends SubsystemBase {
             leadMotorConfig = new SparkMaxConfig();
             leadMotorConfig
                 .inverted(false)                                                                                            //Inverts the motor
-                .smartCurrentLimit(30)                                                                                    //Limits # of amps going to the motor
-                .closedLoopRampRate(0.01);
+                .smartCurrentLimit(30)     
+                .idleMode(IdleMode.kCoast)                                                                               //Limits # of amps going to the motor
+                .closedLoopRampRate(0.001);
+            leadMotorConfig
+                .encoder
+                .positionConversionFactor(ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio / 2);
             /*
             leadMotorConfig                                                                                                  //Ammount of time for the voltage to ramp i.e it will take 0.01 seconds for the input voltage to go from 1V to 2V
                 .encoder
@@ -94,7 +102,8 @@ public class Elevator extends SubsystemBase {
             followMotorConfig
                 .inverted(true)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(0.01);
+                .idleMode(IdleMode.kCoast)
+                .closedLoopRampRate(0.001);
             /*
             followMotorConfig
                 .encoder
@@ -134,7 +143,8 @@ public class Elevator extends SubsystemBase {
     }
 
     public double getElevatorPosition() {
-        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.ChassisElevationOffset;
+        return leaderEncoder.getPosition();
+        //return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.ChassisElevationOffset;
     }
     
     public double getElevatorGoal(){
@@ -176,8 +186,8 @@ public void setElevatorVoltage(double voltage){
 
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
 
-                        if (getElevatorPosition() < 5 || getElevatorGoal() > 50) {
-                            MathUtil.clamp(output, -0.1, 0.1);
+                        if (getElevatorPosition() < 30 || getElevatorGoal() > 45) {
+                            MathUtil.clamp(output, -0.05, 0.05);
                         }
 
                         SmartDashboard.putNumber("Elevator output", output);
