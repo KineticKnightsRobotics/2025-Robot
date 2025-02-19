@@ -61,7 +61,7 @@ public class Arm extends SubsystemBase {
             ArmConstants.ArmProfiledPID.I, 
             ArmConstants.ArmProfiledPID.D
             );
-
+        pivotController.enableContinuousInput(0, 360);
 
         
         // Apply motor/encoder configs
@@ -102,8 +102,8 @@ public class Arm extends SubsystemBase {
             pivotEncoder.getConfigurator().apply(
                 pivotCANcoderConfig.MagnetSensor
                     .withAbsoluteSensorDiscontinuityPoint(1)
-                    .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                    //.withMagnetOffset(0.0)
+                    .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+                    .withMagnetOffset(-ArmConstants.encoderOffset)
             );
 
         } catch (Exception ex) {
@@ -124,7 +124,7 @@ public class Arm extends SubsystemBase {
 
     // Get the position of the pivotEncoder in degrees
     public double getPivotEncoderPosition() {
-        return (pivotEncoder.getAbsolutePosition().getValueAsDouble() - ArmConstants.encoderOffset) * 360;
+        return (pivotEncoder.getAbsolutePosition().getValueAsDouble() /*- ArmConstants.encoderOffset*/) * 360;
     }
 
     // Get the pivot goal of the PID
@@ -162,10 +162,14 @@ public class Arm extends SubsystemBase {
             Commands.run(
                 () -> {
                     // If the encoder position is within the rotation bounds, pivot the arm to the goal
-                    if ((getPivotEncoderPosition() < ArmConstants.maxPivotPos) && (getPivotEncoderPosition() > ArmConstants.minPivotPos)) {
+                    if (/*(getPivotEncoderPosition() < ArmConstants.maxPivotPos) &&*/(getPivotEncoderPosition() > ArmConstants.minPivotPos)) {
                         //SmartDashboard.putNumber("Pivot PID Output", pivotController.calculate(getPivotEncoderPosition()));
                         leaderPivotMotor.set(MathUtil.clamp(pivotController.calculate(getPivotEncoderPosition(), goalPosition), -1.0, 1.0));
                         followPivotMotor.set(MathUtil.clamp(pivotController.calculate(getPivotEncoderPosition(), goalPosition), -1.0, 1.0));
+                    }
+                    else {
+                        leaderPivotMotor.set(0.0);
+                        followPivotMotor.set(0.0);
                     }
                 }, this
             // run until the goal position is met

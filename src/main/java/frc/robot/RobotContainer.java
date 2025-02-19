@@ -6,12 +6,16 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.ArmConstants;
@@ -25,6 +29,11 @@ import frc.robot.subsystems.*;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double AngularRate = Math.PI * 1.5;
+    private SwerveRequest joystickDrive;
+
+    SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     public Joystick driverController = new Joystick(0);
     public Joystick opPanel = new Joystick(1);
@@ -74,21 +83,47 @@ public class RobotContainer {
     public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
 
 
+    public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
+
+
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
     }
 
     public void configureBindings() {
+
+        driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
+
+
+        op3
+            .whileTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1)
+                .andThen();
+
+
+        op6.onTrue(elevatorSubsystem.setElevatorGoal(38).andThen(armSubsystem.setPivotGoal(59)));
+        
+        op17
+            .onTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1).andThen(armSubsystem.setPivotGoal(90)))
+            .whileTrue(endAffectorSubsytem.loadCoral())
+            .onFalse(armSubsystem.setPivotGoal(45));
+        op18
+            .onTrue(endAffectorSubsytem.spitCoral());
+
+
+        op9.onTrue(armSubsystem.setPivotGoal(90));
+
+        /*
         //arm
         op1.onTrue(armSubsystem.setPivotGoal(1.0));
         op2.onTrue(armSubsystem.setPivotGoal(15.0));
         op3.onTrue(armSubsystem.setPivotGoal(50.0));
         op6.onTrue(armSubsystem.setPivotGoal(47.67));
         op7.onTrue(armSubsystem.setPivotGoal(70));
-        op8.onTrue(armSubsystem.setPivotGoal(96.0));
+        op8.onTrue(armSubsystem.setPivotGoal(90.0));
         //elevator
-        op11.whileTrue(elevatorSubsystem.setElevatorGoal(1.5));
+        op11.whileTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1));
         op12.whileTrue(elevatorSubsystem.setElevatorGoal(40));
         op13.whileTrue(elevatorSubsystem.setElevatorGoal(15));
         op15.whileTrue(elevatorSubsystem.setElevatorGoal(56));
@@ -98,6 +133,7 @@ public class RobotContainer {
         op18.whileTrue(endAffectorSubsytem.spitCoral());
         op19.whileTrue(endAffectorSubsytem.loadAlgae());
         op20.whileTrue(endAffectorSubsytem.spitAlgae());
+        */
 
         op21.whileTrue(new allign(driveSubsystem, new Translation2d(1,0), 1));
 
@@ -120,6 +156,7 @@ public class RobotContainer {
     }
 
     public void configureDefaultCommands() {
+        /*
         driveSubsystem.setDefaultCommand(
             new joystickDrive(
                 driveSubsystem,
@@ -128,8 +165,19 @@ public class RobotContainer {
                 () -> driverController.getRawAxis(4)
             )
         );
+        */
+
+        driveSubsystem.setDefaultCommand(
+            driveSubsystem.applyRequest(
+                () -> drive
+                    .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed*0.2)
+                    .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed*0.2)
+                    .withRotationalRate(-driverController.getRawAxis(4)*MaxSpeed*0.2)
+                )
+        );
+
         elevatorSubsystem.setDefaultCommand(
-            elevatorSubsystem.moveElevator()
+            elevatorSubsystem.moveElevator(() -> (armSubsystem.getPivotEncoderPosition() < 85))
         );
         armSubsystem.setDefaultCommand(
             armSubsystem.pivotArm().withInterruptBehavior(InterruptionBehavior.kCancelSelf)

@@ -38,9 +38,9 @@ public class Constants {
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.07;
+            public static double P = 0.05;
             public static double I = 0;
-            public static double D = 1.25;
+            public static double D = 1.5;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
@@ -50,7 +50,7 @@ public class Constants {
         public static double ChassisElevationOffset = 1.25;
         public static double gearRatio = 1/9;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.832519312;
+        public static double encoderOffset = 0.0;
         public static int leaderMotorID = 21;
         public static int followMotorID = 22;
     }
@@ -83,7 +83,7 @@ public class Constants {
         public static double intakeSpeed = 0.05;
 
         public static int encoderID = 34;
-        public static double encoderOffset = 0.87866;
+        public static double encoderOffset = 0.931;
         public static int leaderMotorID = 31;
         public static int followMotorID = 32;
 

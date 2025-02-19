@@ -56,12 +56,14 @@ public class Climber extends SubsystemBase {
         .run(
             () -> {
                 leaderMotor.set(speed);
+                followMotor.set(speed);
             },
             this
         )
         .finallyDo(
             () -> {
                 leaderMotor.set(0.0);
+                followMotor.set(0.0);
             }
         );
     }
