@@ -46,6 +46,8 @@ public class joystickDrive extends Command {
     @Override
     public void initialize() {
         addRequirements();
+
+        
     }
 
     @Override
@@ -56,6 +58,18 @@ public class joystickDrive extends Command {
                 .withVelocityY(-xSupplier.getAsDouble()*maxSpeed*0.2)
                 .withRotationalRate(zSupplier.getAsDouble()*-maxAngularRate*0.2)
         );
+
+
+        /*
+         *         drivetrain.setDefaultCommand(
+            // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() ->
+                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            )
+        );
+         */
     }
 
 

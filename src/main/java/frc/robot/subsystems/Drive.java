@@ -18,11 +18,13 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -30,11 +32,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
+import frc.robot.util.Quest;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -52,7 +56,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    public Vision kLimelight = new Vision("limelight-dignan", this);
+    private Vision kLimelight = new Vision("limelight-dignan", this);
+
+    private Quest quest = new Quest();
+    private boolean hasQuestInitialized = false;
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
@@ -84,6 +91,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -109,6 +119,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -142,6 +154,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -201,7 +215,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV()) {
-            setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
+            //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
             addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),
                 Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),//kLimelight.getTimestamp(),
@@ -209,9 +223,38 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             );
         }
 
-
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
+
+        if (hasQuestInitialized) {
+            addVisionMeasurement(
+                quest.getRobotPose(),
+                Utils.fpgaToCurrentTime(quest.getTimestamp()),
+                VecBuilder.fill(1/10,1/10,1/10)
+            );
+        }
+
+        quest.cleanUpQuestNavMessages();
+
+
+
+        SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
+        SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
+        SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
+        double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
+        SmartDashboard.putNumberArray("Quest Pose", questPose);
+
+        //SmartDashboard.putNumberArray("Quest Pose", new double[] {quest.getRobotPose().getMeasureX().baseUnitMagnitude(),quest.getRobotPose().getMeasureY().baseUnitMagnitude()});
+        /*
+        SmartDashboard.putBoolean("Quest Connected", quest.connected());
+        double[] questnavPose = {quest.getPose().getMeasureX().baseUnitMagnitude(),quest.getPose().getMeasureY().baseUnitMagnitude()};
+        SmartDashboard.putNumberArray("QuestNav Pose", questnavPose);
+        SmartDashboard.putNumber("Quest Battery", quest.getBatteryPercent());
+        */
+        //if (DriverStation.isEnabled()) {
+            //SmartDashboard.putString("Drive Current Command",this.getCurrentCommand().toString());
+        //}
+        
     }
 
     public Pose2d getPose() {
@@ -220,8 +263,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
-    public Translation2d getTagPose(int AprilTagID) {
-        return kFieldLayout.getTagPose(AprilTagID).get().getTranslation().toTranslation2d();
+    public Pose2d getTagPose(int AprilTagID) {
+        return kFieldLayout.getTagPose(AprilTagID).get().toPose2d();
     }
 
 
@@ -237,10 +280,31 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return 
         getPose().getTranslation()
         .minus(
-            getTagPose(apriltagID)
+            getTagPose(apriltagID).getTranslation()
         )
         .unaryMinus()
         .getAngle(); 
+    }
+
+    /*
+     * Resets the questnav field offset
+     * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
+     */
+    public void resetQuestPose() {
+        quest.resetPose(this.getPose());
+        hasQuestInitialized = true;
+    }
+
+    public Command seedQuestPose() {
+        return Commands.runOnce(
+            () -> {resetQuestPose();}
+        );
+    }
+
+    public Command disableQuest() {
+        return Commands.runOnce(
+            () -> {hasQuestInitialized = false;}
+        );
     }
 
 
