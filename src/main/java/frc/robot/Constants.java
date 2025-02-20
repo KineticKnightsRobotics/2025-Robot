@@ -53,6 +53,12 @@ public class Constants {
         public static double encoderOffset = 0.0;
         public static int leaderMotorID = 21;
         public static int followMotorID = 22;
+
+        // Scoring constants
+        public static double stage1 = 10;
+        public static double stage2 = 30;
+        public static double stage3 = 40;
+        public static double stage4 = 50;
     }
 
     public final static class ArmConstants {
