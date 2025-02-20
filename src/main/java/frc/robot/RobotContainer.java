@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,7 +22,8 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.elevatorSysIDCommand;
 import frc.robot.commands.Drive.joystickDrive;
-import frc.robot.commands.Drive.scorePosition;
+import frc.robot.commands.Drive.score;
+import frc.robot.commands.Drive.intakeSource;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
@@ -76,6 +79,11 @@ public class RobotContainer {
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
+
+        // NamedCommands
+        NamedCommands.registerCommand("scoreStage1", new score(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage1).scoreCoral());
+        NamedCommands.registerCommand("scoreStage2", new score(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage2).scoreCoral());
+        NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
     }
 
     public void configureBindings() {
@@ -130,7 +138,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No Auto LMAO");
+        return Commands.print("scoreTest");
     }
 }
 
