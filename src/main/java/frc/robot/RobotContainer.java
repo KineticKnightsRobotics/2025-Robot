@@ -107,15 +107,16 @@ public class RobotContainer {
         op3
             .whileTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1)
-                .andThen();
+            );
 
 
-        op6.onTrue(elevatorSubsystem.setElevatorGoal(38).andThen(armSubsystem.setPivotGoal(59)));
+        op6
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(38)
+            );
         
         op17
-            .onTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1).andThen(armSubsystem.setPivotGoal(90)))
-            .whileTrue(endAffectorSubsytem.loadCoral())
-            .onFalse(armSubsystem.setPivotGoal(45));
+            .onTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1));
         op18
             .onTrue(endAffectorSubsytem.spitCoral());
 
