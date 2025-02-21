@@ -182,7 +182,7 @@ public class Elevator extends SubsystemBase {
         );
     }
     
-    public Command moveElevator(BooleanSupplier willElevatorSquish) {
+    public Command moveElevator() {
         return Commands
         .runOnce(
             () -> {
