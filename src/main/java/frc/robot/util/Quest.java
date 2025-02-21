@@ -47,7 +47,7 @@ public class Quest {
   private Pose2d resetPoseRobot = new Pose2d();
 
   // Position of the quest on the robot (13.5" forward, centered side-to-side, pointed forward))
-  private final Transform2d robotToQuest = new Transform2d(0.38, 0.0, new Rotation2d(Math.PI));
+  private final Transform2d robotToQuest = new Transform2d(-0.38, 0.0, new Rotation2d(Math.PI));
 
   /* Constructor */
   public Quest() {

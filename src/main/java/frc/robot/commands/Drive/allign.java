@@ -29,6 +29,7 @@ public class allign extends Command {
     private Translation2d displacement;
     private int targetApriltag;
     private Pose2d fieldCoordinate;
+    private double angleOffset;
 
     private PIDController xController = new PIDController(StrafeXController.P,StrafeXController.I,StrafeXController.D);
     private PIDController yController = new PIDController(StrafeYController.P,StrafeYController.I,StrafeYController.D);
@@ -42,20 +43,22 @@ public class allign extends Command {
     public allign(
         Drive kSubsystem,
         Translation2d desiredDisplacement,
-        int apriltagID
+        int apriltagID,
+        double _angleOffset
     ) {
         addRequirements(kSubsystem);
         driveSubsystem = kSubsystem;
         displacement = desiredDisplacement;
         targetApriltag = apriltagID;
+        angleOffset = _angleOffset;
+
     }
 
     @Override
     public void initialize() {
         Pose2d tagPose = driveSubsystem.getTagPose(targetApriltag);
         Translation2d displacementRotated = displacement.rotateBy(tagPose.getRotation());
-        fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation());
-
+        fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation().rotateBy(new Rotation2d(angleOffset)));
     }
 
     @Override
@@ -80,7 +83,7 @@ public class allign extends Command {
             speedBuilder
                 .withVelocityX(outputX)
                 .withVelocityY(outputY)
-                .withRotationalRate(0.0)
+                .withRotationalRate(outputR)
         );
     }
 

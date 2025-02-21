@@ -68,7 +68,7 @@ public class Arm extends SubsystemBase {
         configureDevices();
 
         // Set goal to idle position
-        goalPosition = getPivotEncoderPosition();
+        goalPosition = 86;
 
         // Set encoder to 0
         //pivotEncoder.setPosition(pivotEncoder.getAbsolutePosition().getValueAsDouble());// - ArmConstants.encoderOffset);

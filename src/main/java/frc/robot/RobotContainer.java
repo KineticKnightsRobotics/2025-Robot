@@ -12,6 +12,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,12 +24,12 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.commands.elevatorSysIDCommand;
+import frc.robot.commands.intakeSource;
+import frc.robot.commands.score;
 //import frc.robot.commands.*;
 import frc.robot.commands.Drive.allign;
-import frc.robot.commands.Drive.elevatorSysIDCommand;
 import frc.robot.commands.Drive.joystickDrive;
-import frc.robot.commands.Drive.score;
-import frc.robot.commands.Drive.intakeSource;
 import frc.robot.subsystems.*;
 
 public class RobotContainer {
@@ -103,7 +105,43 @@ public class RobotContainer {
 
         driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
 
+        rightBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 17,Units.degreesToRadians(180)));
+        leftBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),17,Units.degreesToRadians(180)));
+        driverA.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 12,Units.degreesToRadians(0.0)));
+        driverB.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 16,Units.degreesToRadians(0.0)));
+        driverY.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 15, Units.degreesToRadians(0.0)));
 
+        op1
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+0.5)
+            );
+        op2
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(15)
+            );            
+        op3
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(38)
+            );
+        op6
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(45)
+            );
+        op7
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.maxChassisHeight)
+            );
+        
+
+
+
+
+
+
+
+    
+
+        /*
         op3
             .whileTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1)
@@ -120,48 +158,8 @@ public class RobotContainer {
         op18
             .onTrue(endAffectorSubsytem.spitCoral());
 
-
         op9.onTrue(armSubsystem.setPivotGoal(90));
-
-        /*
-        //arm
-        op1.onTrue(armSubsystem.setPivotGoal(1.0));
-        op2.onTrue(armSubsystem.setPivotGoal(15.0));
-        op3.onTrue(armSubsystem.setPivotGoal(50.0));
-        op6.onTrue(armSubsystem.setPivotGoal(47.67));
-        op7.onTrue(armSubsystem.setPivotGoal(70));
-        op8.onTrue(armSubsystem.setPivotGoal(90.0));
-        //elevator
-        op11.whileTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1));
-        op12.whileTrue(elevatorSubsystem.setElevatorGoal(40));
-        op13.whileTrue(elevatorSubsystem.setElevatorGoal(15));
-        op15.whileTrue(elevatorSubsystem.setElevatorGoal(56));
-        op14.whileTrue(elevatorSubsystem.setElevatorGoal(30));
-        //end affector
-        op17.whileTrue(endAffectorSubsytem.loadCoral());
-        op18.whileTrue(endAffectorSubsytem.spitCoral());
-        op19.whileTrue(endAffectorSubsytem.loadAlgae());
-        op20.whileTrue(endAffectorSubsytem.spitAlgae());
         */
-
-        op21.whileTrue(new allign(driveSubsystem, new Translation2d(1,0), 1));
-
-        //climber
-        op4.whileTrue(climberSubsystem.setClimberSpeed(1.0));
-        op5.whileTrue(climberSubsystem.setClimberSpeed(-1.0));
-
-
-
-
-
-        //op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
-        //op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
-
-        //not working yet
-        //op4.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, 55, 15));
-        //op5.whileTrue(scorePosition.score(elevatorSubsystem, armSubsystem, ElevatorConstants.ChassisElevationOffset, 90));
-
-        //SmartDashboard.putData("Set Elevator Goal", elevatorSubsystem.setElevatorGoal(10.0));
     }
 
     public void configureDefaultCommands() {
@@ -179,9 +177,9 @@ public class RobotContainer {
         driveSubsystem.setDefaultCommand(
             driveSubsystem.applyRequest(
                 () -> drive
-                    .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed*0.2)
-                    .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed*0.2)
-                    .withRotationalRate(-driverController.getRawAxis(4)*MaxSpeed*0.2)
+                    .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed/**0.2*/)
+                    .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed/**0.2*/)
+                    .withRotationalRate(-driverController.getRawAxis(4)*MaxSpeed/**0.2*/)
                 )
         );
 
