@@ -1,0 +1,103 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "start to reef Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Home"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef 1 to source right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Source to reef 2 right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Home"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "reef 2 to source right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Source to reef 2 right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Home"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "reef 2 to source right"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "source to reef 3 right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator Home"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

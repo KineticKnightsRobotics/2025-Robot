@@ -1,0 +1,85 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "startToReef left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "reefToSource left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeSource"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "sourceToReef1 left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreStage2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef1 to source left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeSource"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "sourceToReef1 left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "scoreStage2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef1 to source left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeSource"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "source to Reef2 left"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
