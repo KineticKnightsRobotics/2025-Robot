@@ -193,8 +193,8 @@ public class Elevator extends SubsystemBase {
             Commands.run(
                 () -> {
                     //double newOutput = elevatorController.calculate(getElevatorPosition());
-                    SmartDashboard.putBoolean("Will arm Squish", willElevatorSquish.getAsBoolean());
-                    if (getElevatorPosition() >= 0 && getElevatorPosition() < ElevatorConstants.maxChassisHeight && willElevatorSquish.getAsBoolean()) {
+                    //SmartDashboard.putBoolean("Will arm Squish", willElevatorSquish.getAsBoolean());
+                    if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
                         SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
 
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
