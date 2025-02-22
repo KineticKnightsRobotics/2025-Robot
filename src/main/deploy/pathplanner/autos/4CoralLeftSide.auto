@@ -11,15 +11,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "reefToSource left"
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "sourceToReef1 left"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "intakeSource"
+            "name": "Elevator L3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Reef1 to source left"
           }
         },
         {
@@ -31,49 +49,25 @@
         {
           "type": "named",
           "data": {
-            "name": "scoreStage2"
+            "name": "Elevator L3"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "Reef1 to source left"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeSource"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "sourceToReef1 left"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "scoreStage2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Reef1 to source left"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeSource"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "source to Reef2 left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3"
           }
         }
       ]
