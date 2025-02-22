@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.DistanceUnit;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -39,6 +40,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
 import frc.robot.util.Quest;
+
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -242,7 +244,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
         SmartDashboard.putNumberArray("Quest Pose", questPose);
 
-        SmartDashboard.putNumber("Robot Velocity", this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble() / 6.75 * 4*Math.PI);
+        SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
         SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
         
     }
@@ -304,7 +306,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
 
 
-
+    
 
 
 
