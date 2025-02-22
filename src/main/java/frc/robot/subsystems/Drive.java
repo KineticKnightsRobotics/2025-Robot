@@ -61,7 +61,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private Quest quest = new Quest();
     private boolean hasQuestInitialized = false;
 
-    private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+    private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
 
     //auto objects
@@ -236,24 +236,14 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         quest.cleanUpQuestNavMessages();
 
-
-
         SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
         SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
         SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
         double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
         SmartDashboard.putNumberArray("Quest Pose", questPose);
 
-        //SmartDashboard.putNumberArray("Quest Pose", new double[] {quest.getRobotPose().getMeasureX().baseUnitMagnitude(),quest.getRobotPose().getMeasureY().baseUnitMagnitude()});
-        /*
-        SmartDashboard.putBoolean("Quest Connected", quest.connected());
-        double[] questnavPose = {quest.getPose().getMeasureX().baseUnitMagnitude(),quest.getPose().getMeasureY().baseUnitMagnitude()};
-        SmartDashboard.putNumberArray("QuestNav Pose", questnavPose);
-        SmartDashboard.putNumber("Quest Battery", quest.getBatteryPercent());
-        */
-        //if (DriverStation.isEnabled()) {
-            //SmartDashboard.putString("Drive Current Command",this.getCurrentCommand().toString());
-        //}
+        SmartDashboard.putNumber("Robot Velocity", this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
         
     }
 

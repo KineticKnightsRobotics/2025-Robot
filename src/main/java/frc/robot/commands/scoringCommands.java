@@ -1,32 +1,41 @@
-package frc.robot.commands.Scoring;
+package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.EndAffector;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public class goToPosition {
+public class scoringCommands extends Command{
+
+    private Drive driveSub;
+    private Elevator elevSub;
+    private EndAffector endAffectSub;
+
+    // Constructor
+    public scoringCommands(Drive drive, Elevator elevator, EndAffector endAffector) {
+        driveSub = drive;
+        elevSub = elevator;
+        endAffectSub = endAffector;
+    }
+
+    public Command scoreCoral (double elevPos) {
+        return
+        new SequentialCommandGroup(
+            elevSub.setElevatorGoal(elevPos),
+            Commands.waitSeconds(2.0),
+            //endAffectSub.spitCoral(),
+            elevSub.setElevatorGoal(0)
+        );
+
+    }
 
     public Command elevatorToPosition(Elevator elv, double height) {
-        return Commands
-            .runOnce(
-                () -> {
-                    elv.setElevatorGoal(height);
-                },
-                elv
-            )
+        return 
+            elv.setElevatorGoal(height)
             .andThen(
-                Commands.run(
-                    () -> {
-                        elv.moveElevator();
-                    },
-                    elv
-                )
+                elv.moveElevator()
                 .until(
                     () -> elv.elevatorAtGoal()
                 )
@@ -34,6 +43,7 @@ public class goToPosition {
     }
 
 
+    /*
     /**
      * 
      * @param elv Elevator Subsystem
@@ -42,11 +52,8 @@ public class goToPosition {
      * @param allignmentVector Vector for allignment
      * @param elevatorHeight height to go to for elevator
      * @return
-     */
+     
     public Command autoScore(
-                Elevator elv,
-                Drive drv,
-                EndAffector aff,
                 Translation2d allignmentVector,
                 double elevatorHeight
             ) {
@@ -59,6 +66,8 @@ public class goToPosition {
                 aff.spitCoral()
             );
     }
+    */
+
+
+    
 }
-
-

@@ -13,10 +13,8 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -27,7 +25,7 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.elevatorSysIDCommand;
 import frc.robot.commands.intakeSource;
-import frc.robot.commands.score;
+import frc.robot.commands.scoringCommands;
 //import frc.robot.commands.*;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.joystickDrive;
@@ -50,6 +48,8 @@ public class RobotContainer {
     public final Arm armSubsystem = new Arm();
     public final EndAffector endAffectorSubsytem = new EndAffector();
     public final Climber climberSubsystem = new Climber();
+
+    public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
 
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
@@ -97,9 +97,11 @@ public class RobotContainer {
         configureBindings();
 
         // NamedCommands
-        NamedCommands.registerCommand("scoreStage1", new score(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage1).scoreCoral());
-        NamedCommands.registerCommand("scoreStage2", new score(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage2).scoreCoral());
-        NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
+        //NamedCommands.registerCommand("scoreStage1", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage1).scoreCoral());
+        //NamedCommands.registerCommand("scoreStage2", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage2).scoreCoral());
+        //NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
+        NamedCommands.registerCommand("Elevator L3", scoringCommands.elevatorToPosition(elevatorSubsystem, 30));
+        NamedCommands.registerCommand("Elevator Home", scoringCommands.elevatorToPosition(elevatorSubsystem, 0));
     }
 
     public void configureBindings() {
@@ -112,6 +114,13 @@ public class RobotContainer {
         driverB.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 16,Units.degreesToRadians(0.0)));
         driverY.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 15, Units.degreesToRadians(0.0)));
 
+        driverX.whileTrue(
+            scoringCommands.elevatorToPosition(elevatorSubsystem, 30)
+            .andThen(
+                scoringCommands.elevatorToPosition(elevatorSubsystem, ElevatorConstants.ChassisElevationOffset+1)
+            )
+        );
+
         op1
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+0.5)
@@ -119,7 +128,7 @@ public class RobotContainer {
         op2
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(15)
-            );            
+            );
         op3
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(38)
@@ -191,9 +200,9 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("scoreTest");
+        return new PathPlannerAuto("4 note right");
     }
-}
+} 
 
 
     /*
