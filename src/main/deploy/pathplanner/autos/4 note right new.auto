@@ -17,16 +17,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Reef 1 to source right"
-                }
-              }
-            ]
+            "pathName": "Reef 1 to source right"
           }
         },
         {
@@ -42,16 +35,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "reef 2 to source right"
-                }
-              }
-            ]
+            "pathName": "reef 2 to source right"
           }
         },
         {
@@ -67,16 +53,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "reef 2 to source right"
-                }
-              }
-            ]
+            "pathName": "reef 2 to source right"
           }
         },
         {
