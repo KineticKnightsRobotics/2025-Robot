@@ -37,6 +37,7 @@ public class elevatorSysIDCommand extends Command {
   public void execute() {
     elevatorSubsystem.setElevatorVoltage(voltage);
     voltage += voltage;
+    SmartDashboard.putNumber("Voltage Elevator", voltage);
   }
 
   // Called once the command ends or is interrupted.

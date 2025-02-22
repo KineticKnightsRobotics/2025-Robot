@@ -140,6 +140,9 @@ public class RobotContainer {
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.maxChassisHeight)
             );
 
+            op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
+            op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
+
 
 
     
