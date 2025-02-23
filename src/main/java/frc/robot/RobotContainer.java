@@ -49,7 +49,7 @@ public class RobotContainer {
     public final Arm armSubsystem = new Arm();
     public final EndAffector endAffectorSubsytem = new EndAffector();
     public final Climber climberSubsystem = new Climber();
-    public final CANdleSubsystem CANdleLED = new CANdleSubsystem(driverController);
+    public final CANdleSubsystem CANdleLED = new CANdleSubsystem();
 
     public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
 
