@@ -32,6 +32,7 @@ import frc.robot.commands.scoringCommands;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
     private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
@@ -148,6 +149,12 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
             op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
 op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
+        op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        op12.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        //Drivetrain.registerTelemetry(logger::telemeterize);
 
     
 
@@ -203,8 +210,8 @@ op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
         //    CANdleLED.CANdleBlue()
         //);
 
-        
-
+        // Run SysId routines when holding back/start and X/Y.
+        // Note that each routine should be run exactly once in a single log.
     }
 
     public Command getAutonomousCommand() {
