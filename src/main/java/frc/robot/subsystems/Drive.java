@@ -174,7 +174,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         try {
             var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                ()->getState().Pose, //Taken from CTRE Examples: https://github.com/CrossTheRoadElec/Phoenix6-Examples/blob/main/java/SwerveWithPathPlanner/src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java#L197
+                ()->getPose(), //Taken from CTRE Examples: https://github.com/CrossTheRoadElec/Phoenix6-Examples/blob/main/java/SwerveWithPathPlanner/src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java#L197
                 this::resetPose,
                 ()->getState().Speeds,
                 (speeds)-> this.setControl(autoRequest.withSpeeds(speeds)),
@@ -246,6 +246,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
         SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
+
+        SmartDashboard.putNumber("Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         
     }
 

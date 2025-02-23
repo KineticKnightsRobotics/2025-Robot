@@ -30,6 +30,7 @@ import frc.robot.commands.scoringCommands;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -144,6 +145,12 @@ public class RobotContainer {
             op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
 
 
+        op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        op12.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        //Drivetrain.registerTelemetry(logger::telemeterize);
 
     
 
@@ -199,8 +206,8 @@ public class RobotContainer {
         //    CANdleLED.CANdleBlue()
         //);
 
-        
-
+        // Run SysId routines when holding back/start and X/Y.
+        // Note that each routine should be run exactly once in a single log.
     }
 
     public Command getAutonomousCommand() {
