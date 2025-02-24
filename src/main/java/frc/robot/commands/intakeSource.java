@@ -2,7 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.EndAffector;
+import frc.robot.subsystems.coralAffector;
 import frc.robot.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
@@ -10,10 +10,10 @@ public class intakeSource {
 
     private Drive driveSub;
     private Elevator elevSub;
-    private EndAffector endAffectSub;
+    private coralAffector endAffectSub;
 
     // Constructor
-    public intakeSource(Drive drive, Elevator elevator, EndAffector endAffector) {
+    public intakeSource(Drive drive, Elevator elevator, coralAffector endAffector) {
         driveSub = drive;
         elevSub = elevator;
         endAffectSub = endAffector;

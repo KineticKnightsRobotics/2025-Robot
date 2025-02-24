@@ -5,7 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
-import frc.robot.subsystems.CANdleSubsystem.AnimationTypes;
+import frc.robot.subsystems.Bling.AnimationTypes;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -35,7 +35,7 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
-    private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
+    private final Bling candleSubsystem = new Bling();
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
@@ -50,10 +50,10 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
-    public final Arm armSubsystem = new Arm();
-    public final EndAffector endAffectorSubsytem = new EndAffector();
+    public final algaeAffector armSubsystem = new algaeAffector();
+    public final coralAffector endAffectorSubsytem = new coralAffector();
     public final Climber climberSubsystem = new Climber();
-    public final CANdleSubsystem CANdleLED = new CANdleSubsystem();
+    public final Bling CANdleLED = new Bling();
 
     public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
 

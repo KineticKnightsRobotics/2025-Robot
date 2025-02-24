@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.MathUtil;
 import java.util.Random;
 
-public class CANdleSubsystem extends SubsystemBase {
+public class Bling extends SubsystemBase {
 
     private final CANdle m_candle;
     private final int LedCount = 100;
@@ -28,7 +28,7 @@ public class CANdleSubsystem extends SubsystemBase {
     private final int[] heat;
     private final Random rand;
 
-    public CANdleSubsystem() {
+    public Bling() {
         m_candle = new CANdle(1, "rio");
 
         CANdleConfiguration config = new CANdleConfiguration();

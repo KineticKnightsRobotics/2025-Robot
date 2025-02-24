@@ -7,17 +7,17 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.EndAffector;
+import frc.robot.subsystems.coralAffector;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class scoringCommands extends Command{
 
     private Drive driveSub;
     private Elevator elevSub;
-    private EndAffector endAffectSub;
+    private coralAffector endAffectSub;
 
     // Constructor
-    public scoringCommands(Drive drive, Elevator elevator, EndAffector endAffector) {
+    public scoringCommands(Drive drive, Elevator elevator, coralAffector endAffector) {
         driveSub = drive;
         elevSub = elevator;
         endAffectSub = endAffector;

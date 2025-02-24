@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.EndAffectorConstants;
 
-public class EndAffector extends SubsystemBase {
+public class coralAffector extends SubsystemBase {
     
 
     SparkMax affectorMotor;
@@ -24,7 +24,7 @@ public class EndAffector extends SubsystemBase {
     DigitalInput endAffectorRangeSensor;
 
 
-    public EndAffector() {
+    public coralAffector() {
         affectorMotor = new SparkMax(EndAffectorConstants.affectorMotorID, MotorType.kBrushless);
         endAffectorBeamBreak = new DigitalInput(EndAffectorConstants.beamBreakPort);
         endAffectorRangeSensor = new DigitalInput(EndAffectorConstants.rangeSensorPort);
