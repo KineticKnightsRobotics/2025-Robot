@@ -13,57 +13,52 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.Constants.EndAffectorConstants;
+import frc.robot.Constants.CoralAffectorConstants;
 
 public class coralAffector extends SubsystemBase {
     
 
-    SparkMax affectorMotor;
-    SparkMaxConfig affectorMotorConfig;
+    SparkMax rollerMotor;
+    SparkMaxConfig rollerMotorConfig;
     DigitalInput endAffectorBeamBreak;
     DigitalInput endAffectorRangeSensor;
 
 
     public coralAffector() {
-        affectorMotor = new SparkMax(EndAffectorConstants.affectorMotorID, MotorType.kBrushless);
-        endAffectorBeamBreak = new DigitalInput(EndAffectorConstants.beamBreakPort);
-        endAffectorRangeSensor = new DigitalInput(EndAffectorConstants.rangeSensorPort);
+        rollerMotor = new SparkMax(CoralAffectorConstants.rollerMotor, MotorType.kBrushless);
+        endAffectorBeamBreak = new DigitalInput(CoralAffectorConstants.beamBreakPort);
+        endAffectorRangeSensor = new DigitalInput(CoralAffectorConstants.rangeSensorPort);
     }
 
 
 
     public void configDevices() {
                 // Effector motor
-        affectorMotorConfig = new SparkMaxConfig();
-        affectorMotorConfig
+        rollerMotorConfig = new SparkMaxConfig();
+        rollerMotorConfig
             .inverted(true)
             .smartCurrentLimit(30)
             .closedLoopRampRate(0.000001)
             .idleMode(IdleMode.kBrake);
 
-        affectorMotor.configure(affectorMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Arm Has Coral", hasCoral());
-        SmartDashboard.putBoolean("Arm Has Algae", hasAlgae());
+        SmartDashboard.putBoolean("Coral Mech Has Coral", hasCoral());
     }
 
     public boolean hasCoral() {
         return !endAffectorBeamBreak.get();
     }
 
-    public boolean hasAlgae() {
-        return endAffectorRangeSensor.get();
-    }
-
     // Load a game piece into the robot
     public Command loadCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> affectorMotor.set(-0.3),
+            () -> rollerMotor.set(-0.3),
             this
         // End condition of linebreak true (piece is in)
         ).until(
@@ -71,44 +66,44 @@ public class coralAffector extends SubsystemBase {
 
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
-            () -> affectorMotor.set(0.0)
+            () -> rollerMotor.set(0.0)
         );
     }
     // Spit out the game piece
     public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> affectorMotor.set(-1.0)
+            () -> rollerMotor.set(-1.0)
 
         // End condition of linebreak true (piece is in)
         ).until(
             () -> !hasCoral()
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
-            () -> affectorMotor.set(0.0)
+            () -> rollerMotor.set(0.0)
         );
     }
 
     public Command loadAlgae() {
         return Commands.run(
-            () -> affectorMotor.set(0.5),
+            () -> rollerMotor.set(0.5),
             this
         ).until(()->hasAlgae())
         .finallyDo(
             () -> {
-                affectorMotor.set(0.1);
+                rollerMotor.set(0.1);
             }
         );
     }
 
     public Command spitAlgae() {
         return Commands.run(
-            () -> affectorMotor.set(-0.5),
+            () -> rollerMotor.set(-0.5),
             this
         ).until(()-> !hasAlgae())
         .finallyDo(
             () -> {
-                affectorMotor.set(0.0);
+                rollerMotor.set(0.0);
             }
         );
     }
