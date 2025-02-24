@@ -16,14 +16,14 @@ import frc.robot.subsystems.Drive;
 public class Vision {
     
     private final String deviceName;
-    private final Drive driveSubsystem;
+    //private final Drive driveSubsystem;
 
     public Vision(
         String kDeviceName,
         Drive kDriveSubsystem
     ) {
         deviceName = kDeviceName;
-        driveSubsystem = kDriveSubsystem;
+        //driveSubsystem = kDriveSubsystem;
     }
 
     public Pose2d getEstimatedRoboPose() {

@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Source to reef 2 right"
+            "pathName": "source to reef 3 right"
           }
         },
         {
@@ -55,7 +55,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "reef 2 to source right"
+            "pathName": "reef 3 to source right"
           }
         },
         {
