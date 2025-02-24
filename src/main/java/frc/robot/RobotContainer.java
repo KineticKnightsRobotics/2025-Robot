@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import frc.robot.subsystems.CANdleSubsystem.AnimationTypes;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -15,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -33,6 +35,8 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
+    private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
     private SwerveRequest joystickDrive;
@@ -49,7 +53,7 @@ public class RobotContainer {
     public final Arm armSubsystem = new Arm();
     public final EndAffector endAffectorSubsytem = new EndAffector();
     public final Climber climberSubsystem = new Climber();
-    public final CANdleSubsystem CANdleLED = new CANdleSubsystem(driverController);
+    public final CANdleSubsystem CANdleLED = new CANdleSubsystem();
 
     public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
 
@@ -89,7 +93,7 @@ public class RobotContainer {
     public final Trigger op21 = new Trigger(() -> opPanel.getRawButton(21));
     public final Trigger op22 = new Trigger(() -> opPanel.getRawButton(22));
     public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
-
+public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
 
     public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
 
@@ -143,7 +147,7 @@ public class RobotContainer {
 
             op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
             op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
-
+op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
         op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
         op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
