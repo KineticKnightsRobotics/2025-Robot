@@ -23,8 +23,8 @@ public class CANdleSubsystem extends SubsystemBase {
     private Animation m_currentAnimation;
     private AnimationTypes m_currentAnimationType;
 
-    private final int COOLING = 55;
-    private final int SPARKING = 120;
+    private final int COOLING = 40;
+    private final int SPARKING = 150;
     private final int[] heat;
     private final Random rand;
 
@@ -107,7 +107,9 @@ public class CANdleSubsystem extends SubsystemBase {
             heat[rand.nextInt(7)] = rand.nextInt(95) + 160;
         }
         for (int i = 0; i < LedCount; i++) {
-            m_candle.setLEDs(0, heat[i], 0, 0, i, 1);
+            int g = Math.min(255, heat[i]);
+            int b = (int) Math.min(255, heat[i] * 0.5); // Adjust blue component for a cooler effect
+            m_candle.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
         }
     }
 
