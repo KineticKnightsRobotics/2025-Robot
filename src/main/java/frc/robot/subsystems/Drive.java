@@ -178,7 +178,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 (speeds)-> this.setControl(autoRequest.withSpeeds(speeds)),
                 new PPHolonomicDriveController(
                     // PID constants for translation
-                    new PIDConstants(10, 0, 0),
+                    new PIDConstants(3.0, 0, 0),
                     // PID constants for rotation
                     new PIDConstants(7, 0, 0)
                 ),
@@ -212,7 +212,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-
+         
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV()) {
             //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
