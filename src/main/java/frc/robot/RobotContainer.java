@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.elevatorSysIDCommand;
 import frc.robot.commands.intakeSource;
@@ -50,7 +49,8 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
-    public final algaeAffector armSubsystem = new algaeAffector();
+    public final coralAffector coralSubsystem = new coralAffector();
+    public final algaeAffector algaeSubsystem = new algaeAffector();
     public final coralAffector endAffectorSubsytem = new coralAffector();
     public final Climber climberSubsystem = new Climber();
     public final Bling CANdleLED = new Bling();
@@ -117,66 +117,16 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
         rightBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 17,Units.degreesToRadians(180)));
         leftBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),17,Units.degreesToRadians(180)));
         driverA.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 12,Units.degreesToRadians(0.0)));
-        driverB.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 16,Units.degreesToRadians(0.0)));
-        driverY.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 15, Units.degreesToRadians(0.0)));
-
-        driverX.whileTrue(
-            scoringCommands.score(30)
-        );
-
-        op1
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+0.5)
-            );
-        op2
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(15)
-            );
-        op3
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(38)
-            );
-        op6
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(45)
-            );
-        op7
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.maxChassisHeight)
-            );
-
-            op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
-            op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
-op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
-
-        op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        op12.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-
-        //Drivetrain.registerTelemetry(logger::telemeterize);
-
-    
-
-        /*
-        op3
-            .whileTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1)
-            );
 
 
-        op6
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(38)
-            );
-        
-        op17
-            .onTrue(elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+1));
-        op18
-            .onTrue(endAffectorSubsytem.spitCoral());
 
-        op9.onTrue(armSubsystem.setPivotGoal(90));
-        */
+
+
+
+        driverStart.and(op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)));
+        driverStart.and(op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
+        driverStart.and(op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
+        driverStart.and(op12.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)));
     }
 
     public void configureDefaultCommands() {
@@ -202,9 +152,6 @@ op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
         elevatorSubsystem.setDefaultCommand(
             elevatorSubsystem.moveElevator()
-        );
-        armSubsystem.setDefaultCommand(
-            armSubsystem.pivotArm().withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
         //CANdleLED.setDefaultCommand(
         //    CANdleLED.CANdleBlue()

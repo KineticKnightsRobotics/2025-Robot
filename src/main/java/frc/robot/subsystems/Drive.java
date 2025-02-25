@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -56,7 +57,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
-    private Vision kLimelight = new Vision("limelight-dignan", this);
+    private Vision kLimelightDig = new Vision("limelight-dig");
+    private Vision kLimelightNan = new Vision("limelight-nan");
 
     private Quest quest = new Quest();
     private boolean hasQuestInitialized = false;
@@ -172,7 +174,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         try {
             var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                ()->getPose(), //Taken from CTRE Examples: https://github.com/CrossTheRoadElec/Phoenix6-Examples/blob/main/java/SwerveWithPathPlanner/src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java#L197
+                ()->getState().Pose, //Taken from CTRE Examples: https://github.com/CrossTheRoadElec/Phoenix6-Examples/blob/main/java/SwerveWithPathPlanner/src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java#L197
                 this::resetPose,
                 ()->getState().Speeds,
                 (speeds)-> this.setControl(autoRequest.withSpeeds(speeds)),
@@ -213,18 +215,23 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             });
         }
 
-        SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
-        if (kLimelight.getTV()) {
-            //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
+        SmartDashboard.putBoolean("Limelight Dig TV", kLimelightDig.getTV());
+        if (kLimelightDig.getTV()) {
             addVisionMeasurement(
-                kLimelight.getEstimatedRoboPose(),
-                Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),//kLimelight.getTimestamp(),
-                kLimelight.getStandardDeviations()
+                kLimelightDig.getEstimatedRoboPose(),
+                Utils.fpgaToCurrentTime(kLimelightDig.getTimestamp()),
+                kLimelightDig.getStandardDeviations()
             );
         }
 
-        SmartDashboard.putData("field2d", this.field);
-        this.field.setRobotPose(getPose());
+        SmartDashboard.putBoolean("Limelight Nan TV", kLimelightNan.getTV());
+        if (kLimelightNan.getTV()) {
+            addVisionMeasurement(
+                kLimelightNan.getEstimatedRoboPose(),
+                Utils.fpgaToCurrentTime(kLimelightNan.getTimestamp()),
+                kLimelightNan.getStandardDeviations()
+            );
+        }
 
         if (hasQuestInitialized) {
             addVisionMeasurement(
@@ -236,17 +243,30 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         quest.cleanUpQuestNavMessages();
 
+        SmartDashboard.putData("field2d", this.field);
+        this.field.setRobotPose(getPose());
+
         SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
         SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
         SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
         double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
         SmartDashboard.putNumberArray("Quest Pose", questPose);
-
-        SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
-        SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
-
+        SmartDashboard.putNumber("Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
         SmartDashboard.putNumber("Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
-        
+    }
+
+    /**
+     * There is no Apriltag ID 0 on the 2025 field, if this function returns 0, that means the limelight does not see a tag.
+     * @return ID of the prioritized tag.
+     */
+    public double getLimelightTarget() {
+        if (kLimelightDig.getTV()) {
+            return kLimelightDig.getTagID();
+        }
+        if (kLimelightNan.getTV()) {
+            return kLimelightNan.getTagID();
+        }
+        return 0;
     }
 
     public Pose2d getPose() {
@@ -300,13 +320,6 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
-    //public double getTranslationRelativeToSpeaker(){
-    //    return Math.abs(getPose().getTranslation().getDistance(getSpeakerPose().get().getTranslation().toTranslation2d()));
-    //}
-
-
-
-    
 
 
 
@@ -322,7 +335,13 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
 
 
-    
+
+
+
+
+
+
+
 
 
     private void startSimThread() {
@@ -339,7 +358,6 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
-
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();

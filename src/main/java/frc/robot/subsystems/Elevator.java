@@ -44,9 +44,9 @@ public class Elevator extends SubsystemBase {
     public Elevator() {
 
         //Configure the leader motor
-        leaderElevatorMotor = new SparkMax(ElevatorConstants.leaderMotorID, MotorType.kBrushless);
+        leaderElevatorMotor = new SparkMax(ElevatorConstants.digMotorID, MotorType.kBrushless);
         leaderEncoder = leaderElevatorMotor.getEncoder();
-        followElevatorMotor = new SparkMax(ElevatorConstants.followMotorID, MotorType.kBrushless);
+        followElevatorMotor = new SparkMax(ElevatorConstants.nanMotorID, MotorType.kBrushless);
         followEncoder = followElevatorMotor.getEncoder();
         elevatorEncoder = new CANcoder(ElevatorConstants.encoderID);
 
@@ -70,7 +70,7 @@ public class Elevator extends SubsystemBase {
 
         configureDevices();
 
-        goalPosition = ElevatorConstants.ChassisElevationOffset+1;
+        goalPosition = ElevatorConstants.chassisHome+1;
         elevatorEncoder.setPosition(0.0);
     }
 
@@ -147,7 +147,7 @@ public class Elevator extends SubsystemBase {
 
     public double getElevatorPosition() {
         //return leaderEncoder.getPosition();
-        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.ChassisElevationOffset;
+        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.chassisHome;
     }
     
     public double getElevatorGoal(){
@@ -167,7 +167,7 @@ public class Elevator extends SubsystemBase {
         return Commands
         .runOnce(
             () -> {
-                goalPosition = MathUtil.clamp(position, ElevatorConstants.ChassisElevationOffset+0.1, ElevatorConstants.maxChassisHeight-0.1);
+                goalPosition = MathUtil.clamp(position, ElevatorConstants.chassisHome+0.1, ElevatorConstants.maxChassisHeight-0.1);
                 //elevatorController.setGoal(position);   
             },
             this

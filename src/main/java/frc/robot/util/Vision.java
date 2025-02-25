@@ -11,19 +11,15 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.VisionConstants.defaultSTD;
-import frc.robot.subsystems.Drive;
 
 public class Vision {
     
     private final String deviceName;
-    //private final Drive driveSubsystem;
 
     public Vision(
-        String kDeviceName,
-        Drive kDriveSubsystem
+        String kDeviceName
     ) {
         deviceName = kDeviceName;
-        //driveSubsystem = kDriveSubsystem;
     }
 
     public Pose2d getEstimatedRoboPose() {
@@ -58,6 +54,10 @@ public class Vision {
 
     public boolean getTV() {
         return LimelightHelpers.getTV(deviceName);
+    }
+    
+    public double getTagID() {
+        return LimelightHelpers.getFiducialID(deviceName);
     }
 
 }
