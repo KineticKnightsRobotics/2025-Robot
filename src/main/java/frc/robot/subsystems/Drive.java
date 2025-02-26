@@ -64,6 +64,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
 
+    
+
     //auto objects
     private Field2d field = new Field2d();
     private AutoBuilder autoBuilder;
@@ -224,7 +226,19 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         }
 
         SmartDashboard.putData("field2d", this.field);
-        this.field.setRobotPose(getPose());
+
+       // this.field.setRobotPose(getPose());
+       field.getObject("PoseEstimatorPose").setPose(getPose());
+
+       if (kLimelight.getTV()) {  
+            Pose2d limelightPose = kLimelight.getEstimatedRoboPose();
+            field.getObject("LimelightPose").setPose(limelightPose);
+        }
+        
+        SmartDashboard.putNumberArray("Odometry Pose", new double[]{getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()});
+        SmartDashboard.putNumberArray("Limelight Pose", new double[]{kLimelight.getEstimatedRoboPose().getX(), kLimelight.getEstimatedRoboPose().getY(), kLimelight.getEstimatedRoboPose().getRotation().getDegrees()});
+        
+        
 
         if (hasQuestInitialized) {
             addVisionMeasurement(
@@ -298,6 +312,11 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             () -> {hasQuestInitialized = false;}
         );
     }
+    
+    public Field2d getField() {
+        return this.field;
+    }
+    
 
 
     //public double getTranslationRelativeToSpeaker(){

@@ -36,6 +36,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
     private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
+    public final Drive driveSubsystem = TunerConstants.createDrivetrain();
+
+
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
@@ -48,7 +51,8 @@ public class RobotContainer {
     public Joystick opPanel = new Joystick(1);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
-    public final Drive driveSubsystem = TunerConstants.createDrivetrain();
+
+    
     public final Elevator elevatorSubsystem = new Elevator();
     public final Arm armSubsystem = new Arm();
     public final EndAffector endAffectorSubsytem = new EndAffector();
@@ -99,6 +103,8 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
 
 
     public RobotContainer() {
+        logger.setDrive(driveSubsystem);
+
         configureDefaultCommands();
         configureBindings();
 
