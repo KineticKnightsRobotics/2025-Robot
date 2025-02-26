@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "start to reef Right"
+            "pathName": "start to reef 1 right"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Elevator L3"
+            "waitTime": 1.0
           }
         },
         {
@@ -29,9 +29,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Elevator L3"
+            "waitTime": 1.0
           }
         },
         {
@@ -47,9 +47,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Elevator L3"
+            "waitTime": 1.0
           }
         },
         {
@@ -59,15 +59,15 @@
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "source to reef 4 right"
+            "waitTime": 1.0
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Elevator L3"
+            "pathName": "source to reef 4 right"
           }
         }
       ]

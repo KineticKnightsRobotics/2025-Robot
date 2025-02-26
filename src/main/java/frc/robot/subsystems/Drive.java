@@ -214,7 +214,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         }
          
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
-        if (kLimelight.getTV()) {
+        if (kLimelight.getTV() && !hasQuestInitialized) {
             //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
             addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),

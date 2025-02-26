@@ -112,7 +112,8 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
 
     public void configureBindings() {
 
-        driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
+        //driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
+        driverStart.onTrue(driveSubsystem.seedQuestPose());
 
         rightBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 17,Units.degreesToRadians(180)));
         leftBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),17,Units.degreesToRadians(180)));
@@ -145,9 +146,9 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.maxChassisHeight)
             );
 
-            op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
-            op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
-op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
+        op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
+        op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
+        op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
         op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
         op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
@@ -156,7 +157,9 @@ op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
         //Drivetrain.registerTelemetry(logger::telemeterize);
 
-    
+        op4.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 18,Units.degreesToRadians(180)));
+        op5.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),18,Units.degreesToRadians(180)));
+
 
         /*
         op3
