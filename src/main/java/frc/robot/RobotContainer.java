@@ -53,13 +53,13 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     
-    public final Elevator elevatorSubsystem = new Elevator();
-    public final Arm armSubsystem = new Arm();
-    public final EndAffector endAffectorSubsytem = new EndAffector();
-    public final Climber climberSubsystem = new Climber();
+    //public final Elevator elevatorSubsystem = new Elevator();
+    //public final Arm armSubsystem = new Arm();
+    //public final EndAffector endAffectorSubsytem = new EndAffector();
+    //public final Climber climberSubsystem = new Climber();
     public final CANdleSubsystem CANdleLED = new CANdleSubsystem();
 
-    public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
+    //public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
 
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
@@ -97,9 +97,9 @@ public class RobotContainer {
     public final Trigger op21 = new Trigger(() -> opPanel.getRawButton(21));
     public final Trigger op22 = new Trigger(() -> opPanel.getRawButton(22));
     public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
-public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
+    public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
 
-    public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
+    //public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
 
 
     public RobotContainer() {
@@ -112,7 +112,7 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
         //NamedCommands.registerCommand("scoreStage1", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage1).scoreCoral());
         //NamedCommands.registerCommand("scoreStage2", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage2).scoreCoral());
         //NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
-        NamedCommands.registerCommand("Elevator L3", scoringCommands.score(30));
+        //NamedCommands.registerCommand("Elevator L3", scoringCommands.score(30));
         //NamedCommands.registerCommand("Elevator Home", scoringCommands.score(0));
     }
 
@@ -127,33 +127,9 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
         driverB.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 16,Units.degreesToRadians(0.0)));
         driverY.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 15, Units.degreesToRadians(0.0)));
 
-        driverX.whileTrue(
-            scoringCommands.score(30)
-        );
 
-        op1
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.ChassisElevationOffset+0.5)
-            );
-        op2
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(15)
-            );
-        op3
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(38)
-            );
-        op6
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(45)
-            );
-        op7
-            .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.maxChassisHeight)
-            );
-
-        op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
-        op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
+        //op22.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->0.02));
+        //op23.whileTrue(new elevatorSysIDCommand(elevatorSubsystem, ()->-0.02));
         op24.onTrue(candleSubsystem.setLEDAnimation(AnimationTypes.CustomFire));
 
         op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
@@ -207,13 +183,6 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
                     .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed/**0.2*/)
                     .withRotationalRate(-driverController.getRawAxis(4)*MaxSpeed/**0.2*/)
                 )
-        );
-
-        elevatorSubsystem.setDefaultCommand(
-            elevatorSubsystem.moveElevator()
-        );
-        armSubsystem.setDefaultCommand(
-            armSubsystem.pivotArm().withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
         //CANdleLED.setDefaultCommand(
         //    CANdleLED.CANdleBlue()
