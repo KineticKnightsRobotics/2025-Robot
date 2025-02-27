@@ -190,7 +190,7 @@ public class RobotContainer {
         // ====================== QUEST CALIBRATION PROCESS ======================
         // Hold this button to calibrate the Quest's position relative to robot center
         // Watch SmartDashboard for "Quest Calculated Offset to Robot Center" values
-        // After getting values, add them to QUEST_TO_ROBOT_TRANSFORM in Drive.java
+        // After getting values, apply them using rightTrigger+leftTrigger
         driverX.whileTrue(calibrationQuest.determineOffsetToRobotCenter(driveSubsystem));
         
         rightTrigger.and(leftTrigger).onTrue(driveSubsystem.applyQuestCalibration(calibrationQuest));
