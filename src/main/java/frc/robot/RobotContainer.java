@@ -12,6 +12,9 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
@@ -33,6 +36,7 @@ import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.util.QuestNav;  // Add this import
 
 public class RobotContainer {
     private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
@@ -101,9 +105,14 @@ public class RobotContainer {
 
     //public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
 
+    // Add a dedicated QuestNav instance for calibration
+    private QuestNav calibrationQuest;
 
     public RobotContainer() {
         logger.setDrive(driveSubsystem);
+
+        // Initialize calibration Quest with a neutral transform
+        calibrationQuest = new QuestNav(new Transform3d());
 
         configureDefaultCommands();
         configureBindings();
@@ -143,10 +152,16 @@ public class RobotContainer {
         op5.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),18,Units.degreesToRadians(180)));
 
         
-            driverX.whileTrue(driveSubsystem.getQuestNav().determineOffsetToRobotCenter(driveSubsystem));
+        // Replace existing calibration binding with this
+        driverX.whileTrue(calibrationQuest.determineOffsetToRobotCenter(driveSubsystem));
         
-
+        rightTrigger.and(leftTrigger).onTrue(driveSubsystem.applyQuestCalibration(calibrationQuest));
+        
+        // Only bind seedQuestPose once
         driverStart.onTrue(driveSubsystem.seedQuestPose());
+
+        // Add button to save calibration
+        op20.onTrue(driveSubsystem.saveQuestCalibration());
 
         /*
         op3
@@ -238,4 +253,5 @@ public class RobotContainer {
         return Commands.print("No autonomous command configured");
     }
 }
+
     */

@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
+import java.util.ArrayList;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
@@ -42,6 +43,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.util.QuestNav;
+import edu.wpi.first.wpilibj.Preferences;
 
 
 /**
@@ -73,6 +75,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     );
     
     private void initializeQuestNav() {
+    private void initializeQuestNav() {
         questNav = new QuestNav(QUEST_TO_ROBOT_TRANSFORM);
         SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
         SmartDashboard.putData("Questnav Disable", disableQuest());
@@ -81,13 +84,17 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     //auto objects
     private Field2d field = new Field2d();
     private AutoBuilder autoBuilder;
-    private SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity);
 
+    // For storing trajectory history
+    private final ArrayList<Pose2d> trajectoryHistory = new ArrayList<>();
+    private final int MAX_TRAJECTORY_POINTS = 100;
+    private int trajectoryUpdateCounter = 0;
 
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
+     * <p>
      * <p>
      * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them through
@@ -141,12 +148,6 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
-     * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
-     *                                  unspecified or set to 0 Hz, this is 250 Hz on
-     *                                  CAN FD, and 100 Hz on CAN 2.0.
-     * @param odometryStandardDeviation The standard deviation for odometry calculation
-     *                                  in the form [x, y, theta]ᵀ, with units in meters
      * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
      * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
      *                                  unspecified or set to 0 Hz, this is 250 Hz on
@@ -274,14 +275,52 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         SmartDashboard.putNumber("Quest Battery",questNav.getBatteryPercent());
         SmartDashboard.putBoolean("Quest Connected", questNav.isConnected());
         SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
-        double[] questPose = {questNav.getRobotPose().getX(),questNav.getRobotPose().getY()};
-        SmartDashboard.putNumberArray("Quest Pose", questPose);
+        double[] questPoseArray = {questNav.getRobotPose().getX(),questNav.getRobotPose().getY()};
+        SmartDashboard.putNumberArray("Quest Pose", questPoseArray);
 
         SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
         SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
 
         SmartDashboard.putNumber("Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         
+        // Improve Quest data visualization
+        if (questNav != null) {
+            if (questNav.isConnected()) {
+                Pose2d questPose = questNav.getRobotPose();
+                field.getObject("QuestPose").setPose(questPose);
+            }
+            
+            // Make more detailed diagnostic data available
+            SmartDashboard.putNumber("Quest Battery", questNav.getBatteryPercent());
+            SmartDashboard.putBoolean("Quest Connected", questNav.isConnected());
+            SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
+            
+            // Only show pose if we're connected
+            if (questNav.isConnected()) {
+                SmartDashboard.putNumberArray("Quest Pose", 
+                    new double[] {
+                        questNav.getRobotPose().getX(),
+                        questNav.getRobotPose().getY(),
+                        questNav.getRobotPose().getRotation().getDegrees()
+                    });
+            }
+        }
+
+        // Update trajectory history every few cycles
+        if (++trajectoryUpdateCounter >= 5) {
+            trajectoryUpdateCounter = 0;
+            
+            // Add current pose to history
+            trajectoryHistory.add(getPose());
+            
+            // Limit history size
+            while (trajectoryHistory.size() > MAX_TRAJECTORY_POINTS) {
+                trajectoryHistory.remove(0);
+            }
+            
+            // Update trajectory on Field2d
+            field.getObject("RobotPath").setPoses(trajectoryHistory);
+        }
     }
 
     public Pose2d getPose() {
@@ -342,6 +381,59 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return questNav;
     }
 
+    /**
+     * Apply calculated Quest offset to the main Quest instance
+     * @param offsetX X component of the offset
+     * @param offsetY Y component of the offset
+     */
+    public Command applyQuestCalibration(double offsetX, double offsetY) {
+        return Commands.runOnce(() -> {
+            questNav.applyCalculatedOffset(offsetX, offsetY);
+            SmartDashboard.putString("Quest Calibration Status", 
+                "Applied offset: [" + offsetX + ", " + offsetY + "]");
+        });
+    }
+    
+    /**
+     * Apply calculated offset from a calibration Quest instance
+     * @param calibrationQuest The QuestNav instance used for calibration
+     */
+    public Command applyQuestCalibration(QuestNav calibrationQuest) {
+        return Commands.runOnce(() -> {
+            if (calibrationQuest != null && questNav != null) {
+                Translation2d offset = calibrationQuest.getCalculatedOffset();
+                // The sign might need to be inverted depending on your coordinate system
+                questNav.applyCalculatedOffset(offset.getX(), offset.getY());
+                SmartDashboard.putString("Quest Calibration Status", 
+                    "Applied offset: [" + offset.getX() + ", " + offset.getY() + "]");
+            } else {
+                SmartDashboard.putString("Quest Calibration Status", 
+                    "Error: Quest instance not available");
+            }
+        });
+    }
+
+    // Add method to save calibration values
+    public Command saveQuestCalibration() {
+        return Commands.runOnce(() -> {
+            Translation2d offset = questNav.getCalculatedOffset();
+            Preferences.setDouble("QuestOffsetX", offset.getX());
+            Preferences.setDouble("QuestOffsetY", offset.getY());
+            SmartDashboard.putString("Quest Calibration Status", 
+                "Saved offset: [" + offset.getX() + ", " + offset.getY() + "]");
+        });
+    }
+
+    // Add method to load saved calibration values
+    private void loadSavedCalibration() {
+        if (Preferences.containsKey("QuestOffsetX") && Preferences.containsKey("QuestOffsetY")) {
+            double x = Preferences.getDouble("QuestOffsetX", 0.0);
+            double y = Preferences.getDouble("QuestOffsetY", 0.0);
+            questNav.applyCalculatedOffset(x, y);
+            SmartDashboard.putString("Quest Calibration Status", 
+                "Loaded saved offset: [" + x + ", " + y + "]");
+        }
+    }
 
     //public double getTranslationRelativeToSpeaker(){
     //    return Math.abs(getPose().getTranslation().getDistance(getSpeakerPose().get().getTranslation().toTranslation2d()));
@@ -451,7 +543,32 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine
      * specified by {@link #m_sysIdRoutineToApply}.
+
      *
+     * @param direction Direction of the SysId Quasistatic test
+     * @return Command to run
+}
+     */
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutineToApply.quasistatic(direction);
+    }
+
+    /**
+     * Runs the SysId Dynamic test in the given direction for the routine
+     * specified by {@link #m_sysIdRoutineToApply}.
+     *
+     * @param direction Direction of the SysId Dynamic test
+     * @return Command to run
+     */
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutineToApply.dynamic(direction);
+    }
+
+    /* The SysId routine to test */
+    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+        
+}
+
      * @param direction Direction of the SysId Quasistatic test
      * @return Command to run
      */
@@ -474,3 +591,4 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
         
 }
+

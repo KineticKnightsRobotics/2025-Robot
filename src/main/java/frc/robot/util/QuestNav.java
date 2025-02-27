@@ -260,6 +260,31 @@ public class QuestNav {
         }
     }
 
+    /**
+     * Apply the calculated offset to the robot-to-Quest transform
+     * @param offsetX X component of the offset
+     * @param offsetY Y component of the offset
+     * @return This QuestNav instance for method chaining
+     */
+    public QuestNav applyCalculatedOffset(double offsetX, double offsetY) {
+        // Create a new transform that includes the offset
+        robotToQuest = new Transform3d(
+            new Translation3d(offsetX, offsetY, robotToQuest.getTranslation().getZ()),
+            robotToQuest.getRotation()
+        );
+        
+        return this;
+    }
+
+    /**
+     * Get the current calculated offset to robot center
+     * @return Translation2d with the current calculated offset
+     */
+    public Translation2d getCalculatedOffset() {
+        return _calculatedOffsetToRobotCenter;
+    }
+    
+    // Improve the calculateOffsetToRobotCenter method with better comments
     private Translation2d calculateOffsetToRobotCenter() {
         Pose3d currentPose = getRobotPose3d();
         Pose2d currentPose2d = currentPose.toPose2d();
@@ -272,6 +297,9 @@ public class QuestNav {
             return new Translation2d(); // Return zero offset when rotation is minimal
         }
 
+        // Calculate the center of rotation based on the displacement and angle change
+        // This uses the fact that when rotating around a point, the displacement follows
+        // a circular path around that point
         double x = ((angle.getCos() - 1) * displacement.getX() + angle.getSin() * displacement.getY()) / (2 * (1 - angle.getCos()));
         double y = ((-1 * angle.getSin()) * displacement.getX() + (angle.getCos() - 1) * displacement.getY()) / (2 * (1 - angle.getCos()));
 
@@ -283,24 +311,37 @@ public class QuestNav {
             Commands.run(
                 () -> drivetrain.setControl(
                     new SwerveRequest.FieldCentric()
-                    .withRotationalRate(0.314)
+                    .withRotationalRate(0.314) // Slow rotation rate
                     .withVelocityX(0)
                     .withVelocityY(0)
                 )
             ).withTimeout(0.5),
             Commands.runOnce(() -> {
-                // Update current offset
-                Translation2d offset = calculateOffsetToRobotCenter();
-                
-                _calculatedOffsetToRobotCenter = _calculatedOffsetToRobotCenter.times((double)_calculatedOffsetToRobotCenterCount / (_calculatedOffsetToRobotCenterCount + 1))
-                    .plus(offset.div(_calculatedOffsetToRobotCenterCount + 1));
-                _calculatedOffsetToRobotCenterCount++;
+                try {
+                    // Update current offset
+                    Translation2d offset = calculateOffsetToRobotCenter();
+                    
+                    // Average with previous values for robustness
+                    _calculatedOffsetToRobotCenter = _calculatedOffsetToRobotCenter.times(
+                        (double)_calculatedOffsetToRobotCenterCount / (_calculatedOffsetToRobotCenterCount + 1))
+                        .plus(offset.div(_calculatedOffsetToRobotCenterCount + 1));
+                    _calculatedOffsetToRobotCenterCount++;
 
-                SmartDashboard.putNumberArray("Quest Calculated Offset to Robot Center", new double[] { 
-                    _calculatedOffsetToRobotCenter.getX(), 
-                    _calculatedOffsetToRobotCenter.getY() 
-                });
-            }).onlyIf(() -> getRotation().getZ() > Math.toRadians(30))
+                    SmartDashboard.putNumberArray("Quest Calculated Offset to Robot Center", new double[] { 
+                        _calculatedOffsetToRobotCenter.getX(), 
+                        _calculatedOffsetToRobotCenter.getY() 
+                    });
+                } catch (Exception e) {
+                    SmartDashboard.putString("Quest Calibration Error", e.getMessage());
+                }
+            }).onlyIf(() -> {
+                try {
+                    return getRotation().getZ() > Math.toRadians(30);
+                } catch (Exception e) {
+                    return false;
+                }
+            })
         );
     }
 }
+
