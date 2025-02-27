@@ -275,8 +275,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
 
-    public Pose2d getTagPose(int AprilTagID) {
-        return kFieldLayout.getTagPose(AprilTagID).get().toPose2d();
+    public Pose2d getTagPose(double AprilTagID) {
+        return kFieldLayout.getTagPose((int)AprilTagID).get().toPose2d();
     }
 
 

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,7 +28,7 @@ public class allign extends Command {
     private final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
     private Translation2d displacement;
-    private int targetApriltag;
+    private double targetApriltag;
     private Pose2d fieldCoordinate;
     private double angleOffset;
 
@@ -43,7 +44,7 @@ public class allign extends Command {
     public allign(
         Drive kSubsystem,
         Translation2d desiredDisplacement,
-        int apriltagID,
+        double apriltagID,
         double _angleOffset
     ) {
         addRequirements(kSubsystem);
@@ -89,6 +90,11 @@ public class allign extends Command {
 
     @Override
     public boolean isFinished() {
-        return false;
+        Transform2d TargetError = fieldCoordinate.minus(driveSubsystem.getPose());
+        return 
+            Math.abs(TargetError.getX()) < 0.0254 &&
+            Math.abs(TargetError.getY()) < 0.0254 
+        
+        ;
     }
 }

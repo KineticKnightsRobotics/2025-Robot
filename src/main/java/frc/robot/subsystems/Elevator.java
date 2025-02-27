@@ -85,15 +85,7 @@ public class Elevator extends SubsystemBase {
             leadMotorConfig
                 .encoder
                 .positionConversionFactor(1.0/*ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio / 2*/);
-            /*
-            leadMotorConfig                                                                                                  //Ammount of time for the voltage to ramp i.e it will take 0.01 seconds for the input voltage to go from 1V to 2V
-                .encoder
-                    .positionConversionFactor(ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio);
-            leadMotorConfig
-                .softLimit
-                    .reverseSoftLimit(ElevatorConstants.ChassisElevationOffset-1)
-                    .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
-            */
+
             leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             followMotorConfig = new SparkMaxConfig();

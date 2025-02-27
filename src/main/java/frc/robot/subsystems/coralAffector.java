@@ -20,20 +20,19 @@ public class coralAffector extends SubsystemBase {
 
     SparkMax rollerMotor;
     SparkMaxConfig rollerMotorConfig;
-    DigitalInput endAffectorBeamBreak;
-    DigitalInput endAffectorRangeSensor;
+    DigitalInput beamUpper, beamLower;
 
 
     public coralAffector() {
-        rollerMotor = new SparkMax(CoralAffectorConstants.rollerMotor, MotorType.kBrushless);
-        endAffectorBeamBreak = new DigitalInput(CoralAffectorConstants.beamBreakPort);
-        endAffectorRangeSensor = new DigitalInput(CoralAffectorConstants.rangeSensorPort);
+        rollerMotor = new SparkMax(CoralAffectorConstants.coralRollerID, MotorType.kBrushless);
+        beamUpper = new DigitalInput(CoralAffectorConstants.beamUpper);
+        beamLower = new DigitalInput(CoralAffectorConstants.beamLower);
     }
 
 
 
     public void configDevices() {
-                // Effector motor
+        // Effector motor
         rollerMotorConfig = new SparkMaxConfig();
         rollerMotorConfig
             .inverted(true)
@@ -51,29 +50,34 @@ public class coralAffector extends SubsystemBase {
     }
 
     public boolean hasCoral() {
-        return !endAffectorBeamBreak.get();
+        return !beamLower.get() || !beamUpper.get();
+    }
+
+    public boolean coralLoaded() {
+        return !beamLower.get() && beamUpper.get();
     }
 
     // Load a game piece into the robot
     public Command loadCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> rollerMotor.set(-0.3),
+            () -> rollerMotor.set(0.3),
             this
         // End condition of linebreak true (piece is in)
         ).until(
-            () -> hasCoral()
+            () -> coralLoaded()
 
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
             () -> rollerMotor.set(0.0)
         );
     }
+
     // Spit out the game piece
     public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> rollerMotor.set(-1.0)
+            () -> rollerMotor.set(1.0)
 
         // End condition of linebreak true (piece is in)
         ).until(
@@ -81,30 +85,6 @@ public class coralAffector extends SubsystemBase {
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
             () -> rollerMotor.set(0.0)
-        );
-    }
-
-    public Command loadAlgae() {
-        return Commands.run(
-            () -> rollerMotor.set(0.5),
-            this
-        ).until(()->hasAlgae())
-        .finallyDo(
-            () -> {
-                rollerMotor.set(0.1);
-            }
-        );
-    }
-
-    public Command spitAlgae() {
-        return Commands.run(
-            () -> rollerMotor.set(-0.5),
-            this
-        ).until(()-> !hasAlgae())
-        .finallyDo(
-            () -> {
-                rollerMotor.set(0.0);
-            }
         );
     }
 }

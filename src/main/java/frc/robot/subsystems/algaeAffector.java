@@ -164,7 +164,7 @@ public class algaeAffector extends SubsystemBase {
             .finallyDo(
                 () -> {
                     setPivotPosition(AlgaeAffectorConstants.PivotPositions.home);
-                    rollerMotor.set(0.5);
+                    rollerMotor.set(0.0);
                 }
             );
     } 

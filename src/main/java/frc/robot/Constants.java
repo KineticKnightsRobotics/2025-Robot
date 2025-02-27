@@ -55,11 +55,14 @@ public class Constants {
         public static int digMotorID = 21;
         public static int nanMotorID = 22;
 
-        public static class ScoringPositions {
-            public static double stage1 = 10;
-            public static double stage2 = 30;
-            public static double stage3 = 40;
-            public static double stage4 = 50;
+        public static class Positions {
+            public static double home = chassisHome+1;
+            public static double L1 = 10;
+            public static double L2 = 30;
+            public static double L3 = 40;
+            public static double L4 = 50;
+            public static double deAlgifyL2 = 0.0;
+            public static double deAlgifyL3 = 0.0;
         }
     }
 
@@ -93,7 +96,10 @@ public class Constants {
     }
 
     public final class ClimberConstants {
-        public static int leaderMotorID = 51;
-        public static int followMotorID = 52;
+        public static int digMotorID = 51;
+        public static int nanMotorID = 52;
+        public static int servoID = 53;
+        public static double servoOpen = 0.0;
+        public static double servoClosed = 0.0;
     }
 }

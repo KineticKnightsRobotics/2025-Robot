@@ -16,20 +16,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.generated.TunerConstants;
+import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.commands.elevatorSysIDCommand;
-import frc.robot.commands.intakeSource;
-import frc.robot.commands.scoringCommands;
+import frc.robot.commands.teleopCommands;
 //import frc.robot.commands.*;
 import frc.robot.commands.Drive.allign;
-import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -38,7 +31,6 @@ public class RobotContainer {
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
-    private SwerveRequest joystickDrive;
 
     SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
@@ -51,11 +43,10 @@ public class RobotContainer {
     public final Elevator elevatorSubsystem = new Elevator();
     public final coralAffector coralSubsystem = new coralAffector();
     public final algaeAffector algaeSubsystem = new algaeAffector();
-    public final coralAffector endAffectorSubsytem = new coralAffector();
     public final Climber climberSubsystem = new Climber();
     public final Bling CANdleLED = new Bling();
 
-    public final scoringCommands scoringCommands = new scoringCommands(driveSubsystem, elevatorSubsystem, endAffectorSubsytem);
+    public final teleopCommands teleopCommand = new teleopCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
 
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
@@ -93,36 +84,122 @@ public class RobotContainer {
     public final Trigger op21 = new Trigger(() -> opPanel.getRawButton(21));
     public final Trigger op22 = new Trigger(() -> opPanel.getRawButton(22));
     public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
-public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
+    public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
 
+    
+    
+    
+    
     public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
+    public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.coralLoaded());
+    public final Trigger dignanHasAlgae = new Trigger(() -> algaeSubsystem.hasAlgae());
 
 
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
 
-        // NamedCommands
-        //NamedCommands.registerCommand("scoreStage1", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage1).scoreCoral());
-        //NamedCommands.registerCommand("scoreStage2", new scoringCommands(elevatorSubsystem, endAffectorSubsytem, ElevatorConstants.stage2).scoreCoral());
-        //NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
-        NamedCommands.registerCommand("Elevator L3", scoringCommands.score(30));
-        //NamedCommands.registerCommand("Elevator Home", scoringCommands.score(0));
+
+        NamedCommands.registerCommand("Score L4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
     }
 
     public void configureBindings() {
 
-        driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
-
-        rightBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 17,Units.degreesToRadians(180)));
-        leftBumper.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),17,Units.degreesToRadians(180)));
-        driverA.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.0), 12,Units.degreesToRadians(0.0)));
+        //driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
 
 
+        /*
+         * DRIVER CONTROLS
+         */
+
+        rightBumper
+            .whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
+        leftBumper
+            .whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
+
+        driverA
+            .and(dignanHasAlgae)
+                .whileTrue(
+                    algaeSubsystem.scoreProcessor()   
+                )
+            .and(dignanHasCoral)
+                .whileTrue(
+                    coralSubsystem.spitCoral()
+                );
+
+        leftTrigger.whileTrue(
+            algaeSubsystem.captureAlgae(AlgaeAffectorConstants.PivotPositions.groundIntake)
+        );
+        rightTrigger.whileTrue(
+            coralSubsystem.loadCoral()
+        );
+
+        driverX.whileTrue(climberSubsystem);
+
+        /*
+         * OPERATOR CONTROLS
+         */
+        op1
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+
+        op6
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L3)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+
+        op11
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L2)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+
+        op12
+            .onTrue(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L1)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+
+        op2
+            .whileTrue(
+                teleopCommand.deAlgify(ElevatorConstants.Positions.deAlgifyL3)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+
+        op7
+            .whileTrue(
+                teleopCommand.deAlgify(ElevatorConstants.Positions.deAlgifyL2)
+            )
+            .onFalse(
+                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            );
+        
+        
 
 
 
 
+
+
+
+
+
+        /*
+         * PROGRAMMER CONTROLS
+         */
         driverStart.and(op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)));
         driverStart.and(op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
         driverStart.and(op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
@@ -130,23 +207,12 @@ public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
     }
 
     public void configureDefaultCommands() {
-        /*
-        driveSubsystem.setDefaultCommand(
-            new joystickDrive(
-                driveSubsystem,
-                () -> driverController.getRawAxis(0),
-                () -> driverController.getRawAxis(1),
-                () -> driverController.getRawAxis(4)
-            )
-        );
-        */
-
         driveSubsystem.setDefaultCommand(
             driveSubsystem.applyRequest(
                 () -> drive
                     .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed/**0.2*/)
                     .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed/**0.2*/)
-                    .withRotationalRate(-driverController.getRawAxis(4)*MaxSpeed/**0.2*/)
+                    .withRotationalRate(-driverController.getRawAxis(4)*AngularRate/**0.2*/)
                 )
         );
 
