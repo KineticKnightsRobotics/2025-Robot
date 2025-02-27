@@ -306,7 +306,14 @@ public class QuestNav {
         return new Translation2d(x, y);
     }
 
+    // In the determineOffsetToRobotCenter method:
+
     public Command determineOffsetToRobotCenter(Drive drivetrain) {
+        // ====================== HOW CALIBRATION WORKS ======================
+        // This command rotates the robot slowly in place
+        // During rotation, it calculates where the Quest headset is relative to robot center
+        // The values are displayed in SmartDashboard as "Quest Calculated Offset to Robot Center"
+        // These X,Y values should be copied to QUEST_TO_ROBOT_TRANSFORM in Drive.java
         return Commands.repeatingSequence(
             Commands.run(
                 () -> drivetrain.setControl(

@@ -41,10 +41,10 @@ import frc.robot.util.Vision;
 import frc.robot.util.Quest;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.geometry.Rotation3d;
 import frc.robot.util.QuestNav;
 import edu.wpi.first.wpilibj.Preferences;
-
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -54,6 +54,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -69,12 +70,31 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
+    // Here's where you hardcode the Quest to Robot offset values
     private static final Transform3d QUEST_TO_ROBOT_TRANSFORM = new Transform3d(
-        new Translation3d(0, 0, 0),
+        // ====================== CALIBRATION INSTRUCTIONS ======================
+        // STEP 1: Run the robot and press the X button on driver controller
+        // STEP 2: Observe "Quest Calculated Offset to Robot Center" in SmartDashboard
+        // STEP 3: Replace these values with the X and Y offsets from Step 2
+        // STEP 4: Redeploy code with your calibrated values
+        // Example: If SmartDashboard shows [-0.123, 0.045], use those values below
+        new Translation3d(-0.38, 0.000, 0),  // Calibrated values (in meters)
         new Rotation3d(0, 0, Math.toRadians(180))
     );
     
-    private void initializeQuestNav() {
+    public Command seedQuestPose() {
+        return Commands.runOnce(() -> resetQuestPose());
+    }
+
+    private void resetQuestPose() {
+        hasQuestInitialized = true;
+        questNav.resetPose(getPose());
+    }
+
+    public Command disableQuest() {
+        return Commands.runOnce(() -> hasQuestInitialized = false);
+    }
+
     private void initializeQuestNav() {
         questNav = new QuestNav(QUEST_TO_ROBOT_TRANSFORM);
         SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
@@ -84,6 +104,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     //auto objects
     private Field2d field = new Field2d();
     private AutoBuilder autoBuilder;
+    private SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds()
         .withDriveRequestType(DriveRequestType.Velocity);
 
     // For storing trajectory history
@@ -91,11 +112,40 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private final int MAX_TRAJECTORY_POINTS = 100;
     private int trajectoryUpdateCounter = 0;
 
+    // Path Tracking fields
+    private final Field2d mainField = field;  // Reuse existing field
+    private final Field2d trajectoryField = new Field2d();
+    private boolean followingTrajectory = false;
+    private Pose2d currentTrajectoryPose = new Pose2d();
+    private ChassisSpeeds commandedTrajectorySpeed = new ChassisSpeeds();
+    private ChassisSpeeds lastCommandedSpeeds = new ChassisSpeeds();
+
+    // Add these to track velocities for plotting
+    private double[] linearVelocityData = new double[2]; // [0]=commanded, [1]=actual
+    private double[] angularVelocityData = new double[2]; // [0]=commanded, [1]=angular
+    private double[] velocityErrorData = new double[2]; // [0]=linear error, [1]=angular error
+
+    // For storing planned trajectory history
+    private final ArrayList<Pose2d> plannedTrajectoryHistory = new ArrayList<>();
+
+    private void startSimThread() {
+        m_lastSimTime = Utils.getCurrentTimeSeconds();
+        
+        /* Run simulation at a faster rate so PID gains behave more reasonably */
+        m_simNotifier = new Notifier(() -> {
+            final double currentTime = Utils.getCurrentTimeSeconds();
+            double deltaTime = currentTime - m_lastSimTime;
+            m_lastSimTime = currentTime;
+
+            /* use the measured time delta, get battery voltage from WPILib */
+            updateSimState(deltaTime, RobotController.getBatteryVoltage());
+        });
+        m_simNotifier.startPeriodic(kSimLoopPeriod);
+    }
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     * <p>
-     * <p>
+     *
      * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
@@ -117,7 +167,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     * <p>
+     *
      * This constructs the underlying hardware devices, so users should not construct
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
@@ -143,18 +193,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
-     * <p>
-     * This constructs the underlying hardware devices, so users should not construct
-     * the devices themselves. If they need the devices, they can access them through
-     * getters in the classes.
      *
      * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
-     *                                  unspecified or set to 0 Hz, this is 250 Hz on
-     *                                  CAN FD, and 100 Hz on CAN 2.0.
+     * @param odometryUpdateFrequency   The frequency to run the odometry loop
      * @param odometryStandardDeviation The standard deviation for odometry calculation
-     *                                  in the form [x, y, theta]ᵀ, with units in meters
-     *                                  and radians
      * @param visionStandardDeviation   The standard deviation for vision calculation
      *                                  in the form [x, y, theta]ᵀ, with units in meters
      *                                  and radians
@@ -172,14 +214,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
-
-        questNav = new QuestNav(new Transform3d(
-            new Translation3d(0, 0, 0), // Position offset (x, y, z)
-            new Rotation3d(0, 0, Math.toRadians(180)) // Orientation offset
-        ));
-
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        initializeQuestNav();
     }
 
     /**
@@ -192,22 +227,24 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    public void ConfigureAutoBuilder(){
+    public void ConfigureAutoBuilder() {
         try {
             var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                ()->getPose(), //Taken from CTRE Examples: https://github.com/CrossTheRoadElec/Phoenix6-Examples/blob/main/java/SwerveWithPathPlanner/src/main/java/frc/robot/subsystems/CommandSwerveDrivetrain.java#L197
+                () -> getPose(),
                 this::resetPose,
-                ()->getState().Speeds,
-                (speeds)-> this.setControl(autoRequest.withSpeeds(speeds)),
+                () -> getState().Speeds,
+                (speeds) -> {
+                    // Store the commanded speeds for visualization
+                    commandedTrajectorySpeed = speeds;
+                    // Apply the control
+                    this.setControl(autoRequest.withSpeeds(speeds));
+                },
                 new PPHolonomicDriveController(
-                    // PID constants for translation
                     new PIDConstants(3.0, 0, 0),
-                    // PID constants for rotation
                     new PIDConstants(7, 0, 0)
                 ),
                 config,
-                // Assume the path needs to be flipped for Red vs Blue, this is normally the case
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this);
         } catch (Exception ex) {
@@ -215,17 +252,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         }
     }
 
-
-
     @Override
     public void periodic() {
-        /*
-         * Periodically try to apply the operator perspective.
-         * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
-         * This allows us to correct the perspective in case the robot code restarts mid-match.
-         * Otherwise, only check and apply the operator perspective if the DS is disabled.
-         * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-         */
+        // Apply operator perspective
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
@@ -237,31 +266,30 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             });
         }
          
+        // Process Limelight vision
         SmartDashboard.putBoolean("Limelight TV", kLimelight.getTV());
         if (kLimelight.getTV() && !hasQuestInitialized) {
-            //setVisionMeasurementStdDevs(kLimelight.getStandardDeviations());
             addVisionMeasurement(
                 kLimelight.getEstimatedRoboPose(),
-                Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),//kLimelight.getTimestamp(),
+                Utils.fpgaToCurrentTime(kLimelight.getTimestamp()),
                 kLimelight.getStandardDeviations()
             );
         }
 
+        // Update field visualization
         SmartDashboard.putData("field2d", this.field);
-
-       // this.field.setRobotPose(getPose());
-       field.getObject("PoseEstimatorPose").setPose(getPose());
-
-       if (kLimelight.getTV()) {  
+        field.getObject("PoseEstimatorPose").setPose(getPose());
+        
+        if (kLimelight.getTV()) {  
             Pose2d limelightPose = kLimelight.getEstimatedRoboPose();
             field.getObject("LimelightPose").setPose(limelightPose);
         }
         
+        // Display pose data
         SmartDashboard.putNumberArray("Odometry Pose", new double[]{getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()});
         SmartDashboard.putNumberArray("Limelight Pose", new double[]{kLimelight.getEstimatedRoboPose().getX(), kLimelight.getEstimatedRoboPose().getY(), kLimelight.getEstimatedRoboPose().getRotation().getDegrees()});
         
-        
-
+        // Process Quest data
         if (hasQuestInitialized) {
             addVisionMeasurement(
                 questNav.getRobotPose(),
@@ -272,41 +300,31 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         questNav.cleanUpQuestCommand();
 
-        SmartDashboard.putNumber("Quest Battery",questNav.getBatteryPercent());
+        // Display Quest data
+        SmartDashboard.putNumber("Quest Battery", questNav.getBatteryPercent());
         SmartDashboard.putBoolean("Quest Connected", questNav.isConnected());
         SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
-        double[] questPoseArray = {questNav.getRobotPose().getX(),questNav.getRobotPose().getY()};
-        SmartDashboard.putNumberArray("Quest Pose", questPoseArray);
-
-        SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
-        SmartDashboard.putNumber("Robot Accelleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
-
-        SmartDashboard.putNumber("Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         
-        // Improve Quest data visualization
-        if (questNav != null) {
-            if (questNav.isConnected()) {
-                Pose2d questPose = questNav.getRobotPose();
-                field.getObject("QuestPose").setPose(questPose);
-            }
+        // Display drive metrics
+        SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
+        SmartDashboard.putNumber("Robot Acceleration", this.getModule(0).getDriveMotor().getAcceleration().getValueAsDouble());
+        SmartDashboard.putNumber("Drive Current Draw", this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
+        
+        // Visualize Quest data
+        if (questNav != null && questNav.isConnected()) {
+            Pose2d questPose = questNav.getRobotPose();
+            field.getObject("QuestPose").setPose(questPose);
             
-            // Make more detailed diagnostic data available
-            SmartDashboard.putNumber("Quest Battery", questNav.getBatteryPercent());
-            SmartDashboard.putBoolean("Quest Connected", questNav.isConnected());
-            SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
-            
-            // Only show pose if we're connected
-            if (questNav.isConnected()) {
-                SmartDashboard.putNumberArray("Quest Pose", 
-                    new double[] {
-                        questNav.getRobotPose().getX(),
-                        questNav.getRobotPose().getY(),
-                        questNav.getRobotPose().getRotation().getDegrees()
-                    });
-            }
+            // Display Quest pose array
+            SmartDashboard.putNumberArray("Quest Pose", 
+                new double[] {
+                    questPose.getX(),
+                    questPose.getY(),
+                    questPose.getRotation().getDegrees()
+                });
         }
 
-        // Update trajectory history every few cycles
+        // Update trajectory history
         if (++trajectoryUpdateCounter >= 5) {
             trajectoryUpdateCounter = 0;
             
@@ -321,64 +339,73 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             // Update trajectory on Field2d
             field.getObject("RobotPath").setPoses(trajectoryHistory);
         }
+        
+        // Update velocity data
+        if (followingTrajectory) {
+            // Calculate linear velocity (magnitude of x and y components)
+            double commandedLinearVel = Math.hypot(commandedTrajectorySpeed.vxMetersPerSecond, commandedTrajectorySpeed.vyMetersPerSecond);
+            double actualLinearVel = Math.hypot(getState().Speeds.vxMetersPerSecond, getState().Speeds.vyMetersPerSecond);
+            
+            // Store velocity data
+            linearVelocityData[0] = commandedLinearVel;
+            linearVelocityData[1] = actualLinearVel;
+            angularVelocityData[0] = commandedTrajectorySpeed.omegaRadiansPerSecond;
+            angularVelocityData[1] = getState().Speeds.omegaRadiansPerSecond;
+            velocityErrorData[0] = commandedLinearVel - actualLinearVel;
+            velocityErrorData[1] = commandedTrajectorySpeed.omegaRadiansPerSecond - getState().Speeds.omegaRadiansPerSecond;
+        }
+
+        if (followingTrajectory && currentTrajectoryPose != null) {
+            // Add planned pose to history
+            plannedTrajectoryHistory.add(currentTrajectoryPose);
+            
+            // Limit planned history size
+            while (plannedTrajectoryHistory.size() > MAX_TRAJECTORY_POINTS) {
+                plannedTrajectoryHistory.remove(0);
+            }
+            
+            // Update planned path on trajectory field
+            trajectoryField.getObject("Planned Path").setPoses(plannedTrajectoryHistory);
+        }
     }
 
     public Pose2d getPose() {
-        //return null;
         return getState().Pose;
     }
-
 
     public Pose2d getTagPose(int AprilTagID) {
         return kFieldLayout.getTagPose(AprilTagID).get().toPose2d();
     }
 
-
     public Translation2d getTranslationRelative(int apriltagID) { //Repurposed 2024 code
-        return 
-        getPose().getTranslation()
-        .minus(
+        return getPose().getTranslation().minus(
             kFieldLayout.getTagPose(apriltagID).get().getTranslation().toTranslation2d()
         );
     }
-
-    public Rotation2d getRotationRelative(int apriltagID) { //Taken from 2024 code.
-        return 
-        getPose().getTranslation()
-        .minus(
-            getTagPose(apriltagID).getTranslation()
-        )
-        .unaryMinus()
-        .getAngle(); 
-    }
-
-    /*
-     * Resets the questnav field offset
-     * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
-     */
-    public void resetQuestPose() {
-        questNav.resetPose(this.getPose());
-        hasQuestInitialized = true;
-    }
-
-    public Command seedQuestPose() {
-        return Commands.runOnce(
-            () -> {resetQuestPose();}
-        );
-    }
-
-    public Command disableQuest() {
-        return Commands.runOnce(
-            () -> {hasQuestInitialized = false;}
-        );
+    
+    // Getter methods for field and data
+    public Field2d getField() {
+        return field;
     }
     
-    public Field2d getField() {
-        return this.field;
+    public Field2d getTrajectoryField() {
+        return trajectoryField;
+    }
+
+    public double[] getLinearVelocityData() {
+        return linearVelocityData;
+    }
+
+    public double[] getAngularVelocityData() {
+        return angularVelocityData;
     }
     
     public QuestNav getQuestNav() {
         return questNav;
+    }
+
+    public double[] getVelocityErrorData() {
+        return velocityErrorData;
     }
 
     /**
@@ -393,7 +420,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 "Applied offset: [" + offsetX + ", " + offsetY + "]");
         });
     }
-    
+
     /**
      * Apply calculated offset from a calibration Quest instance
      * @param calibrationQuest The QuestNav instance used for calibration
@@ -413,74 +440,26 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         });
     }
 
-    // Add method to save calibration values
-    public Command saveQuestCalibration() {
-        return Commands.runOnce(() -> {
-            Translation2d offset = questNav.getCalculatedOffset();
-            Preferences.setDouble("QuestOffsetX", offset.getX());
-            Preferences.setDouble("QuestOffsetY", offset.getY());
-            SmartDashboard.putString("Quest Calibration Status", 
-                "Saved offset: [" + offset.getX() + ", " + offset.getY() + "]");
-        });
-    }
-
-    // Add method to load saved calibration values
-    private void loadSavedCalibration() {
-        if (Preferences.containsKey("QuestOffsetX") && Preferences.containsKey("QuestOffsetY")) {
-            double x = Preferences.getDouble("QuestOffsetX", 0.0);
-            double y = Preferences.getDouble("QuestOffsetY", 0.0);
-            questNav.applyCalculatedOffset(x, y);
-            SmartDashboard.putString("Quest Calibration Status", 
-                "Loaded saved offset: [" + x + ", " + y + "]");
+    public void setTrajectoryFollowing(boolean following) {
+        followingTrajectory = following;
+        if (!following) {
+            // Clear the planned trajectory history when we stop following
+            plannedTrajectoryHistory.clear();
         }
     }
 
-    //public double getTranslationRelativeToSpeaker(){
-    //    return Math.abs(getPose().getTranslation().getDistance(getSpeakerPose().get().getTranslation().toTranslation2d()));
-    //}
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-    private void startSimThread() {
-        m_lastSimTime = Utils.getCurrentTimeSeconds();
-
-        /* Run simulation at a faster rate so PID gains behave more reasonably */
-        m_simNotifier = new Notifier(() -> {
-            final double currentTime = Utils.getCurrentTimeSeconds();
-            double deltaTime = currentTime - m_lastSimTime;
-            m_lastSimTime = currentTime;
-
-            /* use the measured time delta, get battery voltage from WPILib */
-            updateSimState(deltaTime, RobotController.getBatteryVoltage());
-        });
-        m_simNotifier.startPeriodic(kSimLoopPeriod);
+    public boolean isFollowingTrajectory() {
+        return followingTrajectory;
     }
 
+    public ChassisSpeeds getCommandedChassisSpeeds() {
+        return commandedTrajectorySpeed;
+    }
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
-
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -515,10 +494,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     );
 
     /*
-        * SysId routine for characterizing rotation.
-        * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-        * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
-        */
+     * SysId routine for characterizing rotation.
+     * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
+     * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
+     */
     private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
         new SysIdRoutine.Config(
             /* This is in radians per second², but SysId only supports "volts per second" */
@@ -540,35 +519,11 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             this
         )
     );
+
     /**
      * Runs the SysId Quasistatic test in the given direction for the routine
      * specified by {@link #m_sysIdRoutineToApply}.
-
      *
-     * @param direction Direction of the SysId Quasistatic test
-     * @return Command to run
-}
-     */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
-    }
-
-    /**
-     * Runs the SysId Dynamic test in the given direction for the routine
-     * specified by {@link #m_sysIdRoutineToApply}.
-     *
-     * @param direction Direction of the SysId Dynamic test
-     * @return Command to run
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
-    }
-
-    /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
-        
-}
-
      * @param direction Direction of the SysId Quasistatic test
      * @return Command to run
      */
@@ -589,6 +544,4 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
-        
 }
-

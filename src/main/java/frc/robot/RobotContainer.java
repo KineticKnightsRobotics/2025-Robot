@@ -1,6 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Open Source Software; you can modify and/or share it under the terms of the
+// WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
@@ -37,6 +37,9 @@ import frc.robot.commands.Drive.joystickDrive;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.QuestNav;  // Add this import
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;  // Add this import
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;  // Add this import
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;  // Add this import
 
 public class RobotContainer {
     private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
@@ -123,6 +126,37 @@ public class RobotContainer {
         //NamedCommands.registerCommand("intakeSource", new intakeSource(elevatorSubsystem, endAffectorSubsytem).intake());
         //NamedCommands.registerCommand("Elevator L3", scoringCommands.score(30));
         //NamedCommands.registerCommand("Elevator Home", scoringCommands.score(0));
+
+        // Set up Shuffleboard for path following visualization
+        ShuffleboardTab pathFollowingTab = Shuffleboard.getTab("Path Following");
+        
+        // Add main field
+        pathFollowingTab.add("Field", driveSubsystem.getField())
+            .withPosition(0, 0)
+            .withSize(5, 3);
+        
+        // Add trajectory field
+        pathFollowingTab.add("Trajectory View", driveSubsystem.getTrajectoryField())
+            .withPosition(5, 0)
+            .withSize(5, 3);
+            
+        // Add linear velocity graph
+        pathFollowingTab.addDoubleArray("Linear Velocity", () -> driveSubsystem.getLinearVelocityData())
+            .withPosition(0, 3)
+            .withSize(3, 3)
+            .withWidget(BuiltInWidgets.kGraph);
+            
+        // Add angular velocity graph
+        pathFollowingTab.addDoubleArray("Angular Velocity", () -> driveSubsystem.getAngularVelocityData())
+            .withPosition(3, 3)
+            .withSize(3, 3)
+            .withWidget(BuiltInWidgets.kGraph);
+            
+        // Add velocity error graph
+        pathFollowingTab.addDoubleArray("Velocity Error", () -> driveSubsystem.getVelocityErrorData())
+            .withPosition(6, 3)
+            .withSize(3, 3)
+            .withWidget(BuiltInWidgets.kGraph);
     }
 
     public void configureBindings() {
@@ -153,15 +187,16 @@ public class RobotContainer {
 
         
         // Replace existing calibration binding with this
+        // ====================== QUEST CALIBRATION PROCESS ======================
+        // Hold this button to calibrate the Quest's position relative to robot center
+        // Watch SmartDashboard for "Quest Calculated Offset to Robot Center" values
+        // After getting values, add them to QUEST_TO_ROBOT_TRANSFORM in Drive.java
         driverX.whileTrue(calibrationQuest.determineOffsetToRobotCenter(driveSubsystem));
         
         rightTrigger.and(leftTrigger).onTrue(driveSubsystem.applyQuestCalibration(calibrationQuest));
         
         // Only bind seedQuestPose once
         driverStart.onTrue(driveSubsystem.seedQuestPose());
-
-        // Add button to save calibration
-        op20.onTrue(driveSubsystem.saveQuestCalibration());
 
         /*
         op3
@@ -231,7 +266,10 @@ public class RobotContainer {
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        joystick.a().whileTrue(drivetrain.applyRe
+        
+        
+        (() -> brake));
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
