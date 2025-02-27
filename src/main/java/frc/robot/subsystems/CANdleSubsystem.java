@@ -23,8 +23,8 @@ public class CANdleSubsystem extends SubsystemBase {
     private Animation m_currentAnimation;
     private AnimationTypes m_currentAnimationType;
 
-    private final int COOLING = 40;
-    private final int SPARKING = 150;
+    private int COOLING = 40;
+    private int SPARKING = 150;
     private final int[] heat;
     private final Random rand;
 
@@ -97,20 +97,64 @@ public class CANdleSubsystem extends SubsystemBase {
     }
 
     private void runCustomFire() {
+        // Cool down every cell a little
         for (int i = 0; i < LedCount; i++) {
             heat[i] = Math.max(0, heat[i] - rand.nextInt((COOLING * 10 / LedCount) + 2));
         }
-        for (int i = LedCount - 1; i >= 2; i--) {
-            heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2]) / 3;
+        
+        // Heat propagation from bottom to top (assuming LED 0 is physically at bottom)
+        // First handle special case for bottom LEDs
+        if (LedCount >= 3) {
+            // Handle LED 0 separately (sources heat from nowhere/randomly)
+            if (rand.nextInt(255) < SPARKING) {
+                heat[0] = Math.min(255, heat[0] + rand.nextInt(160) + 90);
+            }
+            
+            // Heat propagation - bottom to top
+            for (int i = LedCount - 1; i >= 1; i--) {
+                // Each LED gets heat from the ones below it
+                heat[i] = (heat[i] + heat[Math.max(0, i-1)] * 2) / 3;
+            }
         }
+        
+        // Randomly ignite new sparks near the bottom
         if (rand.nextInt(255) < SPARKING) {
-            heat[rand.nextInt(7)] = rand.nextInt(95) + 160;
+            int y = rand.nextInt(Math.min(7, LedCount));
+            heat[y] = Math.min(255, heat[y] + rand.nextInt(95) + 160);
         }
+        
+        // Convert heat to LED colors
         for (int i = 0; i < LedCount; i++) {
-            int g = Math.min(255, heat[i]);
-            int b = (int) Math.min(255, heat[i] * 0.5); // Adjust blue component for a cooler effect
-            m_candle.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
+            // Map heat to colors - improved green fire palette
+            int heatValue = Math.min(255, heat[i]);
+            
+            // Cooler parts: more blue, less green (blue-green)
+            // Hotter parts: more green, touch of red (yellowish-green)
+            int r = (int)(heatValue * 0.3); // A bit more red for realism
+            int g = heatValue;
+            int b = (int)(heatValue * 0.5 * (1.0 - (heatValue / 255.0))); // More blue in cooler areas
+            
+            // Clamp values
+            r = Math.min(255, Math.max(0, r));
+            g = Math.min(255, Math.max(0, g));
+            b = Math.min(255, Math.max(0, b));
+            
+            m_candle.setLEDs(r, g, b, 0, i, 1);
         }
+    }
+    
+    // Add method to adjust fire parameters
+    public void setFireParameters(int cooling, int sparking) {
+        this.COOLING = MathUtil.clamp(cooling, 0, 255);
+        this.SPARKING = MathUtil.clamp(sparking, 0, 255);
+    }
+    
+    // Add command to adjust fire parameters
+    public Command createSetFireParametersCommand(int cooling, int sparking) {
+        return Commands.runOnce(() -> {
+            this.COOLING = MathUtil.clamp(cooling, 0, 255);
+            this.SPARKING = MathUtil.clamp(sparking, 0, 255);
+        }, this);
     }
 
     public Command setLEDAnimation(AnimationTypes animationType) {

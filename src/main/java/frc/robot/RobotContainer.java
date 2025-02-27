@@ -142,6 +142,11 @@ public class RobotContainer {
         op4.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2), 18,Units.degreesToRadians(180)));
         op5.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),18,Units.degreesToRadians(180)));
 
+        
+            driverX.whileTrue(driveSubsystem.getQuestNav().determineOffsetToRobotCenter(driveSubsystem));
+        
+
+        driverStart.onTrue(driveSubsystem.seedQuestPose());
 
         /*
         op3

@@ -38,6 +38,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
 import frc.robot.util.Quest;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import frc.robot.util.QuestNav;
 
 
 /**
@@ -58,13 +62,21 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     private Vision kLimelight = new Vision("limelight-dignan", this);
 
-    private Quest quest = new Quest();
+    private QuestNav questNav;
     private boolean hasQuestInitialized = false;
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
-
+    private static final Transform3d QUEST_TO_ROBOT_TRANSFORM = new Transform3d(
+        new Translation3d(0, 0, 0),
+        new Rotation3d(0, 0, Math.toRadians(180))
+    );
     
+    private void initializeQuestNav() {
+        questNav = new QuestNav(QUEST_TO_ROBOT_TRANSFORM);
+        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        SmartDashboard.putData("Questnav Disable", disableQuest());
+    }
 
     //auto objects
     private Field2d field = new Field2d();
@@ -93,9 +105,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
-
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        initializeQuestNav();
     }
 
     /**
@@ -121,8 +131,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        initializeQuestNav();
     }
 
     /**
@@ -132,6 +141,12 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
+     * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
+     * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
+     *                                  unspecified or set to 0 Hz, this is 250 Hz on
+     *                                  CAN FD, and 100 Hz on CAN 2.0.
+     * @param odometryStandardDeviation The standard deviation for odometry calculation
+     *                                  in the form [x, y, theta]ᵀ, with units in meters
      * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
      * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
      *                                  unspecified or set to 0 Hz, this is 250 Hz on
@@ -156,6 +171,12 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
+
+        questNav = new QuestNav(new Transform3d(
+            new Translation3d(0, 0, 0), // Position offset (x, y, z)
+            new Rotation3d(0, 0, Math.toRadians(180)) // Orientation offset
+        ));
+
         SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
         SmartDashboard.putData("Questnav Disable", disableQuest());
     }
@@ -242,18 +263,18 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         if (hasQuestInitialized) {
             addVisionMeasurement(
-                quest.getRobotPose(),
-                Utils.fpgaToCurrentTime(quest.getTimestamp()),
-                VecBuilder.fill(1/10,1/10,1/10)
+                questNav.getRobotPose(),
+                Utils.fpgaToCurrentTime(questNav.getTimestamp()),
+                VecBuilder.fill(0.1, 0.1, 0.1)
             );
         }
 
-        quest.cleanUpQuestNavMessages();
+        questNav.cleanUpQuestCommand();
 
-        SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
-        SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
+        SmartDashboard.putNumber("Quest Battery",questNav.getBatteryPercent());
+        SmartDashboard.putBoolean("Quest Connected", questNav.isConnected());
         SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
-        double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
+        double[] questPose = {questNav.getRobotPose().getX(),questNav.getRobotPose().getY()};
         SmartDashboard.putNumberArray("Quest Pose", questPose);
 
         SmartDashboard.putNumber("Robot Velocity", Units.inchesToMeters(this.getModule(0).getDriveMotor().getVelocity().getValueAsDouble()) / 6.75 * 4 * Math.PI);
@@ -297,7 +318,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
      * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
      */
     public void resetQuestPose() {
-        quest.resetPose(this.getPose());
+        questNav.resetPose(this.getPose());
         hasQuestInitialized = true;
     }
 
@@ -317,6 +338,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return this.field;
     }
     
+    public QuestNav getQuestNav() {
+        return questNav;
+    }
 
 
     //public double getTranslationRelativeToSpeaker(){
