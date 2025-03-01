@@ -37,7 +37,7 @@ public class RobotContainer {
     SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    SwerveRequest.RobotCentricFacingAngle search = new SwerveRequest.RobotCentricFacingAngle()
+    SwerveRequest.RobotCentric search = new SwerveRequest.RobotCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     public Joystick driverController = new Joystick(0);
@@ -118,11 +118,11 @@ public class RobotContainer {
         rightBumper
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                teleopCommand.searchForPeg(0.2, -driverController.getRawAxis(0)*MaxSpeed*0.2, search)
+                teleopCommand.searchForPeg(0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
             );
         leftBumper
             .whileTrue(
-                teleopCommand.searchForPeg(-0.2, -driverController.getRawAxis(0)*MaxSpeed*0.2, search)
+                teleopCommand.searchForPeg(           -0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
             );
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
 
@@ -257,7 +257,8 @@ public class RobotContainer {
     }
 
     public void configureNamedCommands() {
-        NamedCommands
+        NamedCommands.registerCommand("AquireCoral", coralSubsystem.loadCoral());
+        NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
     }
 
     public Command getAutonomousCommand() {

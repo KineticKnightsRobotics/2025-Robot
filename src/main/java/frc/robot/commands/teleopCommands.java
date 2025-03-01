@@ -91,14 +91,59 @@ public class teleopCommands extends Command{
         }
     }
 
-    public Command searchForPeg(double searchSpeed, double ySpeed, SwerveRequest.RobotCentricFacingAngle speedRequest){
-        return                 
-            driveSub.applyRequest(
-                () -> speedRequest
-                    .withVelocityX(searchSpeed)
-                    .withVelocityY(ySpeed*0.2)
-                    .withTargetDirection(driveSub.getTagPose(driveSub.getLimelightTarget()).getRotation().rotateBy(new Rotation2d(Math.PI)))
-                )
-                .until(()-> coralSub.allignedWithPeg());
+    public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
+
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() <270) {
+                return
+
+                // On red alliance facing red alliance -> Invert controls
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityX(-searchSpeed)
+                        .withVelocityY(-ySpeed*0.2)
+                        .withRotationalRate(-rSpeed*0.2)
+                    )
+                    .until(()-> coralSub.allignedWithPeg());
+            }
+            else {
+                return    
+                // on red alliance facing blue alliance -> don't invert controls             
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityX(searchSpeed)
+                        .withVelocityY(ySpeed*0.2)
+                        .withRotationalRate(rSpeed*0.2)
+                    )
+                    .until(()-> coralSub.allignedWithPeg());
+            }
+        }
+        else {
+            if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() <270) {
+                return
+                //On blue alliance facing red alliance -> don't invert controls
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityX(searchSpeed)
+                        .withVelocityY(ySpeed*0.2)
+                        .withRotationalRate(rSpeed*0.2)
+                    )
+                    .until(()-> coralSub.allignedWithPeg());
+            }
+            else {
+                return
+                //on blue alliance facing blue alliance -> invert controls
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityX(-searchSpeed)
+                        .withVelocityY(-ySpeed*0.2)
+                        .withRotationalRate(-rSpeed*0.2)
+                    )
+                    .until(()-> coralSub.allignedWithPeg());
+
+            }
+        }
+
+
     }
 }
