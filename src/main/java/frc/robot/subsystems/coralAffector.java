@@ -20,13 +20,14 @@ public class coralAffector extends SubsystemBase {
 
     SparkMax rollerMotor;
     SparkMaxConfig rollerMotorConfig;
-    DigitalInput beamUpper, beamLower;
+    DigitalInput beamUpper, beamLower, proxSensor;
 
 
     public coralAffector() {
         rollerMotor = new SparkMax(CoralAffectorConstants.coralRollerID, MotorType.kBrushless);
         beamUpper = new DigitalInput(CoralAffectorConstants.beamUpper);
         beamLower = new DigitalInput(CoralAffectorConstants.beamLower);
+        proxSensor = new DigitalInput(CoralAffectorConstants.proxSensor);
     }
 
 
@@ -55,6 +56,10 @@ public class coralAffector extends SubsystemBase {
 
     public boolean coralLoaded() {
         return !beamLower.get() && beamUpper.get();
+    }
+    
+    public boolean allignedWithPeg() {
+        return proxSensor.get();
     }
 
     // Load a game piece into the robot

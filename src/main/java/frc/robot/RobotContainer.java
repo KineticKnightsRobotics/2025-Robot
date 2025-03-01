@@ -12,8 +12,10 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,6 +35,9 @@ public class RobotContainer {
     private double AngularRate = Math.PI * 1.5;
 
     SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
+    SwerveRequest.RobotCentricFacingAngle search = new SwerveRequest.RobotCentricFacingAngle()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     public Joystick driverController = new Joystick(0);
@@ -98,9 +103,7 @@ public class RobotContainer {
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
-
-
-        NamedCommands.registerCommand("Score L4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
+        configureNamedCommands();
     }
 
     public void configureBindings() {
@@ -113,9 +116,15 @@ public class RobotContainer {
          */
 
         rightBumper
-            .whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
+            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
+            .whileTrue(
+                teleopCommand.searchForPeg(0.2, -driverController.getRawAxis(0)*MaxSpeed*0.2, search)
+            );
         leftBumper
-            .whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
+            .whileTrue(
+                teleopCommand.searchForPeg(-0.2, -driverController.getRawAxis(0)*MaxSpeed*0.2, search)
+            );
+            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
 
         driverA
             .and(dignanHasAlgae)
@@ -127,14 +136,34 @@ public class RobotContainer {
                     coralSubsystem.spitCoral()
                 );
 
-        leftTrigger.whileTrue(
-            algaeSubsystem.captureAlgae(AlgaeAffectorConstants.PivotPositions.groundIntake)
-        );
-        rightTrigger.whileTrue(
-            coralSubsystem.loadCoral()
-        );
+        driverB
+            .whileTrue(
+                teleopCommand.goToSource(driveSubsystem.getState().Pose)
+            );
 
-        driverX.whileTrue(climberSubsystem);
+        leftTrigger
+            .whileTrue(
+                algaeSubsystem.captureAlgae(AlgaeAffectorConstants.PivotPositions.groundIntake)
+            );
+
+        rightTrigger
+            .whileTrue(
+                coralSubsystem.loadCoral()
+            );
+
+        driverX
+            .whileTrue(
+                climberSubsystem.setClimberSpeed(0.9)
+            );
+        driverY
+            .whileTrue(
+                climberSubsystem.setClimberSpeed(-0.9)
+            );
+        driverStart
+            .whileTrue(
+                climberSubsystem.dropRamp()
+            );
+        
 
         /*
          * OPERATOR CONTROLS
@@ -225,6 +254,10 @@ public class RobotContainer {
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
+    }
+
+    public void configureNamedCommands() {
+        NamedCommands
     }
 
     public Command getAutonomousCommand() {

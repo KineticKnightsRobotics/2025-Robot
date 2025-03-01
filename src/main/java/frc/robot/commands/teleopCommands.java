@@ -2,17 +2,25 @@ package frc.robot.commands;
 
 import javax.naming.PartialResultException;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class teleopCommands extends Command{
 
@@ -20,6 +28,8 @@ public class teleopCommands extends Command{
     private Elevator elevSub;
     private coralAffector coralSub;
     private algaeAffector algaeSub;
+
+    
 
     // Constructor
     public teleopCommands(Drive drive, Elevator elevator, coralAffector coral, algaeAffector algae) {
@@ -57,5 +67,38 @@ public class teleopCommands extends Command{
                 ) ,
                 elevSub.setElevatorGoal(ElevatorConstants.Positions.home)
             );
+    }
+
+    public Command goToSource(Pose2d robotPose) {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red){
+            if (robotPose.getY() > 4.03352) {
+                //Past the halfway point, go to top source, red side
+                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 2, 0);
+            }
+            else {
+                //below halfway point, go to bottom source, red side
+                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 1, 0);
+            }
+        } else {
+            if (robotPose.getY() > 4.03352) {
+                //top source, blue side
+                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 13, 0);
+            }
+            else {
+                //bottom source, blue side.
+                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 12, 0);
+            }
+        }
+    }
+
+    public Command searchForPeg(double searchSpeed, double ySpeed, SwerveRequest.RobotCentricFacingAngle speedRequest){
+        return                 
+            driveSub.applyRequest(
+                () -> speedRequest
+                    .withVelocityX(searchSpeed)
+                    .withVelocityY(ySpeed*0.2)
+                    .withTargetDirection(driveSub.getTagPose(driveSub.getLimelightTarget()).getRotation().rotateBy(new Rotation2d(Math.PI)))
+                )
+                .until(()-> coralSub.allignedWithPeg());
     }
 }

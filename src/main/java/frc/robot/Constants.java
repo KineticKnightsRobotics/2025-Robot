@@ -93,6 +93,7 @@ public class Constants {
         public static int coralRollerID = 43;
         public static int beamUpper = 0;
         public static int beamLower = 1;
+        public static int proxSensor = 3;
     }
 
     public final class ClimberConstants {
