@@ -54,8 +54,9 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Climber Leader Position", digEncoder.getPosition());
-        SmartDashboard.putNumber("Climber Follower Position", nanEncoder.getPosition());
+        SmartDashboard.putNumber("C_digPosition", digEncoder.getPosition());
+        SmartDashboard.putNumber("C_nanPosition", nanEncoder.getPosition());
+        SmartDashboard.putData(this);
     }
 
     public Command setClimberSpeed(double speed) {

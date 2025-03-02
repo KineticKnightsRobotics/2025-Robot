@@ -54,7 +54,7 @@ public class Bling extends SubsystemBase {
             m_candle.animate(m_currentAnimation);
         }
 
-        SmartDashboard.putString("Current LED Animation", m_currentAnimationType.name());
+        SmartDashboard.putString("B_Current LED Animation", m_currentAnimationType.name());
     }
 
     public void setAnimation(AnimationTypes animationType) {

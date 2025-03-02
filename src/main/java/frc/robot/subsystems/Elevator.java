@@ -24,12 +24,12 @@ import frc.robot.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
 
-    private SparkMax leaderElevatorMotor;
+    private SparkMax digElevatorMotor;
     private SparkMaxConfig leadMotorConfig;
-    private RelativeEncoder leaderEncoder;
-    private SparkMax followElevatorMotor;
-    private SparkMaxConfig followMotorConfig;
-    private RelativeEncoder followEncoder;
+    private RelativeEncoder digEncoder;
+    private SparkMax nanElevatorMotor;
+    private SparkMaxConfig nanMotorConfig;
+    private RelativeEncoder nanEncoder;
 
     private CANcoder elevatorEncoder;
     private CANcoderConfiguration elevatorEncoderConfig;
@@ -43,11 +43,11 @@ public class Elevator extends SubsystemBase {
 
     public Elevator() {
 
-        //Configure the leader motor
-        leaderElevatorMotor = new SparkMax(ElevatorConstants.digMotorID, MotorType.kBrushless);
-        leaderEncoder = leaderElevatorMotor.getEncoder();
-        followElevatorMotor = new SparkMax(ElevatorConstants.nanMotorID, MotorType.kBrushless);
-        followEncoder = followElevatorMotor.getEncoder();
+        //Configure the dig motor
+        digElevatorMotor = new SparkMax(ElevatorConstants.digMotorID, MotorType.kBrushless);
+        digEncoder = digElevatorMotor.getEncoder();
+        nanElevatorMotor = new SparkMax(ElevatorConstants.nanMotorID, MotorType.kBrushless);
+        nanEncoder = nanElevatorMotor.getEncoder();
         elevatorEncoder = new CANcoder(ElevatorConstants.encoderID);
 
 
@@ -86,24 +86,24 @@ public class Elevator extends SubsystemBase {
                 .encoder
                 .positionConversionFactor(1.0/*ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio / 2*/);
 
-            leaderElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+            digElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-            followMotorConfig = new SparkMaxConfig();
-            followMotorConfig
+            nanMotorConfig = new SparkMaxConfig();
+            nanMotorConfig
                 .inverted(true)
                 .smartCurrentLimit(30)
                 .idleMode(IdleMode.kCoast)
                 .closedLoopRampRate(0.001);
             
-            followMotorConfig
+            nanMotorConfig
                 .encoder
                     .positionConversionFactor(1.0);
-            //followMotorConfig
+            //nanMotorConfig
             //    .softLimit
             //        .reverseSoftLimit(ElevatorConstants.maxChassisHeight-1)
             //        .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
 
-            followElevatorMotor.configure(followMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+            nanElevatorMotor.configure(nanMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             elevatorEncoderConfig = new CANcoderConfiguration();
             elevatorEncoder.getConfigurator().apply(
@@ -122,23 +122,21 @@ public class Elevator extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Elevator Position", getElevatorPosition());
-        SmartDashboard.putNumber("Elevator Goal", getElevatorGoal());
-        SmartDashboard.putBoolean("Elevator at Goal", elevatorAtGoal());
+        SmartDashboard.putNumber("E_Position", getElevatorPosition());
+        SmartDashboard.putNumber("E_Goal", getElevatorGoal());
+        SmartDashboard.putBoolean("E_atGoal", elevatorAtGoal());
 
 
-        SmartDashboard.putNumber("Elevator Absolute Value", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
-        SmartDashboard.putNumber("Elevator Velocity", elevatorEncoder.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("Elevator Voltage", leaderElevatorMotor.getBusVoltage());
+        SmartDashboard.putNumber("E_AbsolutePosition", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
 
-        SmartDashboard.putNumber("Elevator leader encoder", leaderEncoder.getPosition());
-        SmartDashboard.putNumber("Elevator follow encoder", followEncoder.getPosition());
+        SmartDashboard.putNumber("E_digEncoder", digEncoder.getPosition());
+        SmartDashboard.putNumber("E_nanEncoder", nanEncoder.getPosition());
 
         SmartDashboard.putData(this);
     }
 
     public double getElevatorPosition() {
-        //return leaderEncoder.getPosition();
+        //return digEncoder.getPosition();
         return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.chassisHome;
     }
     
@@ -152,7 +150,7 @@ public class Elevator extends SubsystemBase {
     
     public void setElevatorVoltage(double voltage){
         sysIDVoltage = voltage;
-        leaderElevatorMotor.setVoltage(sysIDVoltage);
+        digElevatorMotor.setVoltage(sysIDVoltage);
     }
 
     public Command setElevatorGoal(double position) {
@@ -172,7 +170,7 @@ public class Elevator extends SubsystemBase {
         return Commands
         .runOnce(
             () -> {
-                leaderElevatorMotor.set(0.0); followElevatorMotor.set(0.0);
+                digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
             },
             this
         ).andThen(
@@ -190,12 +188,12 @@ public class Elevator extends SubsystemBase {
 
                         SmartDashboard.putNumber("Elevator output", output);
 
-                        leaderElevatorMotor.set(output);
-                        followElevatorMotor.set(output);
+                        digElevatorMotor.set(output);
+                        nanElevatorMotor.set(output);
                     }
                     else {
-                        leaderElevatorMotor.set(0.0);
-                        followElevatorMotor.set(0.0);
+                        digElevatorMotor.set(0.0);
+                        nanElevatorMotor.set(0.0);
                     }
                 },
                 this
@@ -204,17 +202,52 @@ public class Elevator extends SubsystemBase {
         );
     }
 
+    public Command homeElevator() {
+        return Commands
+        .runOnce(
+            () -> {
+                digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
+            },
+            this
+        ).andThen(
+            Commands.run(
+                () -> {
+                    //double newOutput = elevatorController.calculate(getElevatorPosition());
+                    if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
+                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.home),-1.0,1.0);
+
+                        if (getElevatorPosition() < 3 || getElevatorPosition() > 50) {
+                            output = MathUtil.clamp(output, -0.2, 0.2);
+                        }
+
+                        //SmartDashboard.putNumber("Elevator output", output);
+
+                        digElevatorMotor.set(output);
+                        nanElevatorMotor.set(output);
+                    }
+                    else {
+                        digElevatorMotor.set(0.0);
+                        nanElevatorMotor.set(0.0);
+                    }
+                },
+                this
+                )
+                .until(() -> elevatorAtGoal())
+                .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+        );
+    }
+
     public Command setElevatorSpeed(double speed) {
         return Commands.run(
             () -> {
-                leaderElevatorMotor.set(speed);
-                followElevatorMotor.set(speed);
+                digElevatorMotor.set(speed);
+                nanElevatorMotor.set(speed);
             }, 
             this)
             .finallyDo(
                 () -> {
-                    leaderElevatorMotor.set(0.0);
-                    followElevatorMotor.set(0.0);
+                    digElevatorMotor.set(0.0);
+                    nanElevatorMotor.set(0.0);
                 }
             );
     }

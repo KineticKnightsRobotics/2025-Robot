@@ -8,7 +8,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -87,8 +86,9 @@ public class algaeAffector extends SubsystemBase {
     // Post pivot position and goal to SmartDashboard
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Algae Mech Absolute Position", getPivotAbsolutePosition());
-        SmartDashboard.putNumber("Algae Mech Primed Position", primedPosition);
+        SmartDashboard.putNumber("A_Absolute Position", getPivotAbsolutePosition());
+        SmartDashboard.putNumber("A_Primed Position", primedPosition);
+        SmartDashboard.putBoolean("A_Dignan Algae", hasAlgae());
         SmartDashboard.putData(this);
     }
 
@@ -110,6 +110,16 @@ public class algaeAffector extends SubsystemBase {
                     },
                     this
                 );
+    }
+
+    public Command overRidePivotPosition(double position) {
+        return Commands
+            .runOnce(
+                () -> {
+                    pivotController.setReference(position, ControlType.kPosition);
+                },
+                this
+            );
     }
 
     public Command captureAlgae() {

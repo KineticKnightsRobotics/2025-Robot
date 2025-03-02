@@ -58,13 +58,11 @@ public class teleopCommands extends Command{
     public Command deAlgify() { 
         return
             new SequentialCommandGroup(
-                elevSub.moveElevator()
-                    .until(()-> elevSub.elevatorAtGoal()),
+                algaeSub.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying),
                 new ParallelRaceGroup(
                     elevSub.moveElevator(),
-                    algaeSub.captureAlgae(AlgaeAffectorConstants.PivotPositions.deAlgifying)
-                ) ,
-                elevSub.setElevatorGoal(ElevatorConstants.Positions.home)
+                    algaeSub.captureAlgae()
+                )
             );
     }
 

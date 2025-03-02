@@ -47,7 +47,10 @@ public class coralAffector extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Coral Mech Has Coral", hasCoral());
+        SmartDashboard.putBoolean("C_Dignan Coral", hasCoral());
+        SmartDashboard.putBoolean("Coral Upper Beambreak", !beamUpper.get());
+        SmartDashboard.putBoolean("Coral Lower Beambreak", !beamLower.get());
+        SmartDashboard.putData(this);
     }
 
     public boolean hasCoral() {
