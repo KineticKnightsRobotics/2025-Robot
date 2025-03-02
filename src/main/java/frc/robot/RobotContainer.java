@@ -115,54 +115,61 @@ public class RobotContainer {
          * DRIVER CONTROLS
          */
 
-        rightBumper
+        driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 teleopCommand.searchForPeg(0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
             );
-        leftBumper
+        driverY
+            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 teleopCommand.searchForPeg(           -0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
             );
-            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
 
-        driverA
+        leftBumper
+            .whileTrue(
+                elevatorSubsystem.moveElevator()
+            )
+            .onFalse(
+                elevatorSubsystem.homeElevator()
+            );
+
+        rightBumper
             .and(dignanHasAlgae)
                 .whileTrue(
-                    algaeSubsystem.scoreProcessor()   
+                    algaeSubsystem.spitAlgae()
                 )
             .and(dignanHasCoral)
                 .whileTrue(
                     coralSubsystem.spitCoral()
                 );
 
-        driverB
+        driverA
             .whileTrue(
                 teleopCommand.goToSource(driveSubsystem.getState().Pose)
             );
 
-        leftTrigger
+        rightTrigger
             .whileTrue(
-                algaeSubsystem.captureAlgae(AlgaeAffectorConstants.PivotPositions.groundIntake)
+                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.groundIntake).andThen(
+                    algaeSubsystem.captureAlgae()
+                )
             );
 
-        rightTrigger
+        leftTrigger
             .whileTrue(
                 coralSubsystem.loadCoral()
             );
 
-        driverX
+        driverB
             .whileTrue(
-                climberSubsystem.setClimberSpeed(0.9)
+                teleopCommand.deAlgify()
+            )
+            .onFalse(
+                elevatorSubsystem.homeElevator()
             );
-        driverY
-            .whileTrue(
-                climberSubsystem.setClimberSpeed(-0.9)
-            );
-        driverStart
-            .whileTrue(
-                climberSubsystem.dropRamp()
-            );
+        
+
         
 
         /*
@@ -171,52 +178,49 @@ public class RobotContainer {
         op1
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
             );
 
         op6
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L3)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
             );
 
         op11
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L2)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
             );
 
         op12
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L1)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
             );
 
         op2
-            .whileTrue(
-                teleopCommand.deAlgify(ElevatorConstants.Positions.deAlgifyL3)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            .onTrue(
+                algaeSubsystem.setPrimedPosition(ElevatorConstants.Positions.deAlgifyL3)
             );
 
         op7
-            .whileTrue(
-                teleopCommand.deAlgify(ElevatorConstants.Positions.deAlgifyL2)
-            )
-            .onFalse(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.home)
+            .onTrue(
+                algaeSubsystem.setPrimedPosition(ElevatorConstants.Positions.deAlgifyL2)
             );
         
-        
+        op10
+            .whileTrue(
+                climberSubsystem.setClimberSpeed(0.9)
+            );
+        op5
+            .whileTrue(
+                climberSubsystem.setClimberSpeed(-0.9)
+            );
+        op9
+            .whileTrue(
+                climberSubsystem.setWinchSpeed(0.1)
+            );
+        op4
+            .whileTrue(
+                climberSubsystem.setWinchSpeed(-0.5)
+            );
 
 
 
@@ -245,9 +249,9 @@ public class RobotContainer {
                 )
         );
 
-        elevatorSubsystem.setDefaultCommand(
-            elevatorSubsystem.moveElevator()
-        );
+        //elevatorSubsystem.setDefaultCommand(
+        //    elevatorSubsystem.moveElevator()
+        //);
         //CANdleLED.setDefaultCommand(
         //    CANdleLED.CANdleBlue()
         //);

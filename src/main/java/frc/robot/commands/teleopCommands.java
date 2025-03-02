@@ -55,10 +55,9 @@ public class teleopCommands extends Command{
             );
     }
 
-    public Command deAlgify(double height) { 
+    public Command deAlgify() { 
         return
             new SequentialCommandGroup(
-                elevSub.setElevatorGoal(height),
                 elevSub.moveElevator()
                     .until(()-> elevSub.elevatorAtGoal()),
                 new ParallelRaceGroup(
