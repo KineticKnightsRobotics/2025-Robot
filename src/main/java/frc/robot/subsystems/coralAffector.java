@@ -50,6 +50,7 @@ public class coralAffector extends SubsystemBase {
         SmartDashboard.putBoolean("C_Dignan Coral", hasCoral());
         SmartDashboard.putBoolean("Coral Upper Beambreak", !beamUpper.get());
         SmartDashboard.putBoolean("Coral Lower Beambreak", !beamLower.get());
+        SmartDashboard.putBoolean("C_AllignedWithPeg", allignedWithPeg());
         SmartDashboard.putData(this);
     }
 

@@ -51,7 +51,7 @@ public class Constants {
 
         public static double gearRatio = 1/9;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.0;
+        public static double encoderOffset = 0.0;//0.151209;
         public static int digMotorID = 21;
         public static int nanMotorID = 22;
 
@@ -77,9 +77,9 @@ public class Constants {
         public static int absoluteEncoderID = 34;
         public static int pivotMotorID = 31;
         public static int rollerMotorID = 32;
-        public static int proxSensor = 2;
+        public static int proxSensor = 7;
 
-        public static double encoderOffset = 0.931;
+        public static double encoderOffset = 0.74335;
         public static double algaePivotGearRatio = 1/5;
 
         public static class PivotPositions {
@@ -91,9 +91,9 @@ public class Constants {
 
     public final class CoralAffectorConstants {
         public static int coralRollerID = 43;
-        public static int beamUpper = 0;
-        public static int beamLower = 1;
-        public static int proxSensor = 3;
+        public static int beamUpper = 8;
+        public static int beamLower = 9;
+        public static int proxSensor = 6;
     }
 
     public final class ClimberConstants {

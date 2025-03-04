@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -27,6 +28,7 @@ public class algaeAffector extends SubsystemBase {
      */
     private SparkMax pivotMotor, rollerMotor;
     private SparkMaxConfig pivotMotorConfig, rollerMotorConfig;
+    private AbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
 
     private DigitalInput proxSensor;
@@ -42,8 +44,10 @@ public class algaeAffector extends SubsystemBase {
         // Config pivot encoder
         
         proxSensor = new DigitalInput(AlgaeAffectorConstants.proxSensor);
+        
         // Apply motor/encoder configs
         configureDevices();
+        pivotEncoder = pivotMotor.getAbsoluteEncoder();
     }
 
     // Set current limits, config motors and encoders
@@ -57,8 +61,8 @@ public class algaeAffector extends SubsystemBase {
                     .closedLoopRampRate(1)
                     .idleMode(IdleMode.kBrake);
             pivotMotorConfig.absoluteEncoder
-                .zeroOffset(0.0)
-                .positionConversionFactor(1.0);
+                .zeroOffset(AlgaeAffectorConstants.encoderOffset)
+                .positionConversionFactor(360);
             pivotMotorConfig
                 .closedLoop
                     .p(AlgaeAffectorConstants.PivotPID.P)
@@ -94,7 +98,7 @@ public class algaeAffector extends SubsystemBase {
 
     // Get the position of the pivotEncoder in degrees
     public double getPivotAbsolutePosition() {
-        return pivotMotor.getAbsoluteEncoder().getPosition();
+        return pivotEncoder.getPosition();
     }
     
     public boolean hasAlgae() {

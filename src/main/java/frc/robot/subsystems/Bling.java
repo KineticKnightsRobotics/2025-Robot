@@ -12,7 +12,8 @@ import java.util.Random;
 
 public class Bling extends SubsystemBase {
 
-    private final CANdle m_candle;
+    private final CANdle m_candleLeft;
+    private final CANdle m_candleRight;
     private final int LedCount = 100;
 
     public enum AnimationTypes {
@@ -29,7 +30,9 @@ public class Bling extends SubsystemBase {
     private final Random rand;
 
     public Bling() {
-        m_candle = new CANdle(1, "rio");
+        m_candleRight = new CANdle(1, "rio");
+        m_candleLeft = new CANdle(0, "rio");
+
 
         CANdleConfiguration config = new CANdleConfiguration();
         config.statusLedOffWhenActive = true;
@@ -38,7 +41,8 @@ public class Bling extends SubsystemBase {
         config.brightnessScalar = 0.5;
         config.vBatOutputMode = VBatOutputMode.Modulated;
 
-        m_candle.configAllSettings(config, 100);
+        m_candleRight.configAllSettings(config, 100);
+        m_candleLeft.configAllSettings(config, 100);
 
         heat = new int[LedCount];
         rand = new Random();
@@ -51,7 +55,9 @@ public class Bling extends SubsystemBase {
         if (m_currentAnimationType == AnimationTypes.CustomFire) {
             runCustomFire();
         } else if (m_currentAnimation != null) {
-            m_candle.animate(m_currentAnimation);
+            m_candleRight.animate(m_currentAnimation);
+            m_candleLeft.animate(m_currentAnimation);
+
         }
 
         SmartDashboard.putString("B_Current LED Animation", m_currentAnimationType.name());
@@ -109,7 +115,9 @@ public class Bling extends SubsystemBase {
         for (int i = 0; i < LedCount; i++) {
             int g = Math.min(255, heat[i]);
             int b = (int) Math.min(255, heat[i] * 0.5); // Adjust blue component for a cooler effect
-            m_candle.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
+            m_candleRight.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
+            m_candleLeft.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
+
         }
     }
 
@@ -118,6 +126,6 @@ public class Bling extends SubsystemBase {
     }
 
     public Command turnOffLEDs() {
-        return Commands.runOnce(() -> m_candle.setLEDs(0, 0, 0, 0, 0, LedCount), this);
+        return Commands.runOnce(() -> m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount)).andThen(()->m_candleRight.setLEDs(0,0,0,0,0,LedCount));
     }
 }
