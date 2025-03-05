@@ -38,7 +38,7 @@ public class Bling extends SubsystemBase {
         config.statusLedOffWhenActive = true;
         config.disableWhenLOS = false;
         config.stripType = LEDStripType.RGB;
-        config.brightnessScalar = 0.5;
+        config.brightnessScalar = 1.0;
         config.vBatOutputMode = VBatOutputMode.Modulated;
 
         m_candleRight.configAllSettings(config, 100);
@@ -47,7 +47,7 @@ public class Bling extends SubsystemBase {
         heat = new int[LedCount];
         rand = new Random();
 
-        setAnimation(AnimationTypes.SingleFade);
+        setAnimation(AnimationTypes.CustomFire);
     }
 
     @Override
