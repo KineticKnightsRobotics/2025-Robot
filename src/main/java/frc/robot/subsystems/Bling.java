@@ -115,9 +115,8 @@ public class Bling extends SubsystemBase {
                 heat[i] = Math.max(0, heat[i] - rand.nextInt(cooling));
             }
             
-            // Heat from each cell drifts up and diffuses - with additional safeguards
+            // Heat from each cell drifts up and diffuses
             for (int i = LedCount - 1; i >= 2; i--) {
-                // Ensure we're not doing integer division that rounds down to zero
                 int sum = heat[i - 1] + heat[i - 2] + heat[i];
                 heat[i] = sum / 3;
             }
@@ -130,41 +129,36 @@ public class Bling extends SubsystemBase {
                 heat[sparkPos] = Math.min(255, heat[sparkPos] + sparkHeat);
             }
             
-            // Batch our LED updates for efficiency
-            int[] rightLedColors = new int[LedCount * 4]; // RGBW values
-            int[] leftLedColors = new int[LedCount * 4];
+            // Go back to the simpler approach of setting blocks of LEDs
+            // This is more reliable than using the array method
             
-            // Map from heat to LED colors
+            // Clear all LEDs first
+            m_candleRight.clearAnimation(0);
+            m_candleLeft.clearAnimation(0);
+            
+            // Set all LEDs at once based on heat values
             for (int i = 0; i < LedCount; i++) {
                 int heatValue = MathUtil.clamp(heat[i], 0, 255);
-                // More realistic fire colors: red dominant, less green, minimal blue
                 int r = heatValue;
                 int g = (int)(heatValue * 0.3);
                 int b = (int)(heatValue * 0.1);
                 
-                // Display the fire upside down (more natural flame movement)
+                // Display the fire upside down for natural flame movement
                 int displayPos = LedCount - 1 - i;
+                
+                // Update one LED at a time, which is reliable
                 if (displayPos >= 0 && displayPos < LedCount) {
-                    int index = displayPos * 4;
-                    rightLedColors[index] = r;
-                    rightLedColors[index + 1] = g;
-                    rightLedColors[index + 2] = b;
-                    rightLedColors[index + 3] = 0; // White component
-                    
-                    leftLedColors[index] = r;
-                    leftLedColors[index + 1] = g;
-                    leftLedColors[index + 2] = b;
-                    leftLedColors[index + 3] = 0;
+                    // Only display if within bounds
+                    m_candleRight.setLEDs(r, g, b, 0, displayPos, 1);
+                    m_candleLeft.setLEDs(r, g, b, 0, displayPos, 1);
                 }
             }
-            
-            // Update all LEDs at once for each CANdle
-            m_candleRight.setLEDs(rightLedColors);
-            m_candleLeft.setLEDs(leftLedColors);
             
         } catch (Exception e) {
             // Log the error and continue
             System.err.println("Error in runCustomFire: " + e.getMessage());
+            e.printStackTrace(); // This will help diagnose the issue
+            
             // Reset heat array in case it's corrupted
             for (int i = 0; i < LedCount; i++) {
                 heat[i] = 0;
