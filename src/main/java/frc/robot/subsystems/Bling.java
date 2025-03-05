@@ -47,7 +47,7 @@ public class Bling extends SubsystemBase {
         heat = new int[LedCount];
         rand = new Random();
 
-        setAnimation(AnimationTypes.CustomFire);
+        setAnimation(AnimationTypes.SingleFade);
     }
 
     @Override

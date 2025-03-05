@@ -83,7 +83,7 @@ public class algaeAffector extends SubsystemBase {
             rollerMotorConfig = new SparkMaxConfig();
             rollerMotorConfig
                 .inverted(false)
-                .smartCurrentLimit(30)
+                .smartCurrentLimit(40)
                 .closedLoopRampRate(0.0001)
                 .idleMode(IdleMode.kBrake);
             rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -158,16 +158,12 @@ public class algaeAffector extends SubsystemBase {
 
     public Command spitAlgae() {
         return Commands
-            .runOnce(
-                () -> {
-            
-                },
-                this
-            ).andThen(
+            .run(
                 () -> {
                     rollerMotor.set(0.8);
-                }
-            ).until(() -> !hasAlgae())
+                },
+                this
+            )
             .finallyDo(
                 () -> {
                     rollerMotor.set(0.0);

@@ -37,7 +37,7 @@ public class Constants {
     }
 
     public final static class DriveConstants {
-        public static double searchingSpeed = 0.25;
+        public static double searchingSpeed = 0.35;
     }
 
     public final static class ElevatorConstants {
@@ -64,8 +64,8 @@ public class Constants {
 
         public static class Positions {
             public static double home = minChassisHeight+1;
-            public static double L1 = 10;
-            public static double L2 = 18;
+            public static double L1 = 4;
+            public static double L2 = 17;
             public static double L3 = 34;
             public static double L4 = 57;
             public static double deAlgifyL2 = 8.5;

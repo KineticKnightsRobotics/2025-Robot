@@ -120,7 +120,7 @@ public class RobotContainer {
 
 
     public final Trigger ejectCoral = driverRB.and(dignanHasCoral);
-    public final Trigger ejectAlgae = driverRB.and(dignanHasAlgae);
+    public final Trigger ejectAlgae = driverRB.and(dignanHasCoral.negate());
 
 
     public RobotContainer() {
@@ -232,12 +232,16 @@ public class RobotContainer {
 
         op2
             .onTrue(
-                algaeSubsystem.setPrimedPosition(ElevatorConstants.Positions.deAlgifyL3)
+                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying).andThen(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.deAlgifyL3)
+                )
             );
 
         op7
             .onTrue(
-                algaeSubsystem.setPrimedPosition(ElevatorConstants.Positions.deAlgifyL2)
+                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying).andThen(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.deAlgifyL2)
+                )
             );
         
         op10
