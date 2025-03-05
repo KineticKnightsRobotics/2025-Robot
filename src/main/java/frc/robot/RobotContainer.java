@@ -1,6 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Open Source Software; you can modify and/or share it under the terms of the
+// WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 
@@ -278,13 +278,13 @@ public class RobotContainer {
         // Make these separate triggers for more reliable behavior
         dignanHasCoral.negate().onTrue(Commands.runOnce(() -> {
             if (!algaeSubsystem.hasAlgae()) {
-                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+                CANdleLED.setAnimation(AnimationTypes.Fire); // Use built-in Fire instead of CustomFire
             }
         }));
         
         dignanHasAlgae.negate().onTrue(Commands.runOnce(() -> {
             if (!coralSubsystem.hasCoral()) {
-                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+                CANdleLED.setAnimation(AnimationTypes.Fire); // Use built-in Fire instead of CustomFire
             }
         }));
     }
