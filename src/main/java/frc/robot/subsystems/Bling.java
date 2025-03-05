@@ -55,7 +55,7 @@ public class Bling extends SubsystemBase {
         ledChanged = new boolean[LedCount];
         rand = new Random();
 
-        setAnimation(AnimationTypes.SingleFade);
+        setAnimation(AnimationTypes.CustomFire);
     }
 
     @Override
@@ -63,20 +63,8 @@ public class Bling extends SubsystemBase {
         frameCounter++;
         pulseCounter++;
         
-        if (m_currentAnimationType == AnimationTypes.CustomFire) {
-            // Only run the fire animation every FRAME_SKIP frames to reduce CAN utilization
-            if (frameCounter % FRAME_SKIP == 0) {
-                runCustomFire();
-            }
-        } else if (m_currentAnimationType == AnimationTypes.CoralPulse) {
-            if (frameCounter % FRAME_SKIP == 0) {
-                runCoralPulse();
-            }
-        } else if (m_currentAnimationType == AnimationTypes.AlgaePulse) {
-            if (frameCounter % FRAME_SKIP == 0) {
-                runAlgaePulse();
-            }
-        } else if (m_currentAnimation != null) {
+        // Use built-in animations rather than custom ones
+        if (m_currentAnimation != null) {
             m_candleRight.animate(m_currentAnimation);
             m_candleLeft.animate(m_currentAnimation);
         }
@@ -115,31 +103,18 @@ public class Bling extends SubsystemBase {
                 m_currentAnimation = new TwinkleOffAnimation(70, 90, 175, 0, 0.8, LedCount, TwinkleOffAnimation.TwinkleOffPercent.Percent100);
                 break;
             case CustomFire:
-                m_currentAnimation = null;
-                // Clear animations and LEDs
-                m_candleRight.clearAnimation(0);
-                m_candleLeft.clearAnimation(0);
-                m_candleRight.setLEDs(0, 0, 0, 0, 0, LedCount);
-                m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount);
-                
-                // Initialize heat values to zero for clean start
-                for (int i = 0; i < LedCount; i++) {
-                    heat[i] = 0;
-                    ledChanged[i] = true; // Mark all LEDs for initial update
-                }
+                // Switch to use built-in fire animation instead of custom
+                m_currentAnimation = new FireAnimation(1, 0.7, LedCount, 0.7, 0.2);
                 break;
+                
             case CoralPulse:
-                m_currentAnimation = null;
-                m_candleRight.clearAnimation(0);
-                m_candleLeft.clearAnimation(0);
-                pulseCounter = 0;
+                // Purple strobe for coral
+                m_currentAnimation = new StrobeAnimation(200, 0, 255, 0, 0.4, LedCount);
                 break;
                 
             case AlgaePulse:
-                m_currentAnimation = null;
-                m_candleRight.clearAnimation(0);
-                m_candleLeft.clearAnimation(0);
-                pulseCounter = 0;
+                // Green strobe for algae
+                m_currentAnimation = new StrobeAnimation(0, 255, 0, 0, 0.4, LedCount);
                 break;
             default:
                 m_currentAnimation = null;
@@ -147,6 +122,7 @@ public class Bling extends SubsystemBase {
         }
     }
 
+    // Keep all custom animation methods for potential future use
     private void runCustomFire() {
         try {
             // Store previous heat values to detect changes
@@ -228,13 +204,14 @@ public class Bling extends SubsystemBase {
             int g = 0;
             int b = (int)(255 * brightness);
             
-            // Update only a few LEDs each frame to reduce CAN utilization
-            final int batchSize = 10;
-            int startIndex = (frameCounter / FRAME_SKIP) % (LedCount / batchSize) * batchSize;
+            // Update all LEDs at once, but in batches to reduce CAN traffic
+            final int batchSize = 20;
+            final int totalBatches = (LedCount + batchSize - 1) / batchSize; // Ceiling division
+            int currentBatch = (frameCounter / FRAME_SKIP) % totalBatches;
+            int startIndex = currentBatch * batchSize;
+            int count = Math.min(batchSize, LedCount - startIndex);
             
-            // Only update if within bounds
             if (startIndex < LedCount) {
-                int count = Math.min(batchSize, LedCount - startIndex);
                 m_candleRight.setLEDs(r, g, b, 0, startIndex, count);
                 m_candleLeft.setLEDs(r, g, b, 0, startIndex, count);
             }
@@ -254,13 +231,14 @@ public class Bling extends SubsystemBase {
             int g = (int)(255 * brightness);
             int b = 0;
             
-            // Update only a few LEDs each frame to reduce CAN utilization
-            final int batchSize = 10;
-            int startIndex = (frameCounter / FRAME_SKIP) % (LedCount / batchSize) * batchSize;
+            // Update all LEDs at once, but in batches to reduce CAN traffic
+            final int batchSize = 20;
+            final int totalBatches = (LedCount + batchSize - 1) / batchSize; // Ceiling division
+            int currentBatch = (frameCounter / FRAME_SKIP) % totalBatches;
+            int startIndex = currentBatch * batchSize;
+            int count = Math.min(batchSize, LedCount - startIndex);
             
-            // Only update if within bounds
             if (startIndex < LedCount) {
-                int count = Math.min(batchSize, LedCount - startIndex);
                 m_candleRight.setLEDs(r, g, b, 0, startIndex, count);
                 m_candleLeft.setLEDs(r, g, b, 0, startIndex, count);
             }
