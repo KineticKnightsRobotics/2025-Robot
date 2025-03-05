@@ -107,38 +107,67 @@ public class Bling extends SubsystemBase {
     }
 
     private void runCustomFire() {
-        // Cool down every cell a little
-        for (int i = 0; i < LedCount; i++) {
-            int cooling = (COOLING * 10 / LedCount) + 2;
-            cooling = Math.max(1, cooling); // Ensure cooling is at least 1 to avoid nextInt(0)
-            heat[i] = Math.max(0, heat[i] - rand.nextInt(cooling));
-        }
-        
-        // Heat from each cell drifts up and diffuses
-        for (int i = LedCount - 1; i >= 2; i--) {
-            heat[i] = (heat[i - 1] + heat[i - 2] + heat[i]) / 3;
-        }
-        
-        // Randomly ignite new sparks near the bottom
-        if (rand.nextInt(255) < SPARKING) {
-            int sparkPos = rand.nextInt(Math.min(7, LedCount));
-            int sparkHeat = rand.nextInt(95) + 160;
-            heat[sparkPos] = Math.min(255, heat[sparkPos] + sparkHeat);
-        }
-        
-        // Map from heat to LED colors - display in reverse to simulate upward flame movement
-        for (int i = 0; i < LedCount; i++) {
-            int heatValue = MathUtil.clamp(heat[i], 0, 255);
-            // More realistic fire colors: red dominant, less green, minimal blue
-            int r = heatValue;
-            int g = (int)(heatValue * 0.3);
-            int b = (int)(heatValue * 0.1);
+        try {
+            // Cool down every cell a little
+            for (int i = 0; i < LedCount; i++) {
+                int cooling = (COOLING * 10 / LedCount) + 2;
+                cooling = Math.max(1, cooling); // Ensure cooling is at least 1 to avoid nextInt(0)
+                heat[i] = Math.max(0, heat[i] - rand.nextInt(cooling));
+            }
             
-            // Display the fire upside down (optional - more natural flame movement)
-            int displayPos = LedCount - 1 - i;
-            if (displayPos >= 0 && displayPos < LedCount) {
-                m_candleRight.setLEDs(r, g, b, 0, displayPos, 1);
-                m_candleLeft.setLEDs(r, g, b, 0, displayPos, 1);
+            // Heat from each cell drifts up and diffuses - with additional safeguards
+            for (int i = LedCount - 1; i >= 2; i--) {
+                // Ensure we're not doing integer division that rounds down to zero
+                int sum = heat[i - 1] + heat[i - 2] + heat[i];
+                heat[i] = sum / 3;
+            }
+            
+            // Randomly ignite new sparks near the bottom
+            if (rand.nextInt(255) < SPARKING) {
+                int maxSparkPosition = Math.max(1, Math.min(7, LedCount - 1));
+                int sparkPos = rand.nextInt(maxSparkPosition);
+                int sparkHeat = rand.nextInt(95) + 160;
+                heat[sparkPos] = Math.min(255, heat[sparkPos] + sparkHeat);
+            }
+            
+            // Batch our LED updates for efficiency
+            int[] rightLedColors = new int[LedCount * 4]; // RGBW values
+            int[] leftLedColors = new int[LedCount * 4];
+            
+            // Map from heat to LED colors
+            for (int i = 0; i < LedCount; i++) {
+                int heatValue = MathUtil.clamp(heat[i], 0, 255);
+                // More realistic fire colors: red dominant, less green, minimal blue
+                int r = heatValue;
+                int g = (int)(heatValue * 0.3);
+                int b = (int)(heatValue * 0.1);
+                
+                // Display the fire upside down (more natural flame movement)
+                int displayPos = LedCount - 1 - i;
+                if (displayPos >= 0 && displayPos < LedCount) {
+                    int index = displayPos * 4;
+                    rightLedColors[index] = r;
+                    rightLedColors[index + 1] = g;
+                    rightLedColors[index + 2] = b;
+                    rightLedColors[index + 3] = 0; // White component
+                    
+                    leftLedColors[index] = r;
+                    leftLedColors[index + 1] = g;
+                    leftLedColors[index + 2] = b;
+                    leftLedColors[index + 3] = 0;
+                }
+            }
+            
+            // Update all LEDs at once for each CANdle
+            m_candleRight.setLEDs(rightLedColors);
+            m_candleLeft.setLEDs(leftLedColors);
+            
+        } catch (Exception e) {
+            // Log the error and continue
+            System.err.println("Error in runCustomFire: " + e.getMessage());
+            // Reset heat array in case it's corrupted
+            for (int i = 0; i < LedCount; i++) {
+                heat[i] = 0;
             }
         }
     }
