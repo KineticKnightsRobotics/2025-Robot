@@ -33,7 +33,7 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
-    private final Bling candleSubsystem = new Bling();
+    // private final Bling candleSubsystem = new Bling(); <-- This line should be removed
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
@@ -270,8 +270,18 @@ public class RobotContainer {
         dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.AlgaePulse));
         
         // When we don't have either game piece, go back to fire animation
-        dignanHasCoral.negate().and(dignanHasAlgae.negate())
-            .onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CustomFire));
+        // Make these separate triggers for more reliable behavior
+        dignanHasCoral.negate().onTrue(Commands.runOnce(() -> {
+            if (!algaeSubsystem.hasAlgae()) {
+                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+            }
+        }));
+        
+        dignanHasAlgae.negate().onTrue(Commands.runOnce(() -> {
+            if (!coralSubsystem.hasCoral()) {
+                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+            }
+        }));
     }
 
     public void configureDefaultCommands() {
