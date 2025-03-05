@@ -95,6 +95,10 @@ public class Bling extends SubsystemBase {
                 break;
             case CustomFire:
                 m_currentAnimation = null;
+                // Initialize heat values to zero for clean start
+                for (int i = 0; i < LedCount; i++) {
+                    heat[i] = 0;
+                }
                 break;
             default:
                 m_currentAnimation = null;
@@ -103,21 +107,39 @@ public class Bling extends SubsystemBase {
     }
 
     private void runCustomFire() {
+        // Cool down every cell a little
         for (int i = 0; i < LedCount; i++) {
-            heat[i] = Math.max(0, heat[i] - rand.nextInt((COOLING * 10 / LedCount) + 2));
+            int cooling = (COOLING * 10 / LedCount) + 2;
+            cooling = Math.max(1, cooling); // Ensure cooling is at least 1 to avoid nextInt(0)
+            heat[i] = Math.max(0, heat[i] - rand.nextInt(cooling));
         }
+        
+        // Heat from each cell drifts up and diffuses
         for (int i = LedCount - 1; i >= 2; i--) {
-            heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2]) / 3;
+            heat[i] = (heat[i - 1] + heat[i - 2] + heat[i]) / 3;
         }
+        
+        // Randomly ignite new sparks near the bottom
         if (rand.nextInt(255) < SPARKING) {
-            heat[rand.nextInt(7)] = rand.nextInt(95) + 160;
+            int sparkPos = rand.nextInt(Math.min(7, LedCount));
+            int sparkHeat = rand.nextInt(95) + 160;
+            heat[sparkPos] = Math.min(255, heat[sparkPos] + sparkHeat);
         }
+        
+        // Map from heat to LED colors - display in reverse to simulate upward flame movement
         for (int i = 0; i < LedCount; i++) {
-            int g = Math.min(255, heat[i]);
-            int b = (int) Math.min(255, heat[i] * 0.5); // Adjust blue component for a cooler effect
-            m_candleRight.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
-            m_candleLeft.setLEDs(0, g, b, 0, i, 1); // Set green and blue values
-
+            int heatValue = MathUtil.clamp(heat[i], 0, 255);
+            // More realistic fire colors: red dominant, less green, minimal blue
+            int r = heatValue;
+            int g = (int)(heatValue * 0.3);
+            int b = (int)(heatValue * 0.1);
+            
+            // Display the fire upside down (optional - more natural flame movement)
+            int displayPos = LedCount - 1 - i;
+            if (displayPos >= 0 && displayPos < LedCount) {
+                m_candleRight.setLEDs(r, g, b, 0, displayPos, 1);
+                m_candleLeft.setLEDs(r, g, b, 0, displayPos, 1);
+            }
         }
     }
 
