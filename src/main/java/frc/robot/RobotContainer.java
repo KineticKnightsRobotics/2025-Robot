@@ -264,6 +264,14 @@ public class RobotContainer {
         test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        // Configure LED bindings based on game piece possession
+        dignanHasCoral.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse));
+        dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.AlgaePulse));
+        
+        // When we don't have either game piece, go back to fire animation
+        dignanHasCoral.negate().and(dignanHasAlgae.negate())
+            .onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CustomFire));
     }
 
     public void configureDefaultCommands() {
