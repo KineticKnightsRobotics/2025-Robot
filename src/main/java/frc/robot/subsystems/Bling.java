@@ -18,16 +18,23 @@ public class Bling extends SubsystemBase {
 
     public enum AnimationTypes {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe,
-        Twinkle, TwinkleOff, SetAll, CustomFire
+        Twinkle, TwinkleOff, SetAll, CustomFire, CoralPulse, AlgaePulse
     }
 
     private Animation m_currentAnimation;
     private AnimationTypes m_currentAnimationType;
 
-    private final int COOLING = 40;
-    private final int SPARKING = 150;
+    private final int COOLING = 55;  // Increased cooling for more dramatic valleys
+    private final int SPARKING = 180; // Increased sparking for more intense flames
     private final int[] heat;
     private final Random rand;
+
+    private int frameCounter = 0;
+    private final int FRAME_SKIP = 5;  // Only update every 5 frames
+    private boolean[] ledChanged;
+
+    private int pulseCounter = 0;
+    private final int PULSE_PERIOD = 50; // Controls the flash speed
 
     public Bling() {
         m_candleRight = new CANdle(1, "rio");
@@ -45,6 +52,7 @@ public class Bling extends SubsystemBase {
         m_candleLeft.configAllSettings(config, 100);
 
         heat = new int[LedCount];
+        ledChanged = new boolean[LedCount];
         rand = new Random();
 
         setAnimation(AnimationTypes.SingleFade);
@@ -52,12 +60,25 @@ public class Bling extends SubsystemBase {
 
     @Override
     public void periodic() {
+        frameCounter++;
+        pulseCounter++;
+        
         if (m_currentAnimationType == AnimationTypes.CustomFire) {
-            runCustomFire();
+            // Only run the fire animation every FRAME_SKIP frames to reduce CAN utilization
+            if (frameCounter % FRAME_SKIP == 0) {
+                runCustomFire();
+            }
+        } else if (m_currentAnimationType == AnimationTypes.CoralPulse) {
+            if (frameCounter % FRAME_SKIP == 0) {
+                runCoralPulse();
+            }
+        } else if (m_currentAnimationType == AnimationTypes.AlgaePulse) {
+            if (frameCounter % FRAME_SKIP == 0) {
+                runAlgaePulse();
+            }
         } else if (m_currentAnimation != null) {
             m_candleRight.animate(m_currentAnimation);
             m_candleLeft.animate(m_currentAnimation);
-
         }
 
         SmartDashboard.putString("B_Current LED Animation", m_currentAnimationType.name());
@@ -95,10 +116,30 @@ public class Bling extends SubsystemBase {
                 break;
             case CustomFire:
                 m_currentAnimation = null;
+                // Clear animations and LEDs
+                m_candleRight.clearAnimation(0);
+                m_candleLeft.clearAnimation(0);
+                m_candleRight.setLEDs(0, 0, 0, 0, 0, LedCount);
+                m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount);
+                
                 // Initialize heat values to zero for clean start
                 for (int i = 0; i < LedCount; i++) {
                     heat[i] = 0;
+                    ledChanged[i] = true; // Mark all LEDs for initial update
                 }
+                break;
+            case CoralPulse:
+                m_currentAnimation = null;
+                m_candleRight.clearAnimation(0);
+                m_candleLeft.clearAnimation(0);
+                pulseCounter = 0;
+                break;
+                
+            case AlgaePulse:
+                m_currentAnimation = null;
+                m_candleRight.clearAnimation(0);
+                m_candleLeft.clearAnimation(0);
+                pulseCounter = 0;
                 break;
             default:
                 m_currentAnimation = null;
@@ -108,6 +149,10 @@ public class Bling extends SubsystemBase {
 
     private void runCustomFire() {
         try {
+            // Store previous heat values to detect changes
+            int[] prevHeat = new int[LedCount];
+            System.arraycopy(heat, 0, prevHeat, 0, LedCount);
+            
             // Cool down every cell a little
             for (int i = 0; i < LedCount; i++) {
                 int cooling = (COOLING * 10 / LedCount) + 2;
@@ -129,28 +174,35 @@ public class Bling extends SubsystemBase {
                 heat[sparkPos] = Math.min(255, heat[sparkPos] + sparkHeat);
             }
             
-            // Go back to the simpler approach of setting blocks of LEDs
-            // This is more reliable than using the array method
-            
-            // Clear all LEDs first
-            m_candleRight.clearAnimation(0);
-            m_candleLeft.clearAnimation(0);
-            
-            // Set all LEDs at once based on heat values
+            // Mark which LEDs have changed enough to warrant an update
             for (int i = 0; i < LedCount; i++) {
-                int heatValue = MathUtil.clamp(heat[i], 0, 255);
-                int r = heatValue;
-                int g = (int)(heatValue * 0.3);
-                int b = (int)(heatValue * 0.1);
-                
-                // Display the fire upside down for natural flame movement
-                int displayPos = LedCount - 1 - i;
-                
-                // Update one LED at a time, which is reliable
-                if (displayPos >= 0 && displayPos < LedCount) {
-                    // Only display if within bounds
-                    m_candleRight.setLEDs(r, g, b, 0, displayPos, 1);
-                    m_candleLeft.setLEDs(r, g, b, 0, displayPos, 1);
+                // Only update if the value has changed by more than a threshold
+                ledChanged[i] = Math.abs(heat[i] - prevHeat[i]) > 5;
+            }
+            
+            // Update LEDs in small batches to reduce CAN utilization
+            final int MAX_LEDS_PER_FRAME = 20; // Limit updates per frame
+            int updatedCount = 0;
+            
+            for (int i = 0; i < LedCount && updatedCount < MAX_LEDS_PER_FRAME; i++) {
+                if (ledChanged[i]) {
+                    int heatValue = MathUtil.clamp(heat[i], 0, 255);
+                    
+                    // GREEN fire colors: green dominant, minimal red/blue
+                    // More dramatic scaling to increase contrast
+                    int r = (int)(heatValue * 0.2);  // Small red component
+                    int g = heatValue;               // Full green
+                    int b = (int)(heatValue * 0.1);  // Minimal blue
+                    
+                    // Display the fire right-side up (remove the inversion)
+                    int displayPos = i;  // Use the position directly without inverting
+                    
+                    // Only update if within bounds
+                    if (displayPos >= 0 && displayPos < LedCount) {
+                        m_candleRight.setLEDs(r, g, b, 0, displayPos, 1);
+                        m_candleLeft.setLEDs(r, g, b, 0, displayPos, 1);
+                        updatedCount++;
+                    }
                 }
             }
             
@@ -163,6 +215,58 @@ public class Bling extends SubsystemBase {
             for (int i = 0; i < LedCount; i++) {
                 heat[i] = 0;
             }
+        }
+    }
+
+    private void runCoralPulse() {
+        try {
+            // Create a pulsing effect between bright and dim purple
+            float brightness = (float)(Math.sin(pulseCounter * 0.1) * 0.5 + 0.5); // Oscillate between 0-1
+            
+            // Purple color with varying brightness
+            int r = (int)(200 * brightness);
+            int g = 0;
+            int b = (int)(255 * brightness);
+            
+            // Update only a few LEDs each frame to reduce CAN utilization
+            final int batchSize = 10;
+            int startIndex = (frameCounter / FRAME_SKIP) % (LedCount / batchSize) * batchSize;
+            
+            // Only update if within bounds
+            if (startIndex < LedCount) {
+                int count = Math.min(batchSize, LedCount - startIndex);
+                m_candleRight.setLEDs(r, g, b, 0, startIndex, count);
+                m_candleLeft.setLEDs(r, g, b, 0, startIndex, count);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error in runCoralPulse: " + e.getMessage());
+        }
+    }
+
+    private void runAlgaePulse() {
+        try {
+            // Create a pulsing effect between bright and dim green
+            float brightness = (float)(Math.sin(pulseCounter * 0.1) * 0.5 + 0.5); // Oscillate between 0-1
+            
+            // Bright green color with varying brightness
+            int r = 0;
+            int g = (int)(255 * brightness);
+            int b = 0;
+            
+            // Update only a few LEDs each frame to reduce CAN utilization
+            final int batchSize = 10;
+            int startIndex = (frameCounter / FRAME_SKIP) % (LedCount / batchSize) * batchSize;
+            
+            // Only update if within bounds
+            if (startIndex < LedCount) {
+                int count = Math.min(batchSize, LedCount - startIndex);
+                m_candleRight.setLEDs(r, g, b, 0, startIndex, count);
+                m_candleLeft.setLEDs(r, g, b, 0, startIndex, count);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error in runAlgaePulse: " + e.getMessage());
         }
     }
 

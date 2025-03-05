@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.AlgaeAffectorConstants;
@@ -33,7 +34,7 @@ import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
-    private final Bling candleSubsystem = new Bling();
+    // private final Bling candleSubsystem = new Bling(); <-- This line should be removed
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double AngularRate = Math.PI * 1.5;
@@ -268,6 +269,24 @@ public class RobotContainer {
         test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        // Configure LED bindings based on game piece possession
+        dignanHasCoral.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse));
+        dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.AlgaePulse));
+        
+        // When we don't have either game piece, go back to fire animation
+        // Make these separate triggers for more reliable behavior
+        dignanHasCoral.negate().onTrue(Commands.runOnce(() -> {
+            if (!algaeSubsystem.hasAlgae()) {
+                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+            }
+        }));
+        
+        dignanHasAlgae.negate().onTrue(Commands.runOnce(() -> {
+            if (!coralSubsystem.hasCoral()) {
+                CANdleLED.setAnimation(AnimationTypes.CustomFire);
+            }
+        }));
     }
 
     public void configureDefaultCommands() {
