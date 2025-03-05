@@ -5,6 +5,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
@@ -24,6 +26,23 @@ public class Vision {
 
     public Pose2d getEstimatedRoboPose() {
         return LimelightHelpers.getBotPose2d_wpiBlue(deviceName);
+    }
+
+    public Matrix<N3,N1> getDefaultSTD() {
+        return defaultSTD.singleTagStD;
+    }
+
+    public Pose2d getEstimatedMegaTagPose(Rotation2d robotHeading) {
+        return new Pose2d(getEstimatedRoboPoseMT2(robotHeading),getEstimatedRobotPoseMT1());
+    }
+
+    public Translation2d getEstimatedRoboPoseMT2(Rotation2d robotHeading) {
+        //return LimelightHelpers.getBotPose2d_wpiBlue(deviceName);
+        LimelightHelpers.SetRobotOrientation(deviceName, robotHeading.getDegrees(),0,0,0,0,0);
+        return LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(deviceName).pose.getTranslation();
+    }
+    public Rotation2d getEstimatedRobotPoseMT1() {
+        return LimelightHelpers.getBotPoseEstimate_wpiBlue(deviceName).pose.getRotation();
     }
 
     public Pose3d getRobotTagRelativePose() {

@@ -70,7 +70,7 @@ public class Elevator extends SubsystemBase {
 
         configureDevices();
 
-        goalPosition = ElevatorConstants.chassisHome+1;
+        goalPosition = ElevatorConstants.Positions.home;
         elevatorEncoder.setPosition(0.0);
     }
 
@@ -78,19 +78,19 @@ public class Elevator extends SubsystemBase {
         try {
             leadMotorConfig = new SparkMaxConfig();
             leadMotorConfig
-                .inverted(false)                                                                                            //Inverts the motor
-                .smartCurrentLimit(30)     
-                .idleMode(IdleMode.kCoast)                                                                               //Limits # of amps going to the motor
-                .closedLoopRampRate(0.001);
+                .inverted(false)          //Inverts the motor
+                .smartCurrentLimit(30)  //Limits # of amps going to the motor
+                .idleMode(IdleMode.kCoast)         //Sets idle mode to coast, when the motor is set to 0% output, then it can be freely spun by hand, gravity, etc
+                .closedLoopRampRate(0.001);   //Ammount of time in seconds that the motor will take to accellerate from 0% output to 100% output.
             leadMotorConfig
                 .encoder
-                .positionConversionFactor(1.0/*ElevatorConstants.gearCircumference * ElevatorConstants.gearRatio / 2*/);
+                    .positionConversionFactor(1.0);
 
             digElevatorMotor.configure(leadMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
             nanMotorConfig = new SparkMaxConfig();
             nanMotorConfig
-                .inverted(true)
+                .inverted(true)         
                 .smartCurrentLimit(30)
                 .idleMode(IdleMode.kCoast)
                 .closedLoopRampRate(0.001);
@@ -98,10 +98,7 @@ public class Elevator extends SubsystemBase {
             nanMotorConfig
                 .encoder
                     .positionConversionFactor(1.0);
-            //nanMotorConfig
-            //    .softLimit
-            //        .reverseSoftLimit(ElevatorConstants.maxChassisHeight-1)
-            //        .forwardSoftLimit(ElevatorConstants.maxChassisHeight+1);
+
 
             nanElevatorMotor.configure(nanMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -109,8 +106,7 @@ public class Elevator extends SubsystemBase {
             elevatorEncoder.getConfigurator().apply(
                 elevatorEncoderConfig.MagnetSensor
                     .withAbsoluteSensorDiscontinuityPoint(1)
-                    .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
-                    //.withMagnetOffset(0.0)
+                    .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
                 );
 
 
@@ -136,8 +132,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public double getElevatorPosition() {
-        //return digEncoder.getPosition();
-        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.chassisHome;
+        return ((elevatorEncoder.getPosition().getValueAsDouble()-ElevatorConstants.encoderOffset) * ElevatorConstants.gearCircumference) + ElevatorConstants.minChassisHeight;
     }
     
     public double getElevatorGoal(){
@@ -153,19 +148,27 @@ public class Elevator extends SubsystemBase {
         digElevatorMotor.setVoltage(sysIDVoltage);
     }
 
+    /**
+     * Sets the goal position that the elevator will go to the next time moveElevator() is called
+     * @param position Elevation in inches from the top of the bottom elevator bar to the bottom of the elevator chassis.
+     */
     public Command setElevatorGoal(double position) {
         return Commands
         .runOnce(
             () -> {
-                goalPosition = MathUtil.clamp(position, ElevatorConstants.chassisHome+0.1, ElevatorConstants.maxChassisHeight-0.1);
-                //elevatorController.setGoal(position);   
+                //Clamp new incoming position incase it is ever out of the physical bounds of the elevator.
+                goalPosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.1, ElevatorConstants.maxChassisHeight-0.1);
             },
             this
         ).unless(
-           () ->(position > ElevatorConstants.maxChassisHeight)
+           () ->(false/*position > ElevatorConstants.maxChassisHeight*/)
         );
     }
     
+    /**
+     * Moves the elvator upwards towards the setpoint using closed loop position control.
+     * @return command that does the above
+     */
     public Command moveElevator() {
         return Commands
         .runOnce(
@@ -178,61 +181,65 @@ public class Elevator extends SubsystemBase {
                 () -> {
                     //double newOutput = elevatorController.calculate(getElevatorPosition());
                     if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
-                        SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
+                        //SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
 
+                        //Calculate next output using current elevator position
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
 
+                        //If the elevator is approaching the top or bottom, limit the output.
                         if (getElevatorPosition() < 3 || getElevatorPosition() > 50) {
                             output = MathUtil.clamp(output, -0.2, 0.2);
                         }
 
-                        SmartDashboard.putNumber("Elevator output", output);
-
+                        //put the output to smart dashboard for debugging purposes.
+                        SmartDashboard.putNumber("E_PID Output", output);
+                        //set motor outputs
                         digElevatorMotor.set(output);
                         nanElevatorMotor.set(output);
                     }
                     else {
+                        //stop motors if elevator position surpases the soft limit.
                         digElevatorMotor.set(0.0);
                         nanElevatorMotor.set(0.0);
                     }
                 },
                 this
                 )
+                //Command will interrupt if another command using this subsystem is scheduled, ie: homeElevator()
                 .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
     }
 
+    /**
+     * Moves the elevator downwards towards its home position gently using output-limited closed loop position control
+     * @return command that does the above.
+     */
     public Command homeElevator() {
         return Commands
         .runOnce(
             () -> {
-                digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
+                //digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
             },
             this
         ).andThen(
             Commands.run(
                 () -> {
-                    //double newOutput = elevatorController.calculate(getElevatorPosition());
-                    if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
-                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.home),-1.0,1.0);
+                        //Slow elevator on the way down to avoid slamming into bottom of the elevator shaft.
+                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.home),-0.60,0.20);
 
-                        if (getElevatorPosition() < 3 || getElevatorPosition() > 50) {
+                        //Slow elevator even more once it gets below 5" of extension to gently place it down
+                        if (getElevatorPosition() < 5) {
                             output = MathUtil.clamp(output, -0.2, 0.2);
                         }
 
-                        //SmartDashboard.putNumber("Elevator output", output);
+                        SmartDashboard.putNumber("E_PID Output", output);
 
                         digElevatorMotor.set(output);
                         nanElevatorMotor.set(output);
-                    }
-                    else {
-                        digElevatorMotor.set(0.0);
-                        nanElevatorMotor.set(0.0);
-                    }
                 },
                 this
                 )
-                .until(() -> elevatorAtGoal())
+                //will interrupt if another command using this subsystem is scheduled, ie: moveElevator()
                 .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
     }

@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.math.MathUtil;
 import java.util.Random;
 
 public class Bling extends SubsystemBase {
@@ -126,6 +125,6 @@ public class Bling extends SubsystemBase {
     }
 
     public Command turnOffLEDs() {
-        return Commands.runOnce(() -> m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount)).andThen(()->m_candleRight.setLEDs(0,0,0,0,0,LedCount));
+        return Commands.runOnce(() -> m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount)).andThen(()-> m_candleRight.setLEDs(0,0,0,0,0,LedCount));
     }
 }

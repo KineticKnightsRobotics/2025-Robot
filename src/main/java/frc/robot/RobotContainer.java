@@ -9,6 +9,7 @@ import frc.robot.subsystems.Bling.AnimationTypes;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -17,10 +18,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.AlgaeAffectorConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.teleopCommands;
 //import frc.robot.commands.*;
@@ -42,8 +46,9 @@ public class RobotContainer {
 
     public Joystick driverController = new Joystick(0);
     public Joystick opPanel = new Joystick(1);
+    public Joystick testPanel = new Joystick(2);
 
-    private final Telemetry logger = new Telemetry(MaxSpeed);
+    //private final Telemetry logger = new Telemetry(MaxSpeed);
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
     public final coralAffector coralSubsystem = new coralAffector();
@@ -53,6 +58,8 @@ public class RobotContainer {
 
     public final teleopCommands teleopCommand = new teleopCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
 
+    public SendableChooser<Command> autoSelector;
+
     // Driver Controller //
     public final Trigger driverA = new Trigger(() -> driverController.getRawButton(1));
     public final Trigger driverB = new Trigger(() -> driverController.getRawButton(2));
@@ -60,10 +67,10 @@ public class RobotContainer {
     public final Trigger driverY = new Trigger(() -> driverController.getRawButton(4));
     public final Trigger driverStart = new Trigger(() -> driverController.getRawButton(8));
 
-    public final Trigger rightTrigger = new Trigger(() -> driverController.getRawAxis(3) > 0.5);
-    public final Trigger leftTrigger = new Trigger(() -> driverController.getRawAxis(2) > 0.5);
-    public final Trigger rightBumper = new Trigger(() -> driverController.getRawButton(6));
-    public final Trigger leftBumper = new Trigger(() -> driverController.getRawButton(5));
+    public final Trigger driverRT = new Trigger(() -> driverController.getRawAxis(3) > 0.5);
+    public final Trigger driverLT = new Trigger(() -> driverController.getRawAxis(2) > 0.5);
+    public final Trigger driverRB = new Trigger(() -> driverController.getRawButton(6));
+    public final Trigger driverLB = new Trigger(() -> driverController.getRawButton(5));
    
     // Operator Panel //
     public final Trigger op1 = new Trigger(() -> opPanel.getRawButton(1));
@@ -75,35 +82,53 @@ public class RobotContainer {
     public final Trigger op7 = new Trigger(() -> opPanel.getRawButton(7));
     public final Trigger op8 = new Trigger(() -> opPanel.getRawButton(8));
     public final Trigger op9 = new Trigger(() -> opPanel.getRawButton(9));
-    public final Trigger op10 = new Trigger(() -> opPanel.getRawButton(10));
-    public final Trigger op11 = new Trigger(() -> opPanel.getRawButton(11));
-    public final Trigger op12 = new Trigger(() -> opPanel.getRawButton(12));
-    public final Trigger op13 = new Trigger(() -> opPanel.getRawButton(13));
-    public final Trigger op14 = new Trigger(() -> opPanel.getRawButton(14));
-    public final Trigger op15 = new Trigger(() -> opPanel.getRawButton(15));
-    public final Trigger op16 = new Trigger(() -> opPanel.getRawButton(16));
-    public final Trigger op17 = new Trigger(() -> opPanel.getRawButton(17));
-    public final Trigger op18 = new Trigger(() -> opPanel.getRawButton(18));
-    public final Trigger op19 = new Trigger(() -> opPanel.getRawButton(19));
-    public final Trigger op20 = new Trigger(() -> opPanel.getRawButton(20));
-    public final Trigger op21 = new Trigger(() -> opPanel.getRawButton(21));
-    public final Trigger op22 = new Trigger(() -> opPanel.getRawButton(22));
-    public final Trigger op23 = new Trigger(() -> opPanel.getRawButton(23));
-    public final Trigger op24 = new Trigger(() -> opPanel.getRawButton(24));
+    public final Trigger op10 = new Trigger(() ->opPanel.getRawButton(10));
+    public final Trigger op11 = new Trigger(() ->opPanel.getRawButton(11));
+    public final Trigger op12 = new Trigger(() ->opPanel.getRawButton(12));
+    public final Trigger op13 = new Trigger(() ->opPanel.getRawButton(13));
+    public final Trigger op14 = new Trigger(() ->opPanel.getRawButton(14));
+    public final Trigger op15 = new Trigger(() ->opPanel.getRawButton(15));
+    public final Trigger op16 = new Trigger(() ->opPanel.getRawButton(16));
+    public final Trigger op17 = new Trigger(() ->opPanel.getRawButton(17));
+    public final Trigger op18 = new Trigger(() ->opPanel.getRawButton(18));
+    public final Trigger op19 = new Trigger(() ->opPanel.getRawButton(19));
+    public final Trigger op20 = new Trigger(() ->opPanel.getRawButton(20));
+    public final Trigger op21 = new Trigger(() ->opPanel.getRawButton(21));
+    public final Trigger op22 = new Trigger(() ->opPanel.getRawButton(22));
+    public final Trigger op23 = new Trigger(() ->opPanel.getRawButton(23));
+    public final Trigger op24 = new Trigger(() ->opPanel.getRawButton(24));
+
+    // Test panel // 
+    public final Trigger test1 = new Trigger(() -> testPanel.getRawButton(1));
+    public final Trigger test2 = new Trigger(() -> testPanel.getRawButton(2));
+    public final Trigger test3 = new Trigger(() -> testPanel.getRawButton(3));
+    public final Trigger test4 = new Trigger(() -> testPanel.getRawButton(4));
+    public final Trigger test5 = new Trigger(() -> testPanel.getRawButton(5));
+    public final Trigger test6 = new Trigger(() -> testPanel.getRawButton(6));
+    public final Trigger test7 = new Trigger(() -> testPanel.getRawButton(7));
+    public final Trigger test8 = new Trigger(() -> testPanel.getRawButton(8));
+    public final Trigger test9 = new Trigger(() -> testPanel.getRawButton(9));
+    public final Trigger test10 = new Trigger(() ->testPanel.getRawButton(10));
 
     
     
     
     
     public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
-    public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.coralLoaded());
+    public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.hasCoral());
     public final Trigger dignanHasAlgae = new Trigger(() -> algaeSubsystem.hasAlgae());
+
+
+    public final Trigger ejectCoral = driverRB.and(dignanHasCoral);
+    public final Trigger ejectAlgae = driverRB.and(dignanHasAlgae);
 
 
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
         configureNamedCommands();
+        autoSelector = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Selector",autoSelector);
     }
 
     public void configureBindings() {
@@ -118,22 +143,33 @@ public class RobotContainer {
         driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                teleopCommand.searchForPeg(0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
+                teleopCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
             );
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                teleopCommand.searchForPeg(           -0.2,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
+                teleopCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
             );
 
-        leftBumper
+        driverLB
             .whileTrue(
                 elevatorSubsystem.moveElevator()
             )
             .onFalse(
                 elevatorSubsystem.homeElevator()
             );
+        
+        ejectCoral
+            .whileTrue(
+                coralSubsystem.spitCoral()
+            );
 
+        ejectAlgae
+            .whileTrue(
+                algaeSubsystem.spitAlgae()
+            );
+
+        /*
         rightBumper
             .and(dignanHasAlgae)
                 .whileTrue(
@@ -143,20 +179,21 @@ public class RobotContainer {
                 .whileTrue(
                     coralSubsystem.spitCoral()
                 );
+        */
 
         driverA
             .whileTrue(
                 teleopCommand.goToSource(driveSubsystem.getState().Pose)
             );
 
-        rightTrigger
+        driverLT
             .whileTrue(
                 algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.groundIntake).andThen(
                     algaeSubsystem.captureAlgae()
                 )
             );
 
-        leftTrigger
+        driverRT
             .whileTrue(
                 coralSubsystem.loadCoral()
             );
@@ -168,8 +205,6 @@ public class RobotContainer {
             .onFalse(
                 elevatorSubsystem.homeElevator()
             );
-        
-
         
 
         /*
@@ -215,28 +250,20 @@ public class RobotContainer {
             );
         op9
             .whileTrue(
-                climberSubsystem.setWinchSpeed(0.1)
+                climberSubsystem.setWinchSpeed(0.2)
             );
         op4
             .whileTrue(
-                climberSubsystem.setWinchSpeed(-0.5)
+                climberSubsystem.setWinchSpeed(-0.2)
             );
-
-
-
-
-
-
-
-
 
         /*
          * PROGRAMMER CONTROLS
          */
-        driverStart.and(op13.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward)));
-        driverStart.and(op14.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse)));
-        driverStart.and(op11.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward)));
-        driverStart.and(op12.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)));
+        test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     }
 
     public void configureDefaultCommands() {
@@ -249,8 +276,8 @@ public class RobotContainer {
                 )
         );
 
-        //elevatorSubsystem.setDefaultCommand(
-        //    elevatorSubsystem.moveElevator()
+        ///elevatorSubsystem.setDefaultCommand(
+            //elevatorSubsystem.homeElevator()
         //);
         //CANdleLED.setDefaultCommand(
         //    CANdleLED.CANdleBlue()
@@ -263,10 +290,13 @@ public class RobotContainer {
     public void configureNamedCommands() {
         NamedCommands.registerCommand("AquireCoral", coralSubsystem.loadCoral());
         NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
+        NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
+        NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
+
     }
 
     public Command getAutonomousCommand() {
-        return new PathPlannerAuto("4 note right new");
+        return autoSelector.getSelected();
     }
 } 
 

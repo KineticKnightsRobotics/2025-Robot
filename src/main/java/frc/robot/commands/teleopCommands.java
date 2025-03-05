@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.AlgaeAffectorConstants;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
@@ -39,6 +41,7 @@ public class teleopCommands extends Command{
         algaeSub = algae;
     }
     
+    /*
     public Command scoreCoralAuto(double height) {
         return
             new SequentialCommandGroup(
@@ -49,9 +52,42 @@ public class teleopCommands extends Command{
                     elevSub.moveElevator(),
                     coralSub.spitCoral().withTimeout(1)
                 ),
-                elevSub.setElevatorGoal(ElevatorConstants.Positions.home),
-                elevSub.moveElevator()
-                    .until(() -> elevSub.elevatorAtGoal())
+                elevSub.homeElevator()
+            );
+    }
+    */
+    public Command scoreCoralAuto(double height) {
+        return
+            new SequentialCommandGroup(
+                //Set elev height
+                elevSub.setElevatorGoal(height),
+                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
+                elevSub.moveElevator().until(()-> elevSub.elevatorAtGoal()),
+                //Continue moving elevator until coral has been spat out.
+                new ParallelDeadlineGroup(
+                    coralSub.spitCoral().withTimeout(1),
+                    elevSub.moveElevator()
+                ),
+                //Send the elevator back to home
+                elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10)
+            );
+    }
+
+    public Command scoreCoralAutoProx(double height, SwerveRequest.RobotCentric speedRequest) {
+        return
+            new SequentialCommandGroup(
+                //Set elev height
+                elevSub.setElevatorGoal(height),
+                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
+                elevSub.moveElevator().until(()-> elevSub.elevatorAtGoal()),
+                searchForPeg(DriveConstants.searchingSpeed,0.05,0.0,speedRequest,false),
+                //Continue moving elevator until coral has been spat out.
+                new ParallelDeadlineGroup(
+                    coralSub.spitCoral().withTimeout(1),
+                    elevSub.moveElevator()
+                ),
+                //Send the elevator back to home
+                elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10)
             );
     }
 
@@ -88,57 +124,68 @@ public class teleopCommands extends Command{
         }
     }
 
-    public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
+    public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest, boolean flippingLogic){
 
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() <270) {
-                return
+        if (flippingLogic) {
+            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() < -90) {
+                    return
 
-                // On red alliance facing red alliance -> Invert controls
-                driveSub.applyRequest(
-                    () -> speedRequest
-                        .withVelocityX(-searchSpeed)
-                        .withVelocityY(-ySpeed*0.2)
-                        .withRotationalRate(-rSpeed*0.2)
-                    )
-                    .until(()-> coralSub.allignedWithPeg());
+                    // On red alliance facing red alliance -> Invert controls
+                    driveSub.applyRequest(
+                        () -> speedRequest
+                            .withVelocityY(-searchSpeed)
+                            .withVelocityX(-ySpeed*0.2)
+                            .withRotationalRate(-rSpeed*0.2)
+                        )
+                        .until(()-> coralSub.allignedWithPeg());
+                }
+                else {
+                    return    
+                    // on red alliance facing blue alliance -> don't invert controls             
+                    driveSub.applyRequest(
+                        () -> speedRequest
+                            .withVelocityY(searchSpeed)
+                            .withVelocityX(ySpeed*0.2)
+                            .withRotationalRate(rSpeed*0.2)
+                        )
+                        .until(()-> coralSub.allignedWithPeg());
+                }
             }
             else {
-                return    
-                // on red alliance facing blue alliance -> don't invert controls             
-                driveSub.applyRequest(
-                    () -> speedRequest
-                        .withVelocityX(searchSpeed)
-                        .withVelocityY(ySpeed*0.2)
-                        .withRotationalRate(rSpeed*0.2)
-                    )
-                    .until(()-> coralSub.allignedWithPeg());
+                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 || driveSub.getState().Pose.getRotation().getDegrees() < -90) {
+                    return
+                    //On blue alliance facing red alliance -> don't invert controls
+                    driveSub.applyRequest(
+                        () -> speedRequest
+                            .withVelocityY(searchSpeed)
+                            .withVelocityX(ySpeed*0.2)
+                            .withRotationalRate(rSpeed*0.2)
+                        )
+                        .until(()-> coralSub.allignedWithPeg());
+                }
+                else {
+                    return
+                    //on blue alliance facing blue alliance -> invert controls
+                    driveSub.applyRequest(
+                        () -> speedRequest
+                            .withVelocityY(-searchSpeed)
+                            .withVelocityX(-ySpeed*0.2)
+                            .withRotationalRate(-rSpeed*0.2)
+                        )
+                        .until(()-> coralSub.allignedWithPeg());
+
+                }
             }
         }
         else {
-            if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() <270) {
-                return
-                //On blue alliance facing red alliance -> don't invert controls
+            return
                 driveSub.applyRequest(
                     () -> speedRequest
                         .withVelocityX(searchSpeed)
-                        .withVelocityY(ySpeed*0.2)
+                        .withVelocityY(ySpeed)
                         .withRotationalRate(rSpeed*0.2)
-                    )
-                    .until(()-> coralSub.allignedWithPeg());
-            }
-            else {
-                return
-                //on blue alliance facing blue alliance -> invert controls
-                driveSub.applyRequest(
-                    () -> speedRequest
-                        .withVelocityX(-searchSpeed)
-                        .withVelocityY(-ySpeed*0.2)
-                        .withRotationalRate(-rSpeed*0.2)
-                    )
-                    .until(()-> coralSub.allignedWithPeg());
-
-            }
+                ).until(()-> coralSub.allignedWithPeg());
         }
 
 

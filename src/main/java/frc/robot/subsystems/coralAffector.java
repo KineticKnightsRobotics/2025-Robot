@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.CoralAffectorConstants;
@@ -48,39 +49,65 @@ public class coralAffector extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("C_Dignan Coral", hasCoral());
-        SmartDashboard.putBoolean("Coral Upper Beambreak", !beamUpper.get());
-        SmartDashboard.putBoolean("Coral Lower Beambreak", !beamLower.get());
+        SmartDashboard.putBoolean("C_Coral Upper Beambreak", !beamUpper.get());
+        SmartDashboard.putBoolean("C_Coral Lower Beambreak", !beamLower.get());
         SmartDashboard.putBoolean("C_AllignedWithPeg", allignedWithPeg());
         SmartDashboard.putData(this);
     }
 
-    public boolean hasCoral() {
-        return !beamLower.get() || !beamUpper.get();
+    /**
+     * @return True when beam is OBSTRUCTED
+     */
+    public boolean entranceBeambreak() {
+        return !beamUpper.get();
+    }
+    /**
+     * @return True when beam is OBSTRUCTED
+     */
+    public boolean exitBeambreak() {
+        return !beamLower.get();
     }
 
-    public boolean coralLoaded() {
-        return !beamLower.get() && beamUpper.get();
+    /**
+     * @return True when EITHER beambreak is obstructed
+     */
+    public boolean hasCoral() {
+        return entranceBeambreak() || exitBeambreak();
     }
     
     public boolean allignedWithPeg() {
         return proxSensor.get();
     }
 
+
+    public Command loadCoral() {
+        return new SequentialCommandGroup(
+            Commands.run(
+                () -> {rollerMotor.set(0.2);},
+                this
+            ).until(() -> (!entranceBeambreak() && exitBeambreak())
+        ).andThen(
+            Commands.run(
+            () -> {rollerMotor.set(-0.2);},
+            this).until(()->entranceBeambreak())
+        )
+        ).finallyDo(
+            () -> {rollerMotor.set(0.0);}
+        );
+    }
+
+    /*
     // Load a game piece into the robot
     public Command loadCoral() {
-        // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> rollerMotor.set(0.3),
+            () -> rollerMotor.set(0.2),
             this
-        // End condition of linebreak true (piece is in)
-        ).until(
-            () -> coralLoaded()
-
-        // Once the command is to be finished, stop the affector motor
+        ).until(() -> (!entranceBeambreak() && exitBeambreak())
         ).finallyDo(
             () -> rollerMotor.set(0.0)
         );
     }
+    */
 
     // Spit out the game piece
     public Command spitCoral() {

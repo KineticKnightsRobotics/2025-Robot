@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -33,6 +35,9 @@ public class Climber extends SubsystemBase {
         nanMotor = new SparkMax(ClimberConstants.nanMotorID, MotorType.kBrushless);
         nanMotorConfig = new SparkMaxConfig();
         nanEncoder = nanMotor.getEncoder();
+        winchMotor = new SparkMax(ClimberConstants.winchID, MotorType.kBrushless);
+        winchConfig = new SparkMaxConfig();
+        configureDevices();
     }
 
     public void configureDevices() {
@@ -40,16 +45,19 @@ public class Climber extends SubsystemBase {
             .smartCurrentLimit(40)
             .inverted(true)
             .idleMode(IdleMode.kBrake);
+        digMotor.configure(digMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         
         nanMotorConfig
             .smartCurrentLimit(40)
-            .inverted(true)
+            .inverted(false)
             .idleMode(IdleMode.kBrake);
+        nanMotor.configure(digMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         winchConfig
             .smartCurrentLimit(10)
             .inverted(false)
             .idleMode(IdleMode.kBrake);
+        winchMotor.configure(winchConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
@@ -78,11 +86,15 @@ public class Climber extends SubsystemBase {
 
     public Command setWinchSpeed(double speed) {
         return Commands
-            .runOnce(
+            .run(
                 () -> {
                     winchMotor.set(speed);;
                 },
                 this
+            ).finallyDo(
+                () -> {
+                    winchMotor.set(0.0);
+                }
             );
     }
 }

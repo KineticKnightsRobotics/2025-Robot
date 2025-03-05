@@ -36,33 +36,40 @@ public class Constants {
         public Translation2d headsetRobotPose = new Translation2d(0,37);
     }
 
+    public final static class DriveConstants {
+        public static double searchingSpeed = 0.25;
+    }
+
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.05;
+            public static double P = 0.1;
             public static double I = 0;
-            public static double D = 1.5;
+            public static double D = 0.0;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
 
         public static double maxChassisHeight = 56.5;       //inches
+        public static double minChassisHeight = 1.25;       //inches
         public static double gearCircumference = 5.50093*2; //inches
-        public static double chassisHome = 1.25; //inches
+
 
         public static double gearRatio = 1/9;
         public static int encoderID = 20;
-        public static double encoderOffset = 0.0;//0.151209;
+        public static double encoderOffset = 0.0;
         public static int digMotorID = 21;
         public static int nanMotorID = 22;
 
+        public static double tippingPoint = 10; //Height at which the robot begins to tip when driving
+
         public static class Positions {
-            public static double home = chassisHome+1;
+            public static double home = minChassisHeight+1;
             public static double L1 = 10;
-            public static double L2 = 30;
-            public static double L3 = 40;
-            public static double L4 = 50;
-            public static double deAlgifyL2 = 0.0;
-            public static double deAlgifyL3 = 0.0;
+            public static double L2 = 18;
+            public static double L3 = 34;
+            public static double L4 = 57;
+            public static double deAlgifyL2 = 8.5;
+            public static double deAlgifyL3 = 25;
         }
     }
 
@@ -83,24 +90,23 @@ public class Constants {
         public static double algaePivotGearRatio = 1/5;
 
         public static class PivotPositions {
-            public static double groundIntake = 0.0;
-            public static double deAlgifying = 0.0;
-            public static double home = 0.0;
+            public static double groundIntake = 13.5;
+            public static double deAlgifying = 65.0;
+            public static double carrying = 49;
+            public static double home = 110.0;
         }
     }
 
     public final class CoralAffectorConstants {
         public static int coralRollerID = 43;
-        public static int beamUpper = 8;
-        public static int beamLower = 9;
+        public static int beamUpper = 9;
+        public static int beamLower = 8;
         public static int proxSensor = 6;
     }
 
     public final class ClimberConstants {
         public static int digMotorID = 51;
         public static int nanMotorID = 52;
-        public static int servoID = 53;
-        public static double servoOpen = 0.0;
-        public static double servoClosed = 0.0;
+        public static int winchID = 53;
     }
 }

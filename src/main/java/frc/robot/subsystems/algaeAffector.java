@@ -48,6 +48,10 @@ public class algaeAffector extends SubsystemBase {
         // Apply motor/encoder configs
         configureDevices();
         pivotEncoder = pivotMotor.getAbsoluteEncoder();
+        pivotController = pivotMotor.getClosedLoopController();
+
+        pivotController.setReference(AlgaeAffectorConstants.PivotPositions.home, ControlType.kPosition);
+        
     }
 
     // Set current limits, config motors and encoders
@@ -62,13 +66,16 @@ public class algaeAffector extends SubsystemBase {
                     .idleMode(IdleMode.kBrake);
             pivotMotorConfig.absoluteEncoder
                 .zeroOffset(AlgaeAffectorConstants.encoderOffset)
-                .positionConversionFactor(360);
+                .positionConversionFactor(360)
+                ;
             pivotMotorConfig
                 .closedLoop
                     .p(AlgaeAffectorConstants.PivotPID.P)
                     .i(AlgaeAffectorConstants.PivotPID.I)
                     .d(AlgaeAffectorConstants.PivotPID.D)
-                    .feedbackSensor(FeedbackSensor.kAbsoluteEncoder);
+                    .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                    .positionWrappingEnabled(true)
+                    .positionWrappingInputRange(0.0, 360);
             pivotMotor.configure(pivotMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
 
@@ -77,7 +84,7 @@ public class algaeAffector extends SubsystemBase {
             rollerMotorConfig
                 .inverted(false)
                 .smartCurrentLimit(30)
-                .closedLoopRampRate(1)
+                .closedLoopRampRate(0.0001)
                 .idleMode(IdleMode.kBrake);
             rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -131,19 +138,20 @@ public class algaeAffector extends SubsystemBase {
             .runOnce(
                 () -> {
                     pivotController.setReference(primedPosition, ControlType.kPosition);
-                    rollerMotor.set(0.0);
+                    rollerMotor.set(-0.05);
                 },
                 this
             ).andThen(
+                Commands.run(
                 () -> {
                     rollerMotor.set(-0.5);
                 },
-                this
+                this)
             ).until(() -> hasAlgae())
             .finallyDo(
                 () -> {
-                    pivotController.setReference(AlgaeAffectorConstants.PivotPositions.home, ControlType.kPosition);
-                    rollerMotor.set(0.0);
+                    pivotController.setReference(AlgaeAffectorConstants.PivotPositions.carrying, ControlType.kPosition);
+                    rollerMotor.set(-0.1);
                 }
             );
     } 
@@ -157,7 +165,7 @@ public class algaeAffector extends SubsystemBase {
                 this
             ).andThen(
                 () -> {
-                    rollerMotor.set(0.5);
+                    rollerMotor.set(0.8);
                 }
             ).until(() -> !hasAlgae())
             .finallyDo(

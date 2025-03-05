@@ -217,8 +217,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         if (kLimelightDig.getTV()) {
             addVisionMeasurement(
                 kLimelightDig.getEstimatedRoboPose(),
+                //kLimelightDig.getEstimatedMegaTagPose(this.getState().Pose.getRotation()),
                 Utils.fpgaToCurrentTime(kLimelightDig.getTimestamp()),
                 kLimelightDig.getStandardDeviations()
+                //kLimelightDig.getDefaultSTD()
             );
         }
 
@@ -226,8 +228,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         if (kLimelightNan.getTV()) {
             addVisionMeasurement(
                 kLimelightNan.getEstimatedRoboPose(),
+                //kLimelightNan.getEstimatedMegaTagPose(this.getState().Pose.getRotation()),
                 Utils.fpgaToCurrentTime(kLimelightNan.getTimestamp()),
                 kLimelightNan.getStandardDeviations()
+                //kLimelightNan.getDefaultSTD()
             );
         }
 
