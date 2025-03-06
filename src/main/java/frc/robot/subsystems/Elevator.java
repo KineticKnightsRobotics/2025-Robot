@@ -244,6 +244,41 @@ public class Elevator extends SubsystemBase {
         );
     }
 
+        /**
+     * Moves the elevator downwards towards its home position gently using output-limited closed loop position control
+     * @return command that does the above.
+     */
+    public Command intakeElevator() {
+        return Commands
+        .runOnce(
+            () -> {
+                //digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
+            },
+            this
+        ).andThen(
+            Commands.run(
+                () -> {
+                        //Slow elevator on the way down to avoid slamming into bottom of the elevator shaft.
+                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.intake),-0.60,0.20);
+
+                        //Slow elevator even more once it gets below 5" of extension to gently place it down
+                        if (getElevatorPosition() < 5) {
+                            output = MathUtil.clamp(output, -0.2, 0.2);
+                        }
+
+                        SmartDashboard.putNumber("E_PID Output", output);
+
+                        digElevatorMotor.set(output);
+                        nanElevatorMotor.set(output);
+                },
+                this
+                )
+                //will interrupt if another command using this subsystem is scheduled, ie: moveElevator()
+                .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+        );
+    }
+
+
     public Command setElevatorSpeed(double speed) {
         return Commands.run(
             () -> {

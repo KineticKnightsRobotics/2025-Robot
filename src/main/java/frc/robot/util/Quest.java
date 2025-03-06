@@ -47,7 +47,7 @@ public class Quest {
   private Pose2d resetPoseRobot = new Pose2d();
 
   // Position of the quest on the robot (13.5" forward, centered side-to-side, pointed forward))
-  private final Transform2d robotToQuest = new Transform2d(0.0762, -0.2939, new Rotation2d(Math.PI));
+  private final Transform2d robotToQuest = new Transform2d(-0.0762, 0.2939, new Rotation2d(3*Math.PI/4));
 
   /* Constructor */
   public Quest() {
@@ -124,7 +124,7 @@ public class Quest {
    * @param newPose new robot pose
    */
   public void resetPose(Pose2d newPose) {
-    resetPoseOculus = getUncorrectedOculusPose().transformBy(robotToQuest.inverse());
+    resetPoseOculus = getUncorrectedOculusPose();
     resetPoseRobot = newPose;
   }
 

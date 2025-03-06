@@ -58,14 +58,16 @@ public class Vision {
         //SmartDashboard.putNumber("Vision avgDist", avgDist);
         SmartDashboard.putNumber(deviceName + " tagCount", tagCount);
 
-
-        if (tagCount == 1 && avgDist > 4) {
+        
+        if (tagCount == 1 && avgDist > 3) {
             return VecBuilder.fill(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE);
         }
         else {
             SmartDashboard.putNumberArray("Vision STD", defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30)).getData());
             return defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30));
         }
+        
+        //return defaultSTD.singleTagStD.times(1 + (Math.pow(avgDist, 2) / 30));
     }
     public double getTimestamp() {
         return Timer.getFPGATimestamp() - LimelightHelpers.getLatency_Capture(deviceName)/1000 - LimelightHelpers.getLatency_Pipeline(deviceName)/1000;

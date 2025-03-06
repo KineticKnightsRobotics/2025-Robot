@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -34,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
 import frc.robot.util.Quest;
@@ -60,6 +62,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
     private Quest quest = new Quest();
     private boolean hasQuestInitialized = false;
+    private Pose2d lastQuestPose = new Pose2d();
 
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
@@ -214,6 +217,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         }
 
         SmartDashboard.putBoolean("Limelight Dig TV", kLimelightDig.getTV());
+        SmartDashboard.putBoolean("Limelight Nan TV", kLimelightNan.getTV());
         if (kLimelightDig.getTV()) {
             addVisionMeasurement(
                 kLimelightDig.getEstimatedRoboPose(),
@@ -223,17 +227,21 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 //kLimelightDig.getDefaultSTD()
             );
         }
+        else {
+            if (kLimelightNan.getTV()) {
+                addVisionMeasurement(
+                    kLimelightNan.getEstimatedRoboPose(),
+                    //kLimelightNan.getEstimatedMegaTagPose(this.getState().Pose.getRotation()),
+                    Utils.fpgaToCurrentTime(kLimelightNan.getTimestamp()),
+                    kLimelightNan.getStandardDeviations()
+                    //kLimelightNan.getDefaultSTD()
+                );
+            }
+        }    
 
-        SmartDashboard.putBoolean("Limelight Nan TV", kLimelightNan.getTV());
-        if (kLimelightNan.getTV()) {
-            addVisionMeasurement(
-                kLimelightNan.getEstimatedRoboPose(),
-                //kLimelightNan.getEstimatedMegaTagPose(this.getState().Pose.getRotation()),
-                Utils.fpgaToCurrentTime(kLimelightNan.getTimestamp()),
-                kLimelightNan.getStandardDeviations()
-                //kLimelightNan.getDefaultSTD()
-            );
-        }
+        if (!hasQuestInitialized && RobotController.getUserButton()) {
+            resetQuestPose();
+        } 
 
         if (hasQuestInitialized) {
             addVisionMeasurement(
@@ -248,13 +256,14 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
 
-        SmartDashboard.putNumber("Quest Battery",quest.getBatteryPercent());
-        SmartDashboard.putBoolean("Quest Connected", quest.isConnected());
-        SmartDashboard.putBoolean("Quest Pose Seeded", hasQuestInitialized);
+        SmartDashboard.putNumber("D_Quest Battery",quest.getBatteryPercent());
+        SmartDashboard.putBoolean("D_Quest Connected", quest.isConnected());
+        SmartDashboard.putBoolean("D_Quest Pose Seeded", hasQuestInitialized);
         double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
-        SmartDashboard.putNumberArray("Quest Pose", questPose);
-        SmartDashboard.putNumber("Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
-        SmartDashboard.putNumber("Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumberArray("D_Quest Pose", questPose);
+        SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
+        SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putBoolean("D_User Button", RobotController.getUserButton());
     }
 
     /**
@@ -305,8 +314,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
      * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
      */
     public void resetQuestPose() {
-        quest.resetPose(this.getPose());
         hasQuestInitialized = true;
+        quest.resetPose(this.getPose());
     }
 
     public Command seedQuestPose() {

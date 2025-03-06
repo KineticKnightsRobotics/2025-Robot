@@ -73,14 +73,14 @@ public class teleopCommands extends Command{
             );
     }
 
-    public Command scoreCoralAutoProx(double height, SwerveRequest.RobotCentric speedRequest) {
+    public Command scoreCoralAutoProx(double height, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return
             new SequentialCommandGroup(
                 //Set elev height
                 elevSub.setElevatorGoal(height),
                 //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
                 elevSub.moveElevator().until(()-> elevSub.elevatorAtGoal()),
-                searchForPeg(DriveConstants.searchingSpeed,0.05,0.0,speedRequest,false),
+                searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
                 //Continue moving elevator until coral has been spat out.
                 new ParallelDeadlineGroup(
                     coralSub.spitCoral().withTimeout(1),
@@ -182,8 +182,8 @@ public class teleopCommands extends Command{
             return
                 driveSub.applyRequest(
                     () -> speedRequest
-                        .withVelocityX(searchSpeed)
-                        .withVelocityY(ySpeed)
+                        .withVelocityY(searchSpeed)
+                        .withVelocityX(ySpeed)
                         .withRotationalRate(rSpeed*0.2)
                 ).until(()-> coralSub.allignedWithPeg());
         }

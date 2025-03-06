@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.AlgaeAffectorConstants;
@@ -184,8 +186,13 @@ public class RobotContainer {
 
         driverA
             .whileTrue(
-                teleopCommand.goToSource(driveSubsystem.getState().Pose)
-            );
+                //teleopCommand.goToSource(driveSubsystem.getState().Pose)
+                new ParallelCommandGroup(
+                    elevatorSubsystem.moveElevator(),
+                    algaeSubsystem.overRidePivotPosition(AlgaeAffectorConstants.PivotPositions.home)
+                )
+            )
+            .onFalse(elevatorSubsystem.homeElevator());
 
         driverLT
             .whileTrue(
@@ -196,7 +203,13 @@ public class RobotContainer {
 
         driverRT
             .whileTrue(
-                coralSubsystem.loadCoral()
+                    new ParallelCommandGroup(
+                        coralSubsystem.loadCoral(),
+                        elevatorSubsystem.intakeElevator()
+                    )
+            )
+            .onFalse(
+                elevatorSubsystem.homeElevator()
             );
 
         driverB
@@ -244,7 +257,7 @@ public class RobotContainer {
                     elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.deAlgifyL2)
                 )
             );
-        
+
         op10
             .whileTrue(
                 climberSubsystem.setClimberSpeed(0.9)
@@ -255,12 +268,13 @@ public class RobotContainer {
             );
         op9
             .whileTrue(
-                climberSubsystem.setWinchSpeed(0.2)
+                climberSubsystem.setWinchSpeed(0.05)
             );
         op4
             .whileTrue(
-                climberSubsystem.setWinchSpeed(-0.2)
+                climberSubsystem.setWinchSpeed(-0.05)
             );
+        
 
         /*
          * PROGRAMMER CONTROLS
@@ -271,33 +285,21 @@ public class RobotContainer {
         test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
         // Configure LED bindings based on game piece possession
-        dignanHasCoral.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse));
-        dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.AlgaePulse));
-        
-        // When we don't have either game piece, go back to fire animation
-        // Make these separate triggers for more reliable behavior
-        dignanHasCoral.negate().onTrue(Commands.runOnce(() -> {
-            if (!algaeSubsystem.hasAlgae()) {
-                CANdleLED.setAnimation(AnimationTypes.Fire); // Use built-in Fire instead of CustomFire
-            }
-        }));
-        
-        dignanHasAlgae.negate().onTrue(Commands.runOnce(() -> {
-            if (!coralSubsystem.hasCoral()) {
-                CANdleLED.setAnimation(AnimationTypes.Fire); // Use built-in Fire instead of CustomFire
-            }
-        }));
+        dignanHasCoral.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse))
+            .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
+        dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse))
+            .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
     }
 
-    public void configureDefaultCommands() {
-        driveSubsystem.setDefaultCommand(
-            driveSubsystem.applyRequest(
-                () -> drive
-                    .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed/**0.2*/)
-                    .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed/**0.2*/)
-                    .withRotationalRate(-driverController.getRawAxis(4)*AngularRate/**0.2*/)
-                )
-        );
+        public void configureDefaultCommands() {
+            driveSubsystem.setDefaultCommand(
+                driveSubsystem.applyRequest(
+                    () -> drive
+                        .withVelocityX(-driverController.getRawAxis(1)*MaxSpeed/**0.2*/)
+                        .withVelocityY(-driverController.getRawAxis(0)*MaxSpeed/**0.2*/)
+                        .withRotationalRate(-driverController.getRawAxis(4)*AngularRate/**0.2*/)
+                    )
+            );
 
         ///elevatorSubsystem.setDefaultCommand(
             //elevatorSubsystem.homeElevator()
@@ -313,8 +315,11 @@ public class RobotContainer {
     public void configureNamedCommands() {
         NamedCommands.registerCommand("AquireCoral", coralSubsystem.loadCoral());
         NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
-        NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
-        NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
+
+        NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
+        NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
 
     }
 

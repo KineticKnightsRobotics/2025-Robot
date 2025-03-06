@@ -18,7 +18,7 @@ public class Bling extends SubsystemBase {
 
     public enum AnimationTypes {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe,
-        Twinkle, TwinkleOff, SetAll, CustomFire, CoralPulse, AlgaePulse
+        Twinkle, TwinkleOff, SetAll, CustomFire, CoralPulse, AlgaePulse,ThirtySeconds
     }
 
     private Animation m_currentAnimation;
@@ -45,7 +45,7 @@ public class Bling extends SubsystemBase {
         config.statusLedOffWhenActive = true;
         config.disableWhenLOS = false;
         config.stripType = LEDStripType.RGB;
-        config.brightnessScalar = 1.0;
+        config.brightnessScalar = 0.5;
         config.vBatOutputMode = VBatOutputMode.Modulated;
 
         m_candleRight.configAllSettings(config, 100);
@@ -55,7 +55,7 @@ public class Bling extends SubsystemBase {
         ledChanged = new boolean[LedCount];
         rand = new Random();
 
-        setAnimation(AnimationTypes.CustomFire);
+        setAnimation(AnimationTypes.SingleFade);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class Bling extends SubsystemBase {
                 m_currentAnimation = new LarsonAnimation(0, 255, 46, 0, 1, LedCount, LarsonAnimation.BounceMode.Front, 3);
                 break;
             case Rainbow:
-                m_currentAnimation = new RainbowAnimation(1, 0.1, LedCount);
+                m_currentAnimation = new RainbowAnimation(0.5, 0.1, LedCount);
                 break;
             case RgbFade:
                 m_currentAnimation = new RgbFadeAnimation(0.7, 0.4, LedCount);
@@ -104,7 +104,20 @@ public class Bling extends SubsystemBase {
                 break;
             case CustomFire:
                 // Switch to use built-in fire animation instead of custom
-                m_currentAnimation = new FireAnimation(1, 0.7, LedCount, 0.7, 0.2);
+                
+                m_currentAnimation = null;
+                // Clear animations and LEDs
+                m_candleRight.clearAnimation(0);
+                m_candleLeft.clearAnimation(0);
+                m_candleRight.setLEDs(0, 0, 0, 0, 0, LedCount);
+                m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount);
+                
+                // Initialize heat values to zero for clean start
+                for (int i = 0; i < LedCount; i++) {
+                    heat[i] = 0;
+                    ledChanged[i] = true; // Mark all LEDs for initial update
+                }
+                // Switch to use built-in fire animation instead of custom
                 break;
                 
             case CoralPulse:
@@ -116,6 +129,10 @@ public class Bling extends SubsystemBase {
                 // Green strobe for algae
                 m_currentAnimation = new StrobeAnimation(0, 255, 0, 0, 0.4, LedCount);
                 break;
+                case ThirtySeconds:
+                m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 98.0 / 256.0, LedCount);
+
+                
             default:
                 m_currentAnimation = null;
                 break;

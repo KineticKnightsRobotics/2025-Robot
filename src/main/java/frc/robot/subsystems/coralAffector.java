@@ -83,14 +83,14 @@ public class coralAffector extends SubsystemBase {
     public Command loadCoral() {
         return new SequentialCommandGroup(
             Commands.run(
-                () -> {rollerMotor.set(0.2);},
-                this
-            ).until(() -> (!entranceBeambreak() && exitBeambreak())
-        ).andThen(
+                () -> {rollerMotor.set(0.8);},
+                this).until(()->entranceBeambreak()),
             Commands.run(
-            () -> {rollerMotor.set(-0.2);},
-            this).until(()->entranceBeambreak())
-        )
+                () -> {rollerMotor.set(0.2);},
+                this).until(()->(!entranceBeambreak() && exitBeambreak())),
+            Commands.run(
+                () -> {rollerMotor.set(-0.2);},
+                this).until(()->entranceBeambreak())
         ).finallyDo(
             () -> {rollerMotor.set(0.0);}
         );

@@ -38,6 +38,7 @@ public class Constants {
 
     public final static class DriveConstants {
         public static double searchingSpeed = 0.35;
+        public static int resetButton = 3;
     }
 
     public final static class ElevatorConstants {
@@ -64,20 +65,21 @@ public class Constants {
 
         public static class Positions {
             public static double home = minChassisHeight+1;
+            public static double intake = home+0.5;
             public static double L1 = 4;
             public static double L2 = 17;
             public static double L3 = 34;
             public static double L4 = 57;
-            public static double deAlgifyL2 = 8.5;
-            public static double deAlgifyL3 = 25;
+            public static double deAlgifyL2 = 10;
+            public static double deAlgifyL3 = 27;
         }
     }
 
     public final static class AlgaeAffectorConstants {
         public static class PivotPID {
-            public static double P = 0.005;
+            public static double P = 0.0125;
             public static double I = 0.0;
-            public static double D = 0.0009;
+            public static double D = 0.000;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
@@ -90,7 +92,7 @@ public class Constants {
         public static double algaePivotGearRatio = 1/5;
 
         public static class PivotPositions {
-            public static double groundIntake = 13.5;
+            public static double groundIntake = 10.0;
             public static double deAlgifying = 65.0;
             public static double carrying = 49;
             public static double home = 110.0;
