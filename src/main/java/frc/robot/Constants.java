@@ -70,8 +70,8 @@ public class Constants {
             public static double L2 = 17;
             public static double L3 = 34;
             public static double L4 = 57;
-            public static double deAlgifyL2 = 10;
-            public static double deAlgifyL3 = 27;
+            public static double deAlgifyL2 = 11;
+            public static double deAlgifyL3 = 28;
         }
     }
 
