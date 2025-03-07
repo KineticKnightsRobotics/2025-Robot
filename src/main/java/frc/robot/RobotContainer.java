@@ -39,7 +39,7 @@ public class RobotContainer {
     // private final Bling candleSubsystem = new Bling(); <-- This line should be removed
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double AngularRate = Math.PI * 1.5;
+    private double AngularRate = Math.PI * 2.5;
 
     SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
@@ -121,6 +121,7 @@ public class RobotContainer {
     public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.hasCoral());
     public final Trigger dignanHasAlgae = new Trigger(() -> algaeSubsystem.hasAlgae());
 
+    public final Trigger last30Seconds = new Trigger(() -> (DriverStation.getMatchTime() < 30));
 
     public final Trigger ejectCoral = driverRB.and(dignanHasCoral);
     public final Trigger ejectAlgae = driverRB.and(dignanHasCoral.negate());
@@ -289,9 +290,12 @@ public class RobotContainer {
             .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
         dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse))
             .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
+        last30Seconds.whileTrue(CANdleLED.setLEDAnimation(AnimationTypes.ThirtySeconds));
     }
 
-        public void configureDefaultCommands() {
+
+
+    public void configureDefaultCommands() {
             driveSubsystem.setDefaultCommand(
                 driveSubsystem.applyRequest(
                     () -> drive

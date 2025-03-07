@@ -18,7 +18,7 @@ public class Bling extends SubsystemBase {
 
     public enum AnimationTypes {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe,
-        Twinkle, TwinkleOff, SetAll, CustomFire, CoralPulse, AlgaePulse,ThirtySeconds
+        Twinkle, TwinkleOff, SetAll, CustomFire, CoralPulse, AlgaePulse, ThirtySeconds
     }
 
     private Animation m_currentAnimation;
@@ -118,8 +118,7 @@ public class Bling extends SubsystemBase {
                     ledChanged[i] = true; // Mark all LEDs for initial update
                 }
                 // Switch to use built-in fire animation instead of custom
-                break;
-                
+                break;                
             case CoralPulse:
                 // Purple strobe for coral
                 m_currentAnimation = new StrobeAnimation(200, 0, 255, 0, 0.4, LedCount);
@@ -129,10 +128,8 @@ public class Bling extends SubsystemBase {
                 // Green strobe for algae
                 m_currentAnimation = new StrobeAnimation(0, 255, 0, 0, 0.4, LedCount);
                 break;
-                case ThirtySeconds:
+            case ThirtySeconds:
                 m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 98.0 / 256.0, LedCount);
-
-                
             default:
                 m_currentAnimation = null;
                 break;
@@ -270,6 +267,6 @@ public class Bling extends SubsystemBase {
     }
 
     public Command turnOffLEDs() {
-        return Commands.runOnce(() -> m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount)).andThen(()->m_candleRight.setLEDs(0,0,0,0,0,LedCount));
+        return Commands.runOnce(() -> {m_candleLeft.setLEDs(0, 0, 0, 0, 0, LedCount);m_candleRight.setLEDs(0,0,0,0,0,LedCount);});
     }
 }
