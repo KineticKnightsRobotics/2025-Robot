@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4ProxRight"
+            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -85,7 +85,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4Right"
+            "name": "ScoreL4ProxLeft"
           }
         }
       ]

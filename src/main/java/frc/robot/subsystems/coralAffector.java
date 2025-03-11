@@ -113,7 +113,7 @@ public class coralAffector extends SubsystemBase {
     public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> rollerMotor.set(1.0)
+            () -> rollerMotor.set(0.50)
 
         // End condition of linebreak true (piece is in)
         ).until(

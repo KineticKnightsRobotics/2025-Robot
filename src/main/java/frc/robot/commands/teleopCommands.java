@@ -128,28 +128,29 @@ public class teleopCommands extends Command{
 
         if (flippingLogic) {
             if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 && driveSub.getState().Pose.getRotation().getDegrees() < -90) {
+                /* */
+                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 || driveSub.getState().Pose.getRotation().getDegrees() < -90) {
                     return
-
-                    // On red alliance facing red alliance -> Invert controls
+                    //On red alliance facing blue alliance -> don't invert controls
                     driveSub.applyRequest(
                         () -> speedRequest
                             .withVelocityY(-searchSpeed)
-                            .withVelocityX(-ySpeed*0.2)
-                            .withRotationalRate(-rSpeed*0.2)
+                            .withVelocityX(ySpeed)
+                            .withRotationalRate(rSpeed*0.2)
                         )
                         .until(()-> coralSub.allignedWithPeg());
                 }
                 else {
-                    return    
-                    // on red alliance facing blue alliance -> don't invert controls             
+                    return
+                    //on red alliance facing red alliance -> invert controls
                     driveSub.applyRequest(
                         () -> speedRequest
-                            .withVelocityY(searchSpeed)
-                            .withVelocityX(ySpeed*0.2)
+                            .withVelocityY(-searchSpeed)
+                            .withVelocityX(ySpeed)
                             .withRotationalRate(rSpeed*0.2)
                         )
                         .until(()-> coralSub.allignedWithPeg());
+
                 }
             }
             else {
@@ -158,8 +159,8 @@ public class teleopCommands extends Command{
                     //On blue alliance facing red alliance -> don't invert controls
                     driveSub.applyRequest(
                         () -> speedRequest
-                            .withVelocityY(searchSpeed)
-                            .withVelocityX(ySpeed*0.2)
+                            .withVelocityY(-searchSpeed)
+                            .withVelocityX(ySpeed)
                             .withRotationalRate(rSpeed*0.2)
                         )
                         .until(()-> coralSub.allignedWithPeg());
@@ -170,8 +171,8 @@ public class teleopCommands extends Command{
                     driveSub.applyRequest(
                         () -> speedRequest
                             .withVelocityY(-searchSpeed)
-                            .withVelocityX(-ySpeed*0.2)
-                            .withRotationalRate(-rSpeed*0.2)
+                            .withVelocityX(ySpeed)
+                            .withRotationalRate(rSpeed*0.2)
                         )
                         .until(()-> coralSub.allignedWithPeg());
 

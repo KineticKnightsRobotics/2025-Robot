@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
@@ -317,7 +318,14 @@ public class RobotContainer {
     }
 
     public void configureNamedCommands() {
-        NamedCommands.registerCommand("AquireCoral", coralSubsystem.loadCoral());
+        NamedCommands.registerCommand("AquireCoral", 
+        //coralSubsystem.loadCoral()
+            new ParallelDeadlineGroup(
+                coralSubsystem.loadCoral(),
+                elevatorSubsystem.intakeElevator()
+            )
+        );
+
         NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
 
         NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));

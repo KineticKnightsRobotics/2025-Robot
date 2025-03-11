@@ -240,7 +240,7 @@ public class Elevator extends SubsystemBase {
                 this
                 )
                 //will interrupt if another command using this subsystem is scheduled, ie: moveElevator()
-                .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         );
     }
 

@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.158299556635651,
-        "y": 3.420248443751971
+        "x": 4.081474939967703,
+        "y": 3.340352367653737
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 1.2321061643835618,
-        "y": 1.0048373287671233
+        "x": 1.1930921052631578,
+        "y": 0.9556743421052636
       },
       "prevControl": {
-        "x": 1.0399427234926952,
-        "y": 0.8449210632248638
+        "x": 1.5487766128100042,
+        "y": 1.2985772060814742
       },
       "nextControl": null,
       "isLocked": false,
@@ -56,7 +56,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 51.581944655178
+    "rotation": 54.098229145547556
   },
   "reversed": false,
   "folder": "Source Auto Right",
