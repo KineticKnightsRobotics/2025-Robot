@@ -36,12 +36,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "R_StoR2_Prox"
@@ -73,12 +67,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "R_StoR3_Prox"
@@ -107,12 +95,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AquireCoral"
           }
         },
         {
