@@ -31,6 +31,8 @@ public class teleopCommands extends Command{
     private coralAffector coralSub;
     private algaeAffector algaeSub;
 
+    private boolean canExt = false;
+
     
 
     // Constructor
@@ -73,7 +75,69 @@ public class teleopCommands extends Command{
             );
     }
 
+    // Keep the elevator at scoring height while seeking and scoring
     public Command scoreCoralAutoProx(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+        return new ParallelDeadlineGroup(
+            // Maintain scoring height
+            elevSub.moveElevator(),
+
+            // SEEK AND SCORE!!!
+            new SequentialCommandGroup(
+                searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
+                coralSub.spitCoral().withTimeout(1)
+                )
+        );
+    }
+
+    /*
+    * Set the height that the elevator should extend to
+    * Move to and maintain the height while the robot is moving to the reef
+    * Combined with a parallelDeadlineGroup in pathplanner so that the command
+    is terminated when the path finishes
+    */
+    public Command ElevatorToGoalAuto(double height){ 
+        // go to the passed goal (L4, L3, L2, or L1)
+        return new SequentialCommandGroup(
+            elevSub.setElevatorGoal(height),
+            elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal())
+        );
+    }
+
+    // Get rid of these two commands first chance you get
+    public Command canExtend() {
+        return Commands.runOnce(() -> {canExt = true;});
+    }
+
+    public Command canExtToFalse() {
+        return Commands.runOnce(() -> {canExt = false;});
+    }
+
+    public Command scoreCoralAuto_Optimized(double height, double searchSpeed , SwerveRequest.RobotCentric speedRequest) {
+        //return new ParallelDeadlineGroup(null, null)
+        return new SequentialCommandGroup(
+            elevSub.setElevatorGoal(11),
+            elevSub.moveElevator().until(() -> (elevSub.elevatorAtGoal() && canExt)),
+            //canExtToFalse(),
+            elevSub.setElevatorGoal(height),
+
+            new ParallelCommandGroup(
+                elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal()),
+                new ParallelDeadlineGroup(
+                    searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
+                    elevSub.moveElevator()
+                )
+            ),
+
+            new ParallelDeadlineGroup(
+                coralSub.spitCoral(),
+                elevSub.moveElevator()
+            )
+
+            //elevSub.homeElevator().until(() -> elevSub.getElevatorPosition() < 10)
+        );
+    }
+
+/**
         return
             new SequentialCommandGroup(
                 searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
@@ -85,19 +149,7 @@ public class teleopCommands extends Command{
                 //Send the elevator back to home
                 //elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10)
             );
-    }
-
-    // Separated so we can home elevator while going to source
-    public Command homeElevatorAuto() {
-        //Send the elevator back to home
-        return Commands.runOnce(() -> elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10));
-    }
-
-    public Command ElevatorToGoalAuto(double height){ 
-        // go to heihg to
-        return Commands.runOnce(()-> elevSub.setElevatorGoal(height)).andThen(elevSub.moveElevator().until(()-> elevSub.elevatorAtGoal()));
-
-    }
+        */
 
     public Command deAlgify() { 
         return

@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxLeft"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -45,12 +39,6 @@
           "type": "path",
           "data": {
             "pathName": "R_StoR2_Prox"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -85,12 +73,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxRight"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -119,12 +101,6 @@
           "type": "path",
           "data": {
             "pathName": "R_StoR4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxLeft"
           }
         }
       ]
