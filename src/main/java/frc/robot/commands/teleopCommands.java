@@ -31,9 +31,8 @@ public class teleopCommands extends Command{
     private coralAffector coralSub;
     private algaeAffector algaeSub;
 
+    // If the elevator can extend or not
     private boolean canExt = false;
-
-    
 
     // Constructor
     public teleopCommands(Drive drive, Elevator elevator, coralAffector coral, algaeAffector algae) {
@@ -103,11 +102,12 @@ public class teleopCommands extends Command{
         );
     }
 
-    // Get rid of these two commands first chance you get
+    // Toggles canExt to true, meaning that the robot passed the event marker and can do the rest of the extension
     public Command canExtend() {
         return Commands.runOnce(() -> {canExt = true;});
     }
 
+    // Toggles canExt to false in preparation for the next path with the event marker
     public Command canExtToFalse() {
         return Commands.runOnce(() -> {canExt = false;});
     }
@@ -115,11 +115,20 @@ public class teleopCommands extends Command{
     public Command scoreCoralAuto_Optimized(double height, double searchSpeed , SwerveRequest.RobotCentric speedRequest) {
         //return new ParallelDeadlineGroup(null, null)
         return new SequentialCommandGroup(
+
+            // Set the first goal to a height where the prox sensor works correctly
             elevSub.setElevatorGoal(11),
+
+            // Will not finish until the elevator is at the goal and the event marker is passed
             elevSub.moveElevator().until(() -> (elevSub.elevatorAtGoal() && canExt)),
-            //canExtToFalse(),
+
+            // Reset for next path
+            canExtToFalse(),
+
+            // Set the new goal of the elevator to a scoring position
             elevSub.setElevatorGoal(height),
 
+            // Seek and finish extending
             new ParallelCommandGroup(
                 elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal()),
                 new ParallelDeadlineGroup(
@@ -128,28 +137,14 @@ public class teleopCommands extends Command{
                 )
             ),
 
+            // SCORE!!!
             new ParallelDeadlineGroup(
                 coralSub.spitCoral(),
                 elevSub.moveElevator()
             )
 
-            //elevSub.homeElevator().until(() -> elevSub.getElevatorPosition() < 10)
         );
     }
-
-/**
-        return
-            new SequentialCommandGroup(
-                searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
-                //Continue moving elevator until coral has been spat out.
-                new ParallelDeadlineGroup(
-                    coralSub.spitCoral().withTimeout(1),
-                    elevSub.moveElevator()
-                )
-                //Send the elevator back to home
-                //elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10)
-            );
-        */
 
     public Command deAlgify() { 
         return

@@ -326,19 +326,17 @@ public class RobotContainer {
             )
         );
 
-        NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
-
-        NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.scoreCoralAutoProx(DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
+        //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.scoreCoralAutoProx(DriveConstants.searchingSpeed, search));
         //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
-        NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.scoreCoralAutoProx(-DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.scoreCoralAutoProx(-DriveConstants.searchingSpeed, search));
         //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
-        NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
-        NamedCommands.registerCommand("ElevatorToL4", teleopCommand.ElevatorToGoalAuto(ElevatorConstants.Positions.L4));
+        //NamedCommands.registerCommand("ElevatorToL4", teleopCommand.ElevatorToGoalAuto(ElevatorConstants.Positions.L4));
 
         NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
         NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
-    
-        NamedCommands.registerCommand("extend", teleopCommand.canExtend());
+        NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
+        NamedCommands.registerCommand("Extend", teleopCommand.canExtend());
     }
 
     public Command getAutonomousCommand() {
