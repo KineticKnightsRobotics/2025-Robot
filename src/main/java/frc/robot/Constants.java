@@ -66,6 +66,7 @@ public class Constants {
         public static class Positions {
             public static double home = minChassisHeight+1;
             public static double intake = home+0.5;
+            public static double primedHeight = 11;
             public static double L1 = 8;
             public static double L2 = 17;
             public static double L3 = 33.5;

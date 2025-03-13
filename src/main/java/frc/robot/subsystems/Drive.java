@@ -95,8 +95,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         }
         ConfigureAutoBuilder();
 
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        //SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        //SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -122,8 +122,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        //SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        //SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -157,8 +157,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         ConfigureAutoBuilder();
-        SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
-        SmartDashboard.putData("Questnav Disable", disableQuest());
+        //SmartDashboard.putData("Questnav Seed Pose", seedQuestPose());
+        //SmartDashboard.putData("Questnav Disable", disableQuest());
     }
 
     /**
@@ -286,6 +286,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return getState().Pose;
     }
 
+    public Pose2d getClosestReefFace() {
+        return reefSelector.getClosestApriltag(this.getState().Pose);
+    }
 
     public Pose2d getTagPose(double AprilTagID) {
         return kFieldLayout.getTagPose((int)AprilTagID).get().toPose2d();

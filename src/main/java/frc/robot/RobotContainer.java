@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
@@ -145,16 +146,21 @@ public class RobotContainer {
          * DRIVER CONTROLS
          */
 
+        //LEFT Reef
         driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                teleopCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
+                //teleopCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
+                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,search)
             );
+        //RIGHT Reef
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                teleopCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
+                //teleopCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
+                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,search)
             );
+
 
         driverLB
             .whileTrue(
@@ -186,37 +192,12 @@ public class RobotContainer {
                 );
         */
 
-        driverA
-            .whileTrue(
-                //teleopCommand.goToSource(driveSubsystem.getState().Pose)
-                new ParallelCommandGroup(
-                    elevatorSubsystem.moveElevator(),
-                    algaeSubsystem.overRidePivotPosition(AlgaeAffectorConstants.PivotPositions.home)
-                )
-            )
-            .onFalse(elevatorSubsystem.homeElevator());
-
-        driverLT
-            .whileTrue(
-                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.groundIntake).andThen(
-                    algaeSubsystem.captureAlgae()
-                )
-            );
-
         driverRT
             .whileTrue(
                     new ParallelCommandGroup(
                         coralSubsystem.loadCoral(),
                         elevatorSubsystem.intakeElevator()
                     )
-            )
-            .onFalse(
-                elevatorSubsystem.homeElevator()
-            );
-
-        driverB
-            .whileTrue(
-                teleopCommand.deAlgify()
             )
             .onFalse(
                 elevatorSubsystem.homeElevator()
@@ -244,37 +225,6 @@ public class RobotContainer {
         op12
             .onTrue(
                 elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L1)
-            );
-
-        op2
-            .onTrue(
-                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying).andThen(
-                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.deAlgifyL3)
-                )
-            );
-
-        op7
-            .onTrue(
-                algaeSubsystem.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying).andThen(
-                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.deAlgifyL2)
-                )
-            );
-
-        op10
-            .whileTrue(
-                climberSubsystem.setClimberSpeed(0.9)
-            );
-        op5
-            .whileTrue(
-                climberSubsystem.setClimberSpeed(-0.9)
-            );
-        op9
-            .whileTrue(
-                climberSubsystem.setWinchSpeed(0.05)
-            );
-        op4
-            .whileTrue(
-                climberSubsystem.setWinchSpeed(-0.05)
             );
         
 
@@ -333,14 +283,14 @@ public class RobotContainer {
         //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
         //NamedCommands.registerCommand("ElevatorToL4", teleopCommand.ElevatorToGoalAuto(ElevatorConstants.Positions.L4));
 
-        NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
-        NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
-        NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
-        NamedCommands.registerCommand("Extend", teleopCommand.canExtend());
+        //NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
+        //NamedCommands.registerCommand("Extend", teleopCommand.canExtend());
     }
 
     public Command getAutonomousCommand() {
-        return autoSelector.getSelected();
+        return new PrintCommand("No Auto LMAO");//autoSelector.getSelected();
     }
 } 
 

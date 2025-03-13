@@ -54,7 +54,6 @@ public class ReefSelector {
         redAllianceReef.add(tagLayout.getTagPose(9).get().toPose2d());
         redAllianceReef.add(tagLayout.getTagPose(10).get().toPose2d());
         redAllianceReef.add(tagLayout.getTagPose(11).get().toPose2d());
-
     }
 
     public Pose2d getClosestApriltag(Pose2d robotPose) {

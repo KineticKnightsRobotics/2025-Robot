@@ -28,7 +28,6 @@ public class allign_newTest extends Command {
     private final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
     private Translation2d displacement;
-    private double targetApriltag;
     private Pose2d fieldCoordinate;
     private double angleOffset;
 
@@ -44,20 +43,18 @@ public class allign_newTest extends Command {
     public allign_newTest(
         Drive kSubsystem,
         Translation2d desiredDisplacement,
-        double apriltagID,
         double _angleOffset
     ) {
         addRequirements(kSubsystem);
         driveSubsystem = kSubsystem;
         displacement = desiredDisplacement;
-        targetApriltag = apriltagID;
         angleOffset = _angleOffset;
 
     }
 
     @Override
     public void initialize() {
-        Pose2d tagPose = driveSubsystem.getTagPose(targetApriltag);
+        Pose2d tagPose = driveSubsystem.getClosestReefFace();
         Translation2d displacementRotated = displacement.rotateBy(tagPose.getRotation());
         fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation().rotateBy(new Rotation2d(angleOffset)));
     }
@@ -75,9 +72,9 @@ public class allign_newTest extends Command {
             driveSubsystem.getPose().getRotation().getDegrees(), fieldCoordinate.getRotation().getDegrees()
         );
 
-        double[] AllignmentOutput = {outputX, outputY, outputR};
-        SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
-
+        //double[] AllignmentOutput = {outputX, outputY, outputR};
+        //SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
+        
         driveSubsystem.setControl(
             speedBuilder
                 .withVelocityX(outputX)

@@ -17,6 +17,7 @@ import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Drive.allign;
+import frc.robot.commands.Drive.allign_newTest;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
@@ -74,72 +75,6 @@ public class teleopCommands extends Command{
             );
     }
 
-    // Keep the elevator at scoring height while seeking and scoring
-    public Command scoreCoralAutoProx(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
-        return new ParallelDeadlineGroup(
-            // Maintain scoring height
-            elevSub.moveElevator(),
-
-            // SEEK AND SCORE!!!
-            new SequentialCommandGroup(
-                searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
-                coralSub.spitCoral().withTimeout(1)
-                )
-        );
-    }
-
-    /*
-    * Set the height that the elevator should extend to
-    * Move to and maintain the height while the robot is moving to the reef
-    * Combined with a parallelDeadlineGroup in pathplanner so that the command
-    is terminated when the path finishes
-    */
-    public Command ElevatorToGoalAuto(double height){ 
-        // go to the passed goal (L4, L3, L2, or L1)
-        return new SequentialCommandGroup(
-            elevSub.setElevatorGoal(height),
-            elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal())
-        );
-    }
-
-    // Toggles canExt to true, meaning that the robot passed the event marker and can do the rest of the extension
-    public Command canExtend() {
-        return Commands.runOnce(() -> {canExt = true;});
-    }
-
-    // Toggles canExt to false in preparation for the next path with the event marker
-    public Command canExtToFalse() {
-        return Commands.runOnce(() -> {canExt = false;});
-    }
-
-    public Command scoreCoralAuto_Optimized(double height, double searchSpeed , SwerveRequest.RobotCentric speedRequest) {
-        //return new ParallelDeadlineGroup(null, null)
-        return new SequentialCommandGroup(
-            // Set the first goal to a height where the prox sensor works correctly
-            elevSub.setElevatorGoal(11),
-            // Will not finish until the elevator is at the goal and the event marker is passed
-            elevSub.moveElevator().until(() -> (elevSub.elevatorAtGoal() && canExt)),
-            // Reset for next path
-            canExtToFalse(),
-            // Set the new goal of the elevator to a scoring position
-            elevSub.setElevatorGoal(height),
-            // Seek and finish extending
-            new ParallelCommandGroup(
-                elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal()),
-                new ParallelDeadlineGroup(
-                    searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
-                    elevSub.moveElevator()
-                )
-            ),
-            // SCORE!!!
-            new ParallelDeadlineGroup(
-                coralSub.spitCoral(),
-                elevSub.moveElevator()
-            )
-
-        );
-    }
-
     public Command deAlgify() { 
         return
             new SequentialCommandGroup(
@@ -151,92 +86,36 @@ public class teleopCommands extends Command{
             );
     }
 
-    public Command goToSource(Pose2d robotPose) {
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red){
-            if (robotPose.getY() > 4.03352) {
-                //Past the halfway point, go to top source, red side
-                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 2, 0);
-            }
-            else {
-                //below halfway point, go to bottom source, red side
-                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 1, 0);
-            }
-        } else {
-            if (robotPose.getY() > 4.03352) {
-                //top source, blue side
-                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 13, 0);
-            }
-            else {
-                //bottom source, blue side.
-                return new allign(driveSub, new Translation2d(Units.inchesToMeters(17.6),0.0), 12, 0);
-            }
-        }
-    }
-
     public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest, boolean flippingLogic){
-        if (flippingLogic) {
-            if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-                /* */
-                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 || driveSub.getState().Pose.getRotation().getDegrees() < -90) {
-                    return
-                    //On red alliance facing blue alliance -> don't invert controls
-                    driveSub.applyRequest(
-                        () -> speedRequest
-                            .withVelocityY(-searchSpeed)
-                            .withVelocityX(ySpeed)
-                            .withRotationalRate(rSpeed*0.2)
-                        )
-                        .until(()-> coralSub.allignedWithPeg());
-                }
-                else {
-                    return
-                    //on red alliance facing red alliance -> invert controls
-                    driveSub.applyRequest(
-                        () -> speedRequest
-                            .withVelocityY(-searchSpeed)
-                            .withVelocityX(ySpeed)
-                            .withRotationalRate(rSpeed*0.2)
-                        )
-                        .until(()-> coralSub.allignedWithPeg());
-
-                }
-            }
-            else {
-                if (driveSub.getState().Pose.getRotation().getDegrees() > 90 || driveSub.getState().Pose.getRotation().getDegrees() < -90) {
-                    return
-                    //On blue alliance facing red alliance -> don't invert controls
-                    driveSub.applyRequest(
-                        () -> speedRequest
-                            .withVelocityY(-searchSpeed)
-                            .withVelocityX(ySpeed)
-                            .withRotationalRate(rSpeed*0.2)
-                        )
-                        .until(()-> coralSub.allignedWithPeg());
-                }
-                else {
-                    return
-                    //on blue alliance facing blue alliance -> invert controls
-                    driveSub.applyRequest(
-                        () -> speedRequest
-                            .withVelocityY(-searchSpeed)
-                            .withVelocityX(ySpeed)
-                            .withRotationalRate(rSpeed*0.2)
-                        )
-                        .until(()-> coralSub.allignedWithPeg());
-
-                }
-            }
-        }
-        else {
-            return
-                driveSub.applyRequest(
-                    () -> speedRequest
-                        .withVelocityY(searchSpeed)
-                        .withVelocityX(ySpeed)
-                        .withRotationalRate(rSpeed*0.2)
-                ).until(()-> coralSub.allignedWithPeg());
-        }
-
-
+        return
+            driveSub.applyRequest(
+                () -> speedRequest
+                    .withVelocityY(searchSpeed)
+                    .withVelocityX(ySpeed)
+                    .withRotationalRate(rSpeed*0.2)
+            ).until(()-> coralSub.allignedWithPeg());
     }
+
+    public Command allignToReef_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+        return new SequentialCommandGroup(
+            new allign_newTest(driveSub, desiredDisplacement, _angleOffset),
+            searchForPeg(-0.2, 0.0, 0.0, speedRequest, false)
+        );
+    }
+
+    public Command teleAim_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, double elevHeight, SwerveRequest.RobotCentric speedRequest) {
+        return new SequentialCommandGroup(
+            elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
+            new ParallelDeadlineGroup(
+                new allign_newTest(driveSub, desiredDisplacement, _angleOffset),
+                elevSub.moveElevator()
+            ),
+            elevSub.setElevatorGoal(elevHeight),
+            new ParallelCommandGroup(
+                searchForPeg(searchSpeed, 0.0, 0.0, speedRequest,false),
+                elevSub.moveElevator()
+            )
+        );
+    }
+
 }
