@@ -179,33 +179,22 @@ public class Elevator extends SubsystemBase {
         ).andThen(
             Commands.run(
                 () -> {
-                    //double newOutput = elevatorController.calculate(getElevatorPosition());
                     if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
-                        //SmartDashboard.putNumber("PID Output",elevatorController.calculate(getElevatorPosition()));
-
-                        //Calculate next output using current elevator position
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
-
-                        //If the elevator is approaching the top or bottom, limit the output.
                         if (getElevatorPosition() < 3 || getElevatorPosition() > 50) {
                             output = MathUtil.clamp(output, -0.2, 0.2);
                         }
-
-                        //put the output to smart dashboard for debugging purposes.
                         SmartDashboard.putNumber("E_PID Output", output);
-                        //set motor outputs
                         digElevatorMotor.set(output);
                         nanElevatorMotor.set(output);
                     }
                     else {
-                        //stop motors if elevator position surpases the soft limit.
                         digElevatorMotor.set(0.0);
                         nanElevatorMotor.set(0.0);
                     }
                 },
                 this
                 )
-                //Command will interrupt if another command using this subsystem is scheduled, ie: homeElevator()
                 .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
         );
     }
@@ -216,32 +205,19 @@ public class Elevator extends SubsystemBase {
      */
     public Command homeElevator() {
         return Commands
-        .runOnce(
-            () -> {
-                //digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
-            },
-            this
-        ).andThen(
-            Commands.run(
+            .run(
                 () -> {
-                        //Slow elevator on the way down to avoid slamming into bottom of the elevator shaft.
-                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.home),-0.60,0.20);
-
-                        //Slow elevator even more once it gets below 5" of extension to gently place it down
-                        if (getElevatorPosition() < 5) {
-                            output = MathUtil.clamp(output, -0.2, 0.2);
-                        }
-
-                        SmartDashboard.putNumber("E_PID Output", output);
-
-                        digElevatorMotor.set(output);
-                        nanElevatorMotor.set(output);
+                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), ElevatorConstants.Positions.home),-0.60,0.20);
+                    if (getElevatorPosition() < 5) {
+                        output = MathUtil.clamp(output, -0.2, 0.2);
+                    }
+                    SmartDashboard.putNumber("E_PID Output", output);
+                    digElevatorMotor.set(output);
+                    nanElevatorMotor.set(output);
                 },
                 this
-                )
-                //will interrupt if another command using this subsystem is scheduled, ie: moveElevator()
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-        );
+            )
+            .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
 
         /**

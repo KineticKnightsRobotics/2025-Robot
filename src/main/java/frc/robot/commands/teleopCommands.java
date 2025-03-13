@@ -115,19 +115,14 @@ public class teleopCommands extends Command{
     public Command scoreCoralAuto_Optimized(double height, double searchSpeed , SwerveRequest.RobotCentric speedRequest) {
         //return new ParallelDeadlineGroup(null, null)
         return new SequentialCommandGroup(
-
             // Set the first goal to a height where the prox sensor works correctly
             elevSub.setElevatorGoal(11),
-
             // Will not finish until the elevator is at the goal and the event marker is passed
             elevSub.moveElevator().until(() -> (elevSub.elevatorAtGoal() && canExt)),
-
             // Reset for next path
             canExtToFalse(),
-
             // Set the new goal of the elevator to a scoring position
             elevSub.setElevatorGoal(height),
-
             // Seek and finish extending
             new ParallelCommandGroup(
                 elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal()),
@@ -136,7 +131,6 @@ public class teleopCommands extends Command{
                     elevSub.moveElevator()
                 )
             ),
-
             // SCORE!!!
             new ParallelDeadlineGroup(
                 coralSub.spitCoral(),
@@ -180,7 +174,6 @@ public class teleopCommands extends Command{
     }
 
     public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest, boolean flippingLogic){
-
         if (flippingLogic) {
             if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
                 /* */

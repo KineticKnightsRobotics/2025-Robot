@@ -39,6 +39,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
 import frc.robot.util.Quest;
+import frc.robot.util.ReefSelector;
 
 
 /**
@@ -60,12 +61,11 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private Vision kLimelightDig = new Vision("limelight-dig");
     private Vision kLimelightNan = new Vision("limelight-nan");
 
-    private Quest quest = new Quest();
+    private ReefSelector reefSelector = new ReefSelector();
+
+    //private Quest quest = new Quest();
     private boolean hasQuestInitialized = false;
-    private Pose2d lastQuestPose = new Pose2d();
-
     private AprilTagFieldLayout kFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
-
 
     //auto objects
     private Field2d field = new Field2d();
@@ -206,14 +206,13 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
-                m_hasAppliedOperatorPerspective = true;
-            });
+            DriverStation.getAlliance()
+                .ifPresent(allianceColor -> {
+                    setOperatorPerspectiveForward(allianceColor == Alliance.Red ? kRedAlliancePerspectiveRotation : kBlueAlliancePerspectiveRotation);
+                    reefSelector.redAlliance = (allianceColor == Alliance.Red ? true : false);
+                    m_hasAppliedOperatorPerspective = true;
+                }
+            );
         }
 
         SmartDashboard.putBoolean("Limelight Dig TV", kLimelightDig.getTV());
@@ -239,10 +238,11 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             }
         }    
 
-        if (!hasQuestInitialized && RobotController.getUserButton()) {
-            resetQuestPose();
-        } 
+        //if (!hasQuestInitialized && RobotController.getUserButton()) {
+        //    resetQuestPose();
+        //} 
 
+        /*
         if (hasQuestInitialized) {
             addVisionMeasurement(
                 quest.getRobotPose(),
@@ -250,17 +250,18 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
                 VecBuilder.fill(1/10,1/10,1/10)
             );
         }
-
         quest.cleanUpQuestNavMessages();
+        */
 
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
-
+        /*
         SmartDashboard.putNumber("D_Quest Battery",quest.getBatteryPercent());
         SmartDashboard.putBoolean("D_Quest Connected", quest.isConnected());
         SmartDashboard.putBoolean("D_Quest Pose Seeded", hasQuestInitialized);
         double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
         SmartDashboard.putNumberArray("D_Quest Pose", questPose);
+        */
         SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
         SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         SmartDashboard.putBoolean("D_User Button", RobotController.getUserButton());
@@ -312,11 +313,12 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     /*
      * Resets the questnav field offset
      * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
-     */
+    
     public void resetQuestPose() {
         hasQuestInitialized = true;
         quest.resetPose(this.getPose());
     }
+    
 
     public Command seedQuestPose() {
         return Commands.runOnce(
@@ -329,7 +331,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             () -> {hasQuestInitialized = false;}
         );
     }
-
+    */
 
 
 
