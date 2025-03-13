@@ -151,14 +151,14 @@ public class RobotContainer {
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //teleopCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,search)
+                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed ,search)
             );
         //RIGHT Reef
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //teleopCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,search)
+                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,DriveConstants.searchingSpeed,search)
             );
 
 
