@@ -335,7 +335,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
         NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
         NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
-        
+        NamedCommands.registerCommand("AquireCoral", coralSubsystem.loadCoral());
         // Set the new goal of the elevator to a scoring position when the "canExtend" eventMarker is passed
         NamedCommands.registerCommand("Extend", elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4));
     }
