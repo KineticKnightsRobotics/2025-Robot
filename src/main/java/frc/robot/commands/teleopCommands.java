@@ -91,6 +91,32 @@ public class teleopCommands extends Command{
             );
     }
 
+    public Command scoreCoralAuto_Optimized(double height, double searchSpeed , SwerveRequest.RobotCentric speedRequest) {
+        //return new ParallelDeadlineGroup(null, null)
+        return new SequentialCommandGroup(
+            // Set the first goal to a height where the prox sensor works correctly
+            elevSub.setElevatorGoal(11),
+            // Will not finish until the elevator is at the goal and the event marker is passed
+            elevSub.moveElevator().until(() -> (elevSub.elevatorAtGoal() && elevSub.getElevatorPosition() > height - 0.1)),
+            // Set the new goal of the elevator to a scoring position
+            elevSub.setElevatorGoal(height),
+            // Seek and finish extending
+            new ParallelCommandGroup(
+                elevSub.moveElevator().until(() -> elevSub.elevatorAtGoal()),
+                new ParallelDeadlineGroup(
+                    searchForPeg(searchSpeed,0.0,0.0,speedRequest,false),
+                    elevSub.moveElevator()
+                )
+            ),
+            // SCORE!!!
+            new ParallelDeadlineGroup(
+                coralSub.spitCoral(),
+                elevSub.moveElevator()
+            )
+
+        );
+    }
+
     public Command deAlgify() { 
         return
             new SequentialCommandGroup(
