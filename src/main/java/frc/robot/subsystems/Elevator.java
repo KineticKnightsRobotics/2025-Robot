@@ -139,8 +139,14 @@ public class Elevator extends SubsystemBase {
         return goalPosition;
     }
 
+    // Is the elevator at the assigned goal?
     public boolean elevatorAtGoal() {
         return Math.abs(goalPosition - getElevatorPosition()) < 1.5;
+    }
+
+    // Is the elevator at another height?
+    public boolean elevatorAtHeight(double height) {
+        return Math.abs(height - getElevatorPosition()) < 1.5;
     }
     
     public void setElevatorVoltage(double voltage){
