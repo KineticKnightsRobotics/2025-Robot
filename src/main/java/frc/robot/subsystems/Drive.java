@@ -265,6 +265,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
         SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         SmartDashboard.putBoolean("D_User Button", RobotController.getUserButton());
+
+        SmartDashboard.putNumber("Closest Apriltag", reefSelector.getClosestApriltagID(this.getState().Pose));
     }
 
     /**
@@ -287,7 +289,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     }
 
     public Pose2d getClosestReefFace() {
-        return reefSelector.getClosestApriltag(this.getState().Pose);
+        return reefSelector.getClosestApriltagPose(this.getState().Pose);
     }
 
     public Pose2d getTagPose(double AprilTagID) {
