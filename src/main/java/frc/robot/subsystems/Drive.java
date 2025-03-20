@@ -38,7 +38,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.util.Vision;
-import frc.robot.util.Quest;
 import frc.robot.util.ReefSelector;
 
 
@@ -62,6 +61,9 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private Vision kLimelightNan = new Vision("limelight-nan");
 
     private ReefSelector reefSelector = new ReefSelector();
+
+    private DigitalInput digProx = new DigitalInput(DriveConstants.digProxSensor);
+    private DigitalInput nanProx = new DigitalInput(DriveConstants.nanProxSensor);
 
     //private Quest quest = new Quest();
     private boolean hasQuestInitialized = false;
@@ -255,17 +257,8 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
-        /*
-        SmartDashboard.putNumber("D_Quest Battery",quest.getBatteryPercent());
-        SmartDashboard.putBoolean("D_Quest Connected", quest.isConnected());
-        SmartDashboard.putBoolean("D_Quest Pose Seeded", hasQuestInitialized);
-        double[] questPose = {quest.getRobotPose().getX(),quest.getRobotPose().getY()};
-        SmartDashboard.putNumberArray("D_Quest Pose", questPose);
-        */
         SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
         SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
-        SmartDashboard.putBoolean("D_User Button", RobotController.getUserButton());
-
         SmartDashboard.putNumber("Closest Apriltag", reefSelector.getClosestApriltagID(this.getState().Pose));
     }
 

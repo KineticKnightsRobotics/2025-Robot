@@ -27,10 +27,10 @@ public class allign extends Command {
     private final double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
-    private Translation2d displacement;
-    private double targetApriltag;
+    private Translation2d poseOffset;
     private Pose2d fieldCoordinate;
     private double angleOffset;
+    private Pose2d tagPose;
 
     private PIDController xController = new PIDController(StrafeXController.P,StrafeXController.I,StrafeXController.D);
     private PIDController yController = new PIDController(StrafeYController.P,StrafeYController.I,StrafeYController.D);
@@ -43,22 +43,22 @@ public class allign extends Command {
 
     public allign(
         Drive kSubsystem,
-        Translation2d desiredDisplacement,
-        double apriltagID,
+        Pose2d pose,
+        Translation2d displacement,
         double _angleOffset
     ) {
         addRequirements(kSubsystem);
         driveSubsystem = kSubsystem;
-        displacement = desiredDisplacement;
-        targetApriltag = apriltagID;
+        tagPose = pose;
+        poseOffset = displacement;
         angleOffset = _angleOffset;
 
+        rController.enableContinuousInput(-179, 180);
     }
 
     @Override
     public void initialize() {
-        Pose2d tagPose = driveSubsystem.getTagPose(targetApriltag);
-        Translation2d displacementRotated = displacement.rotateBy(tagPose.getRotation());
+        Translation2d displacementRotated = poseOffset.rotateBy(tagPose.getRotation());
         fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation().rotateBy(new Rotation2d(angleOffset)));
     }
 
@@ -75,10 +75,8 @@ public class allign extends Command {
             driveSubsystem.getPose().getRotation().getDegrees(), fieldCoordinate.getRotation().getDegrees()
         );
 
-
-
-        double[] AllignmentOutput = {outputX, outputY, outputR};
-        SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
+        //double[] AllignmentOutput = {outputX, outputY, outputR};
+        //SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
 
         driveSubsystem.setControl(
             speedBuilder

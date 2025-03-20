@@ -38,7 +38,8 @@ public class Constants {
 
     public final static class DriveConstants {
         public static double searchingSpeed = 0.35;
-        public static int resetButton = 3;
+        public static int digProxSensor = 4;
+        public static int nanProxSensor = 3;
     }
 
     public final static class ElevatorConstants {
@@ -55,7 +56,7 @@ public class Constants {
         public static double gearCircumference = 5.50093*2; //inches
 
 
-        public static double gearRatio = 1/9;
+        public static double gearRatio = 1/5;
         public static int encoderID = 20;
         public static double encoderOffset = 0.0;
         public static int digMotorID = 21;

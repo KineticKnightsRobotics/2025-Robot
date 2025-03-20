@@ -17,7 +17,6 @@ import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Drive.allign;
-import frc.robot.commands.Drive.allign_newTest;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
@@ -31,9 +30,6 @@ public class teleopCommands extends Command{
     private Elevator elevSub;
     private coralAffector coralSub;
     private algaeAffector algaeSub;
-
-    // If the elevator can extend or not
-    private boolean canExt = false;
 
     // Constructor
     public teleopCommands(Drive drive, Elevator elevator, coralAffector coral, algaeAffector algae) {
@@ -98,7 +94,7 @@ public class teleopCommands extends Command{
 
     public Command allignToReef_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
-            new allign_newTest(driveSub, desiredDisplacement, _angleOffset),
+            new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
             searchForPeg(-0.2, 0.0, 0.0, speedRequest, false)
         );
     }
@@ -107,7 +103,7 @@ public class teleopCommands extends Command{
         return new SequentialCommandGroup(
             elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelDeadlineGroup(
-                new allign_newTest(driveSub, desiredDisplacement, _angleOffset),
+                new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
                 elevSub.moveElevator()
             ),
             elevSub.setElevatorGoal(elevHeight),
