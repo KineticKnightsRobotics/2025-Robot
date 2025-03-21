@@ -79,7 +79,7 @@ public class Elevator extends SubsystemBase {
             leadMotorConfig = new SparkMaxConfig();
             leadMotorConfig
                 .inverted(false)          //Inverts the motor
-                .smartCurrentLimit(30)  //Limits # of amps going to the motor
+                .smartCurrentLimit(40)  //Limits # of amps going to the motor
                 .idleMode(IdleMode.kCoast)         //Sets idle mode to coast, when the motor is set to 0% output, then it can be freely spun by hand, gravity, etc
                 .closedLoopRampRate(0.001);   //Ammount of time in seconds that the motor will take to accellerate from 0% output to 100% output.
             leadMotorConfig
@@ -91,7 +91,7 @@ public class Elevator extends SubsystemBase {
             nanMotorConfig = new SparkMaxConfig();
             nanMotorConfig
                 .inverted(true)         
-                .smartCurrentLimit(30)
+                .smartCurrentLimit(40)
                 .idleMode(IdleMode.kCoast)
                 .closedLoopRampRate(0.001);
             

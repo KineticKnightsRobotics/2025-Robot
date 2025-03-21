@@ -1,20 +1,14 @@
 package frc.robot.commands;
 
-import javax.naming.PartialResultException;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
-import edu.wpi.first.math.geometry.Pose2d;
+
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.AlgaeAffectorConstants;
-import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
@@ -22,7 +16,6 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 public class teleopCommands extends Command{
 
@@ -92,21 +85,29 @@ public class teleopCommands extends Command{
             ).until(()-> coralSub.allignedWithPeg());
     }
 
-    public Command allignToReef_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+    public Command autoAim_Test(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
-            new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
-            searchForPeg(-0.2, 0.0, 0.0, speedRequest, false)
+            elevSub.setElevatorGoal(ElevatorConstants.Positions.L4),
+            new ParallelCommandGroup(
+                searchForPeg(searchSpeed, 0.1, 0.0, speedRequest, false),
+                elevSub.moveElevator().until(()->elevSub.elevatorAtGoal())
+            ),
+            new ParallelDeadlineGroup(
+                coralSub.spitCoral(),
+                elevSub.moveElevator()
+            )
+            
         );
     }
 
-    public Command teleAim_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, double elevHeight, SwerveRequest.RobotCentric speedRequest) {
+    public Command teleAim_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
-            elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
+            //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelDeadlineGroup(
                 new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
                 elevSub.moveElevator()
             ),
-            elevSub.setElevatorGoal(elevHeight),
+            //elevSub.setElevatorGoal(),
             new ParallelCommandGroup(
                 searchForPeg(searchSpeed, 0.0, 0.0, speedRequest,false),
                 elevSub.moveElevator()

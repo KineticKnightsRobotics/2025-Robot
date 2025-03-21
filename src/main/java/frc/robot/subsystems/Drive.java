@@ -240,21 +240,6 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
             }
         }    
 
-        //if (!hasQuestInitialized && RobotController.getUserButton()) {
-        //    resetQuestPose();
-        //} 
-
-        /*
-        if (hasQuestInitialized) {
-            addVisionMeasurement(
-                quest.getRobotPose(),
-                Utils.fpgaToCurrentTime(quest.getTimestamp()),
-                VecBuilder.fill(1/10,1/10,1/10)
-            );
-        }
-        quest.cleanUpQuestNavMessages();
-        */
-
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
         SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
@@ -308,28 +293,6 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         .getAngle(); 
     }
 
-    /*
-     * Resets the questnav field offset
-     * IE: If the quest's 0,0 coordinate is 5,5 on the field coordinate system, then by adding the translation ID 5,5 it will translate questnav's coordinates to feild coordinates
-    
-    public void resetQuestPose() {
-        hasQuestInitialized = true;
-        quest.resetPose(this.getPose());
-    }
-    
-
-    public Command seedQuestPose() {
-        return Commands.runOnce(
-            () -> {resetQuestPose();}
-        );
-    }
-
-    public Command disableQuest() {
-        return Commands.runOnce(
-            () -> {hasQuestInitialized = false;}
-        );
-    }
-    */
 
 
 

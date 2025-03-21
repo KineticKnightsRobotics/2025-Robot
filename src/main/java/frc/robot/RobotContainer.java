@@ -11,9 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,19 +18,16 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
-import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.teleopCommands;
 //import frc.robot.commands.*;
-import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -59,7 +53,7 @@ public class RobotContainer {
     public final coralAffector coralSubsystem = new coralAffector();
     public final algaeAffector algaeSubsystem = new algaeAffector();
     public final Climber climberSubsystem = new Climber();
-    public final Bling CANdleLED = new Bling();
+    public final Bling blingSubsystem = new Bling();
 
     public final teleopCommands teleopCommand = new teleopCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
 
@@ -123,7 +117,7 @@ public class RobotContainer {
     public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.hasCoral());
     public final Trigger dignanHasAlgae = new Trigger(() -> algaeSubsystem.hasAlgae());
 
-    public final Trigger last30Seconds = new Trigger(() -> (DriverStation.getMatchTime() < 30));
+    public final Trigger dignanReefReady = new Trigger(() -> (elevatorSubsystem.elevatorAtGoal() && coralSubsystem.hasCoral() && coralSubsystem.allignedWithPeg()));
 
     public final Trigger ejectCoral = driverRB.and(dignanHasCoral);
     public final Trigger ejectAlgae = driverRB.and(dignanHasCoral.negate());
@@ -151,14 +145,14 @@ public class RobotContainer {
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //teleopCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed ,search)
+                teleopCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed,search)
             );
         //RIGHT Reef
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //teleopCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                teleopCommand.allignToReef_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,DriveConstants.searchingSpeed,search)
+                teleopCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,DriveConstants.searchingSpeed,search)
             );
 
 
@@ -237,11 +231,21 @@ public class RobotContainer {
         test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
         // Configure LED bindings based on game piece possession
-        dignanHasCoral.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse))
-            .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
-        dignanHasAlgae.onTrue(CANdleLED.setLEDAnimation(AnimationTypes.CoralPulse))
-            .onFalse(CANdleLED.setLEDAnimation(AnimationTypes.SingleFade));
-        last30Seconds.whileTrue(CANdleLED.setLEDAnimation(AnimationTypes.ThirtySeconds));
+        dignanHasCoral
+            .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
+            .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+        dignanHasAlgae
+            .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
+            .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+        dignanReefReady
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore))
+            .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+
+        //dignanHasCoral.onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.CoralPulse))
+        //    .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.SingleFade));
+        //dignanHasAlgae.onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.CoralPulse))
+        //    .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.SingleFade));
+        //last30Seconds.whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ThirtySeconds));
     }
 
 
@@ -255,42 +259,26 @@ public class RobotContainer {
                         .withRotationalRate(-driverController.getRawAxis(4)*AngularRate/**0.2*/)
                     )
             );
-
-        ///elevatorSubsystem.setDefaultCommand(
-            //elevatorSubsystem.homeElevator()
-        //);
-        //CANdleLED.setDefaultCommand(
-        //    CANdleLED.CANdleBlue()
-        //);
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
     }
 
     public void configureNamedCommands() {
         NamedCommands.registerCommand("AquireCoral", 
-        //coralSubsystem.loadCoral()
             new ParallelDeadlineGroup(
                 coralSubsystem.loadCoral(),
                 elevatorSubsystem.intakeElevator()
             )
         );
 
-        //NamedCommands.registerCommand("ScoreL4", teleopCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
-        //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.scoreCoralAutoProx(DriveConstants.searchingSpeed, search));
-        //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
-        //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.scoreCoralAutoProx(-DriveConstants.searchingSpeed, search));
-        //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
-        //NamedCommands.registerCommand("ElevatorToL4", teleopCommand.ElevatorToGoalAuto(ElevatorConstants.Positions.L4));
+        NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.autoAim_Test(-DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.autoAim_Test(DriveConstants.searchingSpeed, search));
 
-        //NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
-        //NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.scoreCoralAuto_Optimized(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
-        //NamedCommands.registerCommand("HomeElevator", elevatorSubsystem.homeElevator().until(()-> elevatorSubsystem.getElevatorPosition() < 10));
-        //NamedCommands.registerCommand("Extend", teleopCommand.canExtend());
+        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4/2),elevatorSubsystem.moveElevator()));
+        NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.homeElevator());
     }
 
     public Command getAutonomousCommand() {
-        return new PrintCommand("No Auto LMAO");//autoSelector.getSelected();
+        //return new PrintCommand("No Auto LMAO");
+        return autoSelector.getSelected();
     }
 } 
 

@@ -3,45 +3,40 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.562664473684211,
-        "y": 2.9088815789473688
+        "x": 7.032020547945206,
+        "y": 1.921404109589041
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.078339572729675,
-        "y": 2.921065995743946
+        "x": 6.790889357175035,
+        "y": 1.9874022068173665
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.022532894736842,
-        "y": 2.7549342105263155
+        "x": 5.319092465753425,
+        "y": 2.9732020547945206
       },
       "prevControl": {
-        "x": 5.271027474093412,
-        "y": 2.782328444050935
+        "x": 5.529034441283345,
+        "y": 2.837465667224369
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 124.15879000637688
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.8207885304659522,
+      "minWaypointRelativePos": 0.8,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.0,
-        "maxAcceleration": 4.0,
+        "maxVelocity": 2.5,
+        "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -50,10 +45,22 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "ElevatorUp",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "ElevatorUp"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 4.2,
+    "maxAcceleration": 8.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -61,13 +68,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 119.98163936884934
+    "rotation": 121.47683934958394
   },
   "reversed": false,
-  "folder": "V1 Paths",
+  "folder": "Source Auto Right EventFlags",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.35625428582466
+    "rotation": 135.0
   },
   "useDefaultConstraints": true
 }
