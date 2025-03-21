@@ -69,6 +69,15 @@ public class ReefSelector {
         }
     }
 
+    public Pose2d getBargePose() {
+        if (redAlliance) {
+            return tagLayout.getTagPose(5).get().toPose2d();
+        }
+        else {
+            return tagLayout.getTagPose(14).get().toPose2d();
+        }
+    }
+
     public int getClosestApriltagID(Pose2d robotPose) {
         Pose2d pose;
         if (redAlliance) {

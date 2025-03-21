@@ -38,6 +38,7 @@ public class Elevator extends SubsystemBase {
     private PIDController elevatorController;
 
     private double goalPosition;
+    private double algaePosition;
 
     private double sysIDVoltage = 0.0;
 
@@ -138,6 +139,9 @@ public class Elevator extends SubsystemBase {
     public double getElevatorGoal(){
         return goalPosition;
     }
+    public double getElevatorAlgaeGoal() {
+        return algaePosition;
+    }  
 
     public boolean elevatorAtGoal() {
         return Math.abs(goalPosition - getElevatorPosition()) < 1.5;
@@ -149,7 +153,7 @@ public class Elevator extends SubsystemBase {
     }
 
     /**
-     * Sets the goal position that the elevator will go to the next time moveElevator() is called
+     * Sets the goal position that the elevator will go to the next time elevatorToGoal() is called
      * @param position Elevation in inches from the top of the bottom elevator bar to the bottom of the elevator chassis.
      */
     public Command setElevatorGoal(double position) {
@@ -160,11 +164,25 @@ public class Elevator extends SubsystemBase {
                 goalPosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.1, ElevatorConstants.maxChassisHeight-0.1);
             },
             this
-        ).unless(
-           () ->(false/*position > ElevatorConstants.maxChassisHeight*/)
+        );
+    }
+
+        /**
+     * Sets the goal position that the elevator will go to the next time dealgifying command is run
+     * @param position Elevation in inches from the top of the bottom elevator bar to the bottom of the elevator chassis.
+     */
+    public Command setElevatorDealgify(double position) {
+        return Commands
+        .runOnce(
+            () -> {
+                //Clamp new incoming position incase it is ever out of the physical bounds of the elevator.
+                algaePosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.1, ElevatorConstants.maxChassisHeight-0.1);
+            },
+            this
         );
     }
     
+
     /**
      * Moves the elvator upwards towards the setpoint using closed loop position control.
      * @return command that does the above
@@ -181,9 +199,13 @@ public class Elevator extends SubsystemBase {
                 () -> {
                     if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
                         double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), goalPosition),-1.0,1.0);
-                        if (getElevatorPosition() < 3 || getElevatorPosition() > 50) {
-                            output = MathUtil.clamp(output, -0.2, 0.2);
+                        if (getElevatorPosition() < 3) {
+                            output = MathUtil.clamp(output, -0.2, 1.0);
                         }
+                        if (getElevatorPosition() > 50) {
+                            output = MathUtil.clamp(output, -1.0, 0.2);
+                        }
+
                         SmartDashboard.putNumber("E_PID Output", output);
                         digElevatorMotor.set(output);
                         nanElevatorMotor.set(output);
@@ -200,16 +222,16 @@ public class Elevator extends SubsystemBase {
     }
 
     /**
-     * Moves the elevator downwards towards its home position gently using output-limited closed loop position control
+     * Moves the elevator to a specific point
      * @return command that does the above.
      */
     public Command elevatorToHeight(double height) {
         return Commands
             .run(
                 () -> {
-                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.60,0.20);
-                    if (getElevatorPosition() < 5) {
-                        output = MathUtil.clamp(output, -0.2, 0.2);
+                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.80,1.0);
+                    if (getElevatorPosition() < 10) {
+                        output = MathUtil.clamp(output, -0.2, 1.0);
                     }
                     SmartDashboard.putNumber("E_PID Output", output);
                     digElevatorMotor.set(output);

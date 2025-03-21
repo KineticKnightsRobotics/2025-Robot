@@ -274,6 +274,10 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
         return kFieldLayout.getTagPose((int)AprilTagID).get().toPose2d();
     }
 
+    public Pose2d getBargePose() {
+        return reefSelector.getBargePose();
+    }
+
 
     public Translation2d getTranslationRelative(int apriltagID) { //Repurposed 2024 code
         return 

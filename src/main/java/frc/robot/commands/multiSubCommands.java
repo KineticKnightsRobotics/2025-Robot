@@ -4,6 +4,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -11,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
+import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
@@ -65,15 +67,12 @@ public class multiSubCommands extends Command{
             );
     }
 
-    public Command getAlgae() { 
+    public Command dealgify() { 
         return
             new SequentialCommandGroup(
-
                 new ParallelRaceGroup(
-                    elevSub.elevatorToGoal(),
-                    (elevSub.getElevatorGoal() < 5.0 ? 
-                        algaeSub.intakeAlgae(PivotPositions.deAlgifying,PivotPositions.home) :
-                        algaeSub.intakeAlgae(PivotPositions.groundIntake, PivotPositions.))
+                    elevSub.elevatorToHeight(elevSub.getElevatorAlgaeGoal()),
+                    algaeSub.intakeAlgae(PivotPositions.deAlgifying, PivotPositions.home)
                 )
             );
     }
@@ -90,7 +89,7 @@ public class multiSubCommands extends Command{
 
     public Command autoAim_Test(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
-            elevSub.setElevatorGoal(ElevatorConstants.Positions.L4),
+            elevSub.setElevatorGoal(Positions.L4),
             new ParallelCommandGroup(
                 searchForPeg(searchSpeed, 0.1, 0.0, speedRequest, false),
                 elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal())
@@ -107,15 +106,40 @@ public class multiSubCommands extends Command{
         return new SequentialCommandGroup(
             //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelDeadlineGroup(
-                new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
+                //new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset), //TODO: Uncomment at drive space for test!
                 elevSub.elevatorToGoal()
             ),
             //elevSub.setElevatorGoal(),
             new ParallelCommandGroup(
                 searchForPeg(searchSpeed, 0.0, 0.0, speedRequest,false),
                 elevSub.elevatorToGoal()
+            ),
+            new ParallelCommandGroup(
+                coralSub.spitCoral(),
+                elevSub.elevatorToGoal()
             )
         );
     }
+
+    public Command aimBarge() {
+        return new SequentialCommandGroup(
+            //new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180), //TODO: Uncomment at drive space for test!
+            elevSub.setElevatorGoal(Positions.L4),
+            elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
+            new ParallelCommandGroup(
+                algaeSub.setAlgaePosition(PivotPositions.home),
+                elevSub.elevatorToGoal()   
+            )
+        );
+    }
+
+    public Command intakeCoral() {
+        return new ParallelDeadlineGroup(
+            coralSub.loadCoral(),
+            elevSub.setElevatorGoal(Positions.intake)
+        );
+    }
+
+
 
 }

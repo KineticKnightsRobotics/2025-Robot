@@ -116,6 +116,10 @@ public class algaeAffector extends SubsystemBase {
     //    return Commands.runOnce(()-> {primedPosition = position;},this);
     //}
 
+    public Command setAlgaePosition(double position) {
+        return Commands.runOnce(()->{pivotController.setReference(position, ControlType.kPosition);});
+    }
+
     public Command intakeAlgae(double intakingPosition, double endingPosition) {
         return Commands
             .runOnce(
