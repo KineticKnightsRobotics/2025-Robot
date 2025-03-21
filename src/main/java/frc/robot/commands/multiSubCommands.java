@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.AlgaeAffectorConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.commands.Drive.allign;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
@@ -17,7 +18,7 @@ import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public class teleopCommands extends Command{
+public class multiSubCommands extends Command{
 
     private Drive driveSub;
     private Elevator elevSub;
@@ -25,7 +26,7 @@ public class teleopCommands extends Command{
     private algaeAffector algaeSub;
 
     // Constructor
-    public teleopCommands(Drive drive, Elevator elevator, coralAffector coral, algaeAffector algae) {
+    public multiSubCommands(Drive drive, Elevator elevator, coralAffector coral, algaeAffector algae) {
         driveSub = drive;
         elevSub = elevator;
         coralSub = coral;
@@ -53,24 +54,26 @@ public class teleopCommands extends Command{
                 //Set elev height
                 elevSub.setElevatorGoal(height),
                 //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
-                elevSub.moveElevator().until(()-> elevSub.elevatorAtGoal()),
+                elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
                 //Continue moving elevator until coral has been spat out.
                 new ParallelDeadlineGroup(
                     coralSub.spitCoral().withTimeout(1),
-                    elevSub.moveElevator()
+                    elevSub.elevatorToGoal()
                 ),
                 //Send the elevator back to home
-                elevSub.homeElevator().until(()-> elevSub.getElevatorPosition() < 10)
+                elevSub.elevatorToGoal().until(()-> elevSub.getElevatorPosition() < 10)
             );
     }
 
-    public Command deAlgify() { 
+    public Command getAlgae() { 
         return
             new SequentialCommandGroup(
-                algaeSub.setPrimedPosition(AlgaeAffectorConstants.PivotPositions.deAlgifying),
+
                 new ParallelRaceGroup(
-                    elevSub.moveElevator(),
-                    algaeSub.captureAlgae()
+                    elevSub.elevatorToGoal(),
+                    (elevSub.getElevatorGoal() < 5.0 ? 
+                        algaeSub.intakeAlgae(PivotPositions.deAlgifying,PivotPositions.home) :
+                        algaeSub.intakeAlgae(PivotPositions.groundIntake, PivotPositions.))
                 )
             );
     }
@@ -90,11 +93,11 @@ public class teleopCommands extends Command{
             elevSub.setElevatorGoal(ElevatorConstants.Positions.L4),
             new ParallelCommandGroup(
                 searchForPeg(searchSpeed, 0.1, 0.0, speedRequest, false),
-                elevSub.moveElevator().until(()->elevSub.elevatorAtGoal())
+                elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal())
             ),
             new ParallelDeadlineGroup(
                 coralSub.spitCoral(),
-                elevSub.moveElevator()
+                elevSub.elevatorToGoal()
             )
             
         );
@@ -105,12 +108,12 @@ public class teleopCommands extends Command{
             //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelDeadlineGroup(
                 new allign(driveSub, driveSub.getClosestReefFace(), desiredDisplacement, _angleOffset),
-                elevSub.moveElevator()
+                elevSub.elevatorToGoal()
             ),
             //elevSub.setElevatorGoal(),
             new ParallelCommandGroup(
                 searchForPeg(searchSpeed, 0.0, 0.0, speedRequest,false),
-                elevSub.moveElevator()
+                elevSub.elevatorToGoal()
             )
         );
     }

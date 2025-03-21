@@ -26,7 +26,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.commands.teleopCommands;
+import frc.robot.Constants.ElevatorConstants.Positions;
+import frc.robot.commands.multiSubCommands;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -55,7 +56,7 @@ public class RobotContainer {
     public final Climber climberSubsystem = new Climber();
     public final Bling blingSubsystem = new Bling();
 
-    public final teleopCommands teleopCommand = new teleopCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
+    public final multiSubCommands teleopCommand = new multiSubCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
 
     public SendableChooser<Command> autoSelector;
 
@@ -158,10 +159,10 @@ public class RobotContainer {
 
         driverLB
             .whileTrue(
-                elevatorSubsystem.moveElevator()
+                elevatorSubsystem.elevatorToGoal()
             )
             .onFalse(
-                elevatorSubsystem.homeElevator()
+                elevatorSubsystem.elevatorToHeight(Positions.home)
             );
         
         ejectCoral
@@ -190,11 +191,11 @@ public class RobotContainer {
             .whileTrue(
                     new ParallelCommandGroup(
                         coralSubsystem.loadCoral(),
-                        elevatorSubsystem.intakeElevator()
+                        elevatorSubsystem.elevatorToHeight(Positions.intake)
                     )
             )
             .onFalse(
-                elevatorSubsystem.homeElevator()
+                elevatorSubsystem.elevatorToHeight(Positions.home)
             );
         
 
@@ -265,15 +266,15 @@ public class RobotContainer {
         NamedCommands.registerCommand("AquireCoral", 
             new ParallelDeadlineGroup(
                 coralSubsystem.loadCoral(),
-                elevatorSubsystem.intakeElevator()
+                elevatorSubsystem.elevatorToHeight(Positions.intake)
             )
         );
 
         NamedCommands.registerCommand("OptimizedScoreLeft", teleopCommand.autoAim_Test(-DriveConstants.searchingSpeed, search));
         NamedCommands.registerCommand("OptimizedScoreRight", teleopCommand.autoAim_Test(DriveConstants.searchingSpeed, search));
 
-        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4/2),elevatorSubsystem.moveElevator()));
-        NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.homeElevator());
+        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4/2),elevatorSubsystem.elevatorToGoal()));
+        NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));
     }
 
     public Command getAutonomousCommand() {

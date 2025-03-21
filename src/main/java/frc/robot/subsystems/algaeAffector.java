@@ -112,32 +112,15 @@ public class algaeAffector extends SubsystemBase {
         return proxSensor.get();
     }
 
-    public Command setPrimedPosition(double position) {
-        return
-            Commands
-            .runOnce(
-                    ()-> {
-                        primedPosition = position;
-                    },
-                    this
-                );
-    }
+    //public Command setPrimedPosition(double position) {
+    //    return Commands.runOnce(()-> {primedPosition = position;},this);
+    //}
 
-    public Command overRidePivotPosition(double position) {
+    public Command intakeAlgae(double intakingPosition, double endingPosition) {
         return Commands
             .runOnce(
                 () -> {
-                    pivotController.setReference(position, ControlType.kPosition);
-                },
-                this
-            );
-    }
-
-    public Command captureAlgae() {
-        return Commands
-            .runOnce(
-                () -> {
-                    pivotController.setReference(primedPosition, ControlType.kPosition);
+                    pivotController.setReference(intakingPosition, ControlType.kPosition);
                     rollerMotor.set(-0.05);
                 },
                 this
@@ -150,7 +133,7 @@ public class algaeAffector extends SubsystemBase {
             ).until(() -> hasAlgae())
             .finallyDo(
                 () -> {
-                    pivotController.setReference(AlgaeAffectorConstants.PivotPositions.carrying, ControlType.kPosition);
+                    pivotController.setReference(endingPosition, ControlType.kPosition);
                     rollerMotor.set(-0.1);
                 }
             );
