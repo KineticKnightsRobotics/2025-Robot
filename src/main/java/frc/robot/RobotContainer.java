@@ -137,6 +137,7 @@ public class RobotContainer {
     public final Trigger lastFiveSeconds = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 5.0);
 
+
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
@@ -284,10 +285,10 @@ public class RobotContainer {
             
         // Endgame LED animations with color progression based on time and game piece status
         // Last 20-10 seconds
-        inEndgame.and(lastTenSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae))
+        inEndgame.and(dignanHasCoral.or(dignanHasAlgae))
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameYellowWithGamepiece));
         
-        inEndgame.and(lastTenSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae).negate())
+        inEndgame.and(dignanHasCoral.or(dignanHasAlgae).negate())
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameYellow));
             
         // Last 10-5 seconds
