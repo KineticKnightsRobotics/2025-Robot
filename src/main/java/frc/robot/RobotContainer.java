@@ -131,9 +131,9 @@ public class RobotContainer {
     public final Trigger inRegularTeleop = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 20.0);
     public final Trigger inEndgame = new Trigger(() -> 
-        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 20.0);
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 20.0 && DriverStation.getMatchTime() >10);
     public final Trigger lastTenSeconds = new Trigger(() -> 
-        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 10.0);
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 10.0 && DriverStation.getMatchTime () > 5);
     public final Trigger lastFiveSeconds = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 5.0);
 
@@ -291,10 +291,10 @@ public class RobotContainer {
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameYellow));
             
         // Last 10-5 seconds
-        lastTenSeconds.and(lastFiveSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae))
+        lastTenSeconds.and(dignanHasCoral.or(dignanHasAlgae))
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameOrangeWithGamepiece));
         
-        lastTenSeconds.and(lastFiveSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae).negate())
+        lastTenSeconds.and(dignanHasCoral.or(dignanHasAlgae).negate())
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameOrange));
         
         // Last 5 seconds
