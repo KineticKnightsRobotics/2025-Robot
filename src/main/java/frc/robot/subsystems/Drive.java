@@ -242,9 +242,13 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
 
         SmartDashboard.putData("field2d", this.field);
         this.field.setRobotPose(getPose());
-        SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
-        SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
+        //SmartDashboard.putNumber("D_Robot Velocity", Math.sqrt(getState().Speeds.vxMetersPerSecond * getState().Speeds.vxMetersPerSecond + getState().Speeds.vyMetersPerSecond*getState().Speeds.vyMetersPerSecond));
+        //SmartDashboard.putNumber("D_Drive Curerent Draw",this.getModule(0).getDriveMotor().getStatorCurrent().getValueAsDouble());
         SmartDashboard.putNumber("Closest Apriltag", reefSelector.getClosestApriltagID(this.getState().Pose));
+
+        SmartDashboard.putBoolean("D_DigSensor", getSensorDig());
+        SmartDashboard.putBoolean("D_NanSensor", getSensorNan());
+        
     }
 
     /**
@@ -264,6 +268,18 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     public Pose2d getPose() {
         //return null;
         return getState().Pose;
+    }
+
+    public boolean getSensorDig() {
+        return digProx.get();
+    }
+
+    public boolean getSensorNan() {
+        return nanProx.get();
+    }
+
+    public int getClosestReefID() {
+        return reefSelector.getClosestApriltagID(this.getState().Pose);
     }
 
     public Pose2d getClosestReefFace() {

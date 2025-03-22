@@ -72,6 +72,7 @@ public class Elevator extends SubsystemBase {
         configureDevices();
 
         goalPosition = ElevatorConstants.Positions.home;
+        algaePosition = ElevatorConstants.Positions.deAlgifyL2;
         elevatorEncoder.setPosition(0.0);
     }
 
@@ -229,9 +230,9 @@ public class Elevator extends SubsystemBase {
         return Commands
             .run(
                 () -> {
-                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.80,1.0);
-                    if (getElevatorPosition() < 10) {
-                        output = MathUtil.clamp(output, -0.2, 1.0);
+                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.60,1.0);
+                    if (getElevatorPosition() < 20) {
+                        output = MathUtil.clamp(output, -0.1, 1.0);
                     }
                     SmartDashboard.putNumber("E_PID Output", output);
                     digElevatorMotor.set(output);

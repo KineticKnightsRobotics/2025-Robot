@@ -16,12 +16,12 @@ public class Constants {
 
         public static class AlignmentController {
             public static class StrafeXController {
-                public static double P = 1.5;
+                public static double P = 2.5;
                 public static double I = 0.0;
                 public static double D = 0.15;
             }
             public static class StrafeYController {
-                public static double P = 1.5;
+                public static double P = 2.5;
                 public static double I = 0.0;
                 public static double D = 0.15;
             }
@@ -38,13 +38,13 @@ public class Constants {
 
     public final static class DriveConstants {
         public static double searchingSpeed = 0.35;
-        public static int digProxSensor = 4;
-        public static int nanProxSensor = 3;
+        public static int digProxSensor = 3;
+        public static int nanProxSensor = 2;
     }
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.01;
+            public static double P = 0.1;
             public static double I = 0;
             public static double D = 0.0;
             public static double MaxVelocity = 0;
@@ -79,7 +79,7 @@ public class Constants {
 
     public final static class AlgaeAffectorConstants {
         public static class PivotPID {
-            public static double P = 0.0125;
+            public static double P = 0.0075;
             public static double I = 0.0;
             public static double D = 0.000;
             public static double MaxVelocity = 0;
@@ -90,7 +90,7 @@ public class Constants {
         public static int rollerMotorID = 32;
         public static int proxSensor = 7;
 
-        public static double encoderOffset = 0.74335;
+        public static double encoderOffset = 0.90297;
         public static double algaePivotGearRatio = 1/5;
 
         public static class PivotPositions {
