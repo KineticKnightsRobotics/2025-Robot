@@ -30,6 +30,7 @@ import frc.robot.commands.multiSubCommands;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.allignReef;
 import frc.robot.commands.Drive.searchForBranch;
+import edu.wpi.first.wpilibj.DriverStation;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -122,6 +123,19 @@ public class RobotContainer {
 
     public final Trigger dignanReefReady = new Trigger(() -> (elevatorSubsystem.elevatorAtGoal() && coralSubsystem.hasCoral() && coralSubsystem.allignedWithPeg()));
 
+    public final Trigger lastTwenty = new Trigger(() -> {
+        return DriverStation.getMatchTime() <= 20.0;
+    });    
+    public final Trigger inAuto = new Trigger(() -> DriverStation.isAutonomousEnabled());
+    public final Trigger inTeleop = new Trigger(() -> DriverStation.isTeleopEnabled());
+    public final Trigger inRegularTeleop = new Trigger(() -> 
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 20.0);
+    public final Trigger inEndgame = new Trigger(() -> 
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 20.0);
+    public final Trigger lastTenSeconds = new Trigger(() -> 
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 10.0);
+    public final Trigger lastFiveSeconds = new Trigger(() -> 
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 5.0);
 
     public RobotContainer() {
         configureDefaultCommands();
@@ -234,16 +248,75 @@ public class RobotContainer {
         test3.whileTrue(new searchForBranch(driveSubsystem, coralSubsystem, false));
         test4.whileTrue(multiSubCommand.dealgify()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
 
-        // Configure LED bindings based on game piece possession
-        dignanHasCoral
+
+        // dignanHasCoral
+        //     .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
+        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+        // dignanHasAlgae
+        //     .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
+        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+        // dignanReefReady
+        //     .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore))
+        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+            
+
+        inRegularTeleop.and(dignanHasCoral)
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        dignanHasAlgae
+        inRegularTeleop.and(dignanHasAlgae)
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        dignanReefReady
+        inRegularTeleop.and(dignanReefReady)
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+            
+        // Auto LED animations
+        inAuto
+            .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.AutoDefault));
+            
+        // Game piece detection during auto - coral only
+        inAuto.and(dignanHasCoral)
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.AutoGamePiece));
+        
+        // This explicitly handles the case when we're in auto but don't have coral
+        inAuto.and(dignanHasCoral.negate())
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.AutoDefault));
+            
+        // Endgame LED animations with color progression based on time and game piece status
+        // Last 20-10 seconds
+        inEndgame.and(lastTenSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae))
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameYellowWithGamepiece));
+        
+        inEndgame.and(lastTenSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae).negate())
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameYellow));
+            
+        // Last 10-5 seconds
+        lastTenSeconds.and(lastFiveSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae))
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameOrangeWithGamepiece));
+        
+        lastTenSeconds.and(lastFiveSeconds.negate()).and(dignanHasCoral.or(dignanHasAlgae).negate())
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameOrange));
+        
+        // Last 5 seconds
+        lastFiveSeconds.and(dignanHasCoral.or(dignanHasAlgae))
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameRedWithGamepiece));
+            
+        lastFiveSeconds.and(dignanHasCoral.or(dignanHasAlgae).negate())
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.EndgameRed));
+            
+        // Ready to score has highest priority
+        inEndgame.and(dignanReefReady)
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore));
+        
+        // Regular teleop LED animations
+        inRegularTeleop.and(dignanHasCoral.or(dignanHasAlgae))
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired));
+            
+        inRegularTeleop.and(dignanReefReady)
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore));
+            
+        inRegularTeleop.and(dignanHasCoral.negate().and(dignanHasAlgae.negate()))
+            .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
     }
 
 
@@ -278,4 +351,4 @@ public class RobotContainer {
         //return new PrintCommand("No Auto LMAO");
         return autoSelector.getSelected();
     }
-} 
+}

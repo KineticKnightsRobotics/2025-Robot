@@ -18,7 +18,9 @@ public class Bling extends SubsystemBase {
 
     public enum AnimationTypes {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe, Twinkle, TwinkleOff,
-        GamepieceAquired, Idle, ReadytoScore
+        GamepieceAquired, Idle, ReadytoScore, 
+        AutoDefault, AutoGamePiece, 
+        EndgameYellow, EndgameOrange, EndgameRed
     }
 
     private Animation m_currentAnimation;
@@ -67,9 +69,27 @@ public class Bling extends SubsystemBase {
             case ReadytoScore:
                 m_currentAnimation = new StrobeAnimation(240, 10, 180, 0, 98.0 / 256.0, LedCount);
                 break;
-
-
                 
+            // Autonomous animations
+            case AutoDefault:
+                m_currentAnimation = new FireAnimation(0.7, 0.5, LedCount, 0.7, 0.1);
+                break;
+            case AutoGamePiece:
+                m_currentAnimation = new FireAnimation(1.0, 0.8, LedCount, 1.0, 0.2);
+                break;
+                
+            // Endgame animations
+            case EndgameYellow:
+                m_currentAnimation = new StrobeAnimation(255, 255, 0, 0, 0.8, LedCount);
+                break;
+            case EndgameOrange:
+                m_currentAnimation = new StrobeAnimation(255, 165, 0, 0, 0.8, LedCount);
+                break;
+            case EndgameRed:
+                m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 0.8, LedCount);
+                break;
+
+            // Standard animations
             case ColorFlow:
                 m_currentAnimation = new ColorFlowAnimation(128, 20, 70, 0, 0.7, LedCount, ColorFlowAnimation.Direction.Forward);
                 break;
