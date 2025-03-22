@@ -74,10 +74,10 @@ public class Bling extends SubsystemBase {
                 
             // Autonomous animations
             case AutoDefault:
-                m_currentAnimation = new FireAnimation(0.7, 0.5, LedCount, 0.7, 0.1);
+                m_currentAnimation = new FireAnimation(0.5, 0.5, LedCount-15, 0.5, 0.1);
                 break;
             case AutoGamePiece:
-                m_currentAnimation = new FireAnimation(1.0, 0.8, LedCount, 1.0, 0.2);
+                m_currentAnimation = new FireAnimation(1.0, 0.8, LedCount, 1.0, 0.4);
                 break;
                 
             // Endgame animations - single fade for no gamepiece
