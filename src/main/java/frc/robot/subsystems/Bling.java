@@ -20,7 +20,9 @@ public class Bling extends SubsystemBase {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe, Twinkle, TwinkleOff,
         GamepieceAquired, Idle, ReadytoScore, 
         AutoDefault, AutoGamePiece, 
-        EndgameYellow, EndgameOrange, EndgameRed
+        EndgameYellow, EndgameOrange, EndgameRed,
+        EndgameGamePiece,  // New animation type for game piece in endgame
+        EndgameYellowWithGamepiece, EndgameOrangeWithGamepiece, EndgameRedWithGamepiece
     }
 
     private Animation m_currentAnimation;
@@ -78,7 +80,7 @@ public class Bling extends SubsystemBase {
                 m_currentAnimation = new FireAnimation(1.0, 0.8, LedCount, 1.0, 0.2);
                 break;
                 
-            // Endgame animations
+            // Endgame animations - all blinking now
             case EndgameYellow:
                 m_currentAnimation = new StrobeAnimation(255, 255, 0, 0, 0.8, LedCount);
                 break;
@@ -87,6 +89,23 @@ public class Bling extends SubsystemBase {
                 break;
             case EndgameRed:
                 m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 0.8, LedCount);
+                break;
+            case EndgameGamePiece:
+                m_currentAnimation = new StrobeAnimation(0, 255, 0, 0, 0.8, LedCount);
+                break;
+                
+            // Endgame with gamepiece - Fixed constructors with valid parameters
+            case EndgameYellowWithGamepiece:
+                m_currentAnimation = new StrobeAnimation(255, 255, 0, 0, 0.9, LedCount);
+                ((StrobeAnimation)m_currentAnimation).setSpeed(0.4); // Make it blink faster
+                break;
+            case EndgameOrangeWithGamepiece:
+                m_currentAnimation = new StrobeAnimation(255, 165, 0, 0, 0.9, LedCount);
+                ((StrobeAnimation)m_currentAnimation).setSpeed(0.4); // Make it blink faster
+                break;
+            case EndgameRedWithGamepiece:
+                m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 0.9, LedCount);
+                ((StrobeAnimation)m_currentAnimation).setSpeed(0.4); // Make it blink faster
                 break;
 
             // Standard animations
