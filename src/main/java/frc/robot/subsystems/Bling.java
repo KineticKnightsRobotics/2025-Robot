@@ -80,15 +80,18 @@ public class Bling extends SubsystemBase {
                 m_currentAnimation = new FireAnimation(1.0, 0.8, LedCount, 1.0, 0.2);
                 break;
                 
-            // Endgame animations - all blinking now
+            // Endgame animations - single fade for no gamepiece
             case EndgameYellow:
-                m_currentAnimation = new StrobeAnimation(255, 255, 0, 0, 0.8, LedCount);
+                // Yellow fade animation
+                m_currentAnimation = new SingleFadeAnimation(255, 255, 0, 0, 0.5, LedCount);
                 break;
             case EndgameOrange:
-                m_currentAnimation = new StrobeAnimation(255, 165, 0, 0, 0.8, LedCount);
+                // Orange fade animation
+                m_currentAnimation = new SingleFadeAnimation(255, 165, 0, 0, 0.5, LedCount);
                 break;
             case EndgameRed:
-                m_currentAnimation = new StrobeAnimation(255, 0, 0, 0, 0.8, LedCount);
+                // Red fade animation
+                m_currentAnimation = new SingleFadeAnimation(255, 0, 0, 0, 0.5, LedCount);
                 break;
             case EndgameGamePiece:
                 m_currentAnimation = new StrobeAnimation(0, 255, 0, 0, 0.8, LedCount);
