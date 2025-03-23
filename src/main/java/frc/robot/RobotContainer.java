@@ -11,15 +11,18 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.DriveConstants;
@@ -187,6 +190,9 @@ public class RobotContainer {
         driverRB
             .whileTrue(
                 multiSubCommand.dealgify()
+            )
+            .onFalse(
+                new SequentialCommandGroup(algaeSubsystem.setAlgaePosition(PivotPositions.home),new WaitCommand(1).until(()->algaeSubsystem.atPosition()),elevatorSubsystem.elevatorToHeight(Positions.home))
             );
 
         driverLT
@@ -197,7 +203,8 @@ public class RobotContainer {
         driverRT
             .whileTrue(
                 multiSubCommand.intakeCoral()
-            );
+            )
+            .onFalse(elevatorSubsystem.elevatorToHeight(Positions.home).alongWith(algaeSubsystem.setAlgaePosition(PivotPositions.home)));
         /*
          * OPERATOR CONTROLS
          */
@@ -239,15 +246,29 @@ public class RobotContainer {
         //test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
         //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
+        //test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(),new Translation2d(Units.inchesToMeters(17.6),0.25),180));
 
-        //test1.whileTrue(new allignReef(driveSubsystem, driveSubsystem.getClosestReefFace(), new Translation2d(0,0), 0).andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Twinkle)));
+
+        test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(), new Translation2d(Units.inchesToMeters(17.6),0.25),180));
+        
+        test2.whileTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), 180).andThen(elevatorSubsystem.setElevatorGoal(10)));
+
         //test1.onTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), 180).andThen(elevatorSubsystem.setElevatorGoal(10)));
         //test2.whileTrue(multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed,search));
         //test3.whileTrue(multiSubCommand.aimBarge());
-        test1.whileTrue(elevatorSubsystem.elevatorToGoal()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
-        test2.whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.groundIntake, PivotPositions.carrying));
-        test3.whileTrue(new searchForBranch(driveSubsystem, coralSubsystem, false));
+
+
+        //test1.whileTrue(elevatorSubsystem.elevatorToGoal()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
+        //test2.whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.groundIntake, PivotPositions.carrying));
+        //test2.whileTrue(coralSubsystem.spitCoral());
+        test3.whileTrue(
+                new ParallelCommandGroup(
+                    new searchForBranch(driveSubsystem, coralSubsystem, false),
+                    elevatorSubsystem.elevatorToGoal()
+                )
+            ).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
         test4.whileTrue(multiSubCommand.dealgify()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
+        test5.whileTrue(algaeSubsystem.setAlgaePosition(33));
 
 
         // dignanHasCoral

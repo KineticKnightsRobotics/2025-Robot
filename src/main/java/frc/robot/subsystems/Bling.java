@@ -87,7 +87,7 @@ public class Bling extends SubsystemBase {
                 break;
             case EndgameOrange:
                 // Orange fade animation
-                m_currentAnimation = new SingleFadeAnimation(255, 140, 0, 0, 0.5, LedCount);
+                m_currentAnimation = new SingleFadeAnimation(255, 75, 0, 0, 0.5, LedCount);
                 break;
             case EndgameRed:
                 // Red fade animation
@@ -103,7 +103,7 @@ public class Bling extends SubsystemBase {
                 ((StrobeAnimation)m_currentAnimation).setSpeed(0.4); // Make it blink faster
                 break;
             case EndgameOrangeWithGamepiece:
-                m_currentAnimation = new StrobeAnimation(255, 140, 0, 0, 0.9, LedCount);
+                m_currentAnimation = new StrobeAnimation(255, 75, 0, 0, 0.9, LedCount);
                 ((StrobeAnimation)m_currentAnimation).setSpeed(0.4); // Make it blink faster
                 break;
             case EndgameRedWithGamepiece:

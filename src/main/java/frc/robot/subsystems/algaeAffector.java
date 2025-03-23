@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AlgaeAffectorConstants;
+import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 
 public class algaeAffector extends SubsystemBase {
     
@@ -34,6 +35,7 @@ public class algaeAffector extends SubsystemBase {
     private DigitalInput proxSensor;
 
     private double primedPosition;
+    private double pivotPosition;
 
     public algaeAffector() {
 
@@ -51,6 +53,7 @@ public class algaeAffector extends SubsystemBase {
         pivotController = pivotMotor.getClosedLoopController();
 
         pivotController.setReference(AlgaeAffectorConstants.PivotPositions.home, ControlType.kPosition);
+        pivotPosition = PivotPositions.home;
         
     }
 
@@ -100,12 +103,17 @@ public class algaeAffector extends SubsystemBase {
         SmartDashboard.putNumber("A_Absolute Position", getPivotAbsolutePosition());
         SmartDashboard.putNumber("A_Primed Position", primedPosition);
         SmartDashboard.putBoolean("A_Dignan Algae", hasAlgae());
+        SmartDashboard.putBoolean("A_At Position", atPosition());
         SmartDashboard.putData(this);
     }
 
     // Get the position of the pivotEncoder in degrees
     public double getPivotAbsolutePosition() {
         return pivotEncoder.getPosition();
+    }
+
+    public boolean atPosition() {
+        return Math.abs(getPivotAbsolutePosition() - pivotPosition) < 5;
     }
     
     public boolean hasAlgae() {
@@ -117,7 +125,7 @@ public class algaeAffector extends SubsystemBase {
     //}
 
     public Command setAlgaePosition(double position) {
-        return Commands.runOnce(()->{pivotController.setReference(position, ControlType.kPosition);});
+        return Commands.runOnce(()->{pivotController.setReference(position, ControlType.kPosition); pivotPosition = position;});
     }
 
     public Command intakeAlgae(double intakingPosition, double endingPosition) {
@@ -125,20 +133,22 @@ public class algaeAffector extends SubsystemBase {
             .runOnce(
                 () -> {
                     pivotController.setReference(intakingPosition, ControlType.kPosition);
+                    pivotPosition = intakingPosition;
                     rollerMotor.set(-0.05);
                 },
                 this
             ).andThen(
                 Commands.run(
                 () -> {
-                    rollerMotor.set(-0.5);
+                    rollerMotor.set(-0.8);
                 },
                 this)
             ).until(() -> hasAlgae())
             .finallyDo(
                 () -> {
                     pivotController.setReference(endingPosition, ControlType.kPosition);
-                    rollerMotor.set(-0.1);
+                    pivotPosition = endingPosition;
+                    rollerMotor.set(-0.25);
                 }
             );
     } 
@@ -155,6 +165,7 @@ public class algaeAffector extends SubsystemBase {
                 () -> {
                     rollerMotor.set(0.0);
                     pivotController.setReference(AlgaeAffectorConstants.PivotPositions.home, ControlType.kPosition);
+                    pivotPosition = AlgaeAffectorConstants.PivotPositions.home;
                 }
             );
     }

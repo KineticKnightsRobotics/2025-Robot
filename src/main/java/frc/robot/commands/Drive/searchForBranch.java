@@ -80,8 +80,12 @@ public class searchForBranch extends Command {
         }
 
 
-        if (!(drvSub.getSensorDig() && drvSub.getSensorNan())) {
-            ySpeed = 0.1;
+        if (!(drvSub.getSensorDig() || drvSub.getSensorNan())) {
+            ySpeed = 0.25;
+        }
+
+        if ((drvSub.getSensorDig() || drvSub.getSensorNan()) && !(drvSub.getSensorDig() && drvSub.getSensorNan())) {
+            ySpeed = 0.05;
         }
 
         //Determine Y
@@ -92,8 +96,8 @@ public class searchForBranch extends Command {
 
         drvSub.setControl(
             speedBuilder
-                .withVelocityY(xSpeed)
-                .withVelocityX(ySpeed)
+                .withVelocityY(xSpeed * MaxSpeed)
+                .withVelocityX(ySpeed * MaxSpeed)
                 .withRotationalRate(0.0)
         );
     }

@@ -1,10 +1,20 @@
 package frc.robot.commands;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 
-
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -15,6 +25,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.allignReef;
 import edu.wpi.first.math.util.Units;
@@ -66,13 +77,26 @@ public class multiSubCommands extends Command{
             );
     }
 
+    public Command intakeCoral() {
+        return new SequentialCommandGroup(
+            algaeSub.setAlgaePosition(PivotPositions.coralIntaking),
+            new ParallelDeadlineGroup(
+                coralSub.loadCoral(),
+                elevSub.elevatorToHeight(Positions.intake)
+            ),
+            algaeSub.setAlgaePosition(PivotPositions.home),
+            elevSub.elevatorToHeight(Positions.home)
+        );
+    }
+
     public Command dealgify() { 
         return
             new SequentialCommandGroup(
                 new ParallelDeadlineGroup(
                     algaeSub.intakeAlgae(PivotPositions.deAlgifying, PivotPositions.home),
-                    elevSub.elevatorToHeight(elevSub.getElevatorAlgaeGoal())
+                    elevSub.elevatorToAlgae()
                 ),
+                new WaitCommand(1).until(()->algaeSub.atPosition()),
                 elevSub.elevatorToHeight(Positions.home)
             );
     }
@@ -135,13 +159,16 @@ public class multiSubCommands extends Command{
         );
     }
 
-    public Command intakeCoral() {
-        return new ParallelDeadlineGroup(
-            coralSub.loadCoral(),
-            elevSub.setElevatorGoal(Positions.intake)
+    public Command pathPlannerToReef(Supplier<Pose2d> tagPose, Translation2d poseOffset, double angleOffset) {
+        return Commands.runOnce(
+            () -> {
+            AutoBuilder.pathfindToPose(
+                new Pose2d(tagPose.get().getTranslation().plus(poseOffset.rotateBy(tagPose.get().getRotation())), tagPose.get().getRotation().rotateBy(new Rotation2d(angleOffset))),
+                new PathConstraints(3, 3, 360, 540),
+                0.0);
+            }
         );
+
     }
-
-
 
 }

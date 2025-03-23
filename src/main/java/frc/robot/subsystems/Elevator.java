@@ -121,6 +121,7 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("E_Position", getElevatorPosition());
+        SmartDashboard.putNumber("E_Algae Pos", getElevatorAlgaeGoal());
         SmartDashboard.putNumber("E_Goal", getElevatorGoal());
         SmartDashboard.putBoolean("E_atGoal", elevatorAtGoal());
 
@@ -222,6 +223,44 @@ public class Elevator extends SubsystemBase {
         );
     }
 
+     /**
+     * Moves the elvator upwards towards the setpoint using closed loop position control.
+     * @return command that does the above
+     */
+    public Command elevatorToAlgae() {
+        return Commands
+        .runOnce(
+            () -> {
+                digElevatorMotor.set(0.0); nanElevatorMotor.set(0.0);
+            },
+            this
+        ).andThen(
+            Commands.run(
+                () -> {
+                    if (getElevatorPosition() < ElevatorConstants.maxChassisHeight) {
+                        double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), algaePosition),-1.0,1.0);
+                        if (getElevatorPosition() < 3) {
+                            output = MathUtil.clamp(output, -0.2, 1.0);
+                        }
+                        if (getElevatorPosition() > 50) {
+                            output = MathUtil.clamp(output, -1.0, 0.2);
+                        }
+
+                        SmartDashboard.putNumber("E_PID Output", output);
+                        digElevatorMotor.set(output);
+                        nanElevatorMotor.set(output);
+                    }
+                    else {
+                        digElevatorMotor.set(0.0);
+                        nanElevatorMotor.set(0.0);
+                    }
+                },
+                this
+                )
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+        );
+    }   
+
     /**
      * Moves the elevator to a specific point
      * @return command that does the above.
@@ -230,7 +269,7 @@ public class Elevator extends SubsystemBase {
         return Commands
             .run(
                 () -> {
-                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.60,1.0);
+                    double output = MathUtil.clamp(elevatorController.calculate(getElevatorPosition(), height),-0.55,1.0);
                     if (getElevatorPosition() < 20) {
                         output = MathUtil.clamp(output, -0.1, 1.0);
                     }

@@ -66,7 +66,6 @@ public class allignReef extends Command {
 
     @Override
     public void execute() {
-
         outputX = xController.calculate(
             driveSubsystem.getPose().getX(), fieldCoordinate.getX()
         );
