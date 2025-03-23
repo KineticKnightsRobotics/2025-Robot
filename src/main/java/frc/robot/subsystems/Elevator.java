@@ -146,7 +146,7 @@ public class Elevator extends SubsystemBase {
     }  
 
     public boolean elevatorAtGoal() {
-        return Math.abs(goalPosition - getElevatorPosition()) < 1.5;
+        return Math.abs(goalPosition - getElevatorPosition()) < 1.0;
     }
     
     public void setElevatorVoltage(double voltage){
@@ -178,7 +178,7 @@ public class Elevator extends SubsystemBase {
         .runOnce(
             () -> {
                 //Clamp new incoming position incase it is ever out of the physical bounds of the elevator.
-                algaePosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.1, ElevatorConstants.maxChassisHeight-0.1);
+                algaePosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.5, ElevatorConstants.maxChassisHeight-0.1);
             },
             this
         );

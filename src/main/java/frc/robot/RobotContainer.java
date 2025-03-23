@@ -167,16 +167,23 @@ public class RobotContainer {
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed,search)
+                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
                     .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
+            )
+            .onFalse(
+                elevatorSubsystem.elevatorToHeight(Positions.home)
             );
         //RIGHT Reef
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),180,DriveConstants.searchingSpeed,search)
+                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),Math.PI,DriveConstants.searchingSpeed,search)
                     .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
+
+            )
+            .onFalse(
+                elevatorSubsystem.elevatorToHeight(Positions.home)
             );
 
         driverLB
@@ -249,9 +256,9 @@ public class RobotContainer {
         //test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(),new Translation2d(Units.inchesToMeters(17.6),0.25),180));
 
 
-        test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(), new Translation2d(Units.inchesToMeters(17.6),0.25),180));
+        test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(), new Translation2d(Units.inchesToMeters(17.6),0.25),Math.PI));
         
-        test2.whileTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), 180).andThen(elevatorSubsystem.setElevatorGoal(10)));
+        test2.whileTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), Math.PI).andThen(elevatorSubsystem.setElevatorGoal(10)));
 
         //test1.onTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), 180).andThen(elevatorSubsystem.setElevatorGoal(10)));
         //test2.whileTrue(multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed,search));
@@ -262,9 +269,19 @@ public class RobotContainer {
         //test2.whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.groundIntake, PivotPositions.carrying));
         //test2.whileTrue(coralSubsystem.spitCoral());
         test3.whileTrue(
-                new ParallelCommandGroup(
-                    new searchForBranch(driveSubsystem, coralSubsystem, false),
+                new SequentialCommandGroup(
+                elevatorSubsystem.setElevatorGoal(Positions.primedHeight),
+                elevatorSubsystem.elevatorToGoal().until(()->elevatorSubsystem.elevatorAtGoal()),
+                new ParallelDeadlineGroup(
+                    new searchForBranch(driveSubsystem, coralSubsystem),
                     elevatorSubsystem.elevatorToGoal()
+                ),
+                elevatorSubsystem.setElevatorGoal(Positions.L4),
+                elevatorSubsystem.elevatorToGoal().until(()->elevatorSubsystem.elevatorAtGoal()),
+                new ParallelCommandGroup(
+                    coralSubsystem.spitCoral(),
+                    elevatorSubsystem.elevatorToGoal()
+                )
                 )
             ).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
         test4.whileTrue(multiSubCommand.dealgify()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));

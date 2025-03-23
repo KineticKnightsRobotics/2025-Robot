@@ -79,6 +79,11 @@ public class allignReef extends Command {
         double[] AllignmentOutput = {outputX, outputY, outputR};
         SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
 
+
+
+        SmartDashboard.putNumber("AA_X", Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()));
+        SmartDashboard.putNumber("AA_Y",Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()));
+
         driveSubsystem.setControl(
             speedBuilder
                 .withVelocityX(outputX)
@@ -90,8 +95,8 @@ public class allignReef extends Command {
     @Override
     public boolean isFinished() {
         return 
-            Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()) < 0.0254*4 &&
-            Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()) < 0.0254*4
+            Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()) < 0.0254*6 &&
+            Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()) < 0.0254*6
         
         ;
     }

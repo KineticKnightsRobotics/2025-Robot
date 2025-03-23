@@ -37,7 +37,7 @@ public class Constants {
     }
 
     public final static class DriveConstants {
-        public static double searchingSpeed = 0.15;
+        public static double searchingSpeed = 0.075;
         public static int digProxSensor = 3;
         public static int nanProxSensor = 2;
     }

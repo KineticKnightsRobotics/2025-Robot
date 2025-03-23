@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.allignReef;
+import frc.robot.commands.Drive.searchForBranch;
 import edu.wpi.first.math.util.Units;
 
 public class multiSubCommands extends Command{
@@ -96,6 +97,7 @@ public class multiSubCommands extends Command{
                     algaeSub.intakeAlgae(PivotPositions.deAlgifying, PivotPositions.home),
                     elevSub.elevatorToAlgae()
                 ),
+                algaeSub.setAlgaePosition(PivotPositions.home),
                 new WaitCommand(1).until(()->algaeSub.atPosition()),
                 elevSub.elevatorToHeight(Positions.home)
             );
@@ -132,13 +134,13 @@ public class multiSubCommands extends Command{
         return new SequentialCommandGroup(
             //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelCommandGroup(
-                //new allignReef(driveSub, desiredDisplacement, _angleOffset)//, //TODO: Uncomment at drive space for test!
+                new allignReef(driveSub, desiredDisplacement, _angleOffset), //TODO: Uncomment at drive space for test!
                 elevSub.elevatorToHeight(Positions.primedHeight).until(() -> elevSub.elevatorAtGoal())
             ),
-            //elevSub.setElevatorGoal(),
+            elevSub.setElevatorGoal(Positions.L4),
             new ParallelCommandGroup(
-                searchForPeg(searchSpeed, 0.0, 0.0, speedRequest),
-                elevSub.elevatorToGoal()
+                new searchForBranch(driveSub, coralSub),
+                elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal())
             ),
             new ParallelCommandGroup(
                 coralSub.spitCoral(),
@@ -160,14 +162,12 @@ public class multiSubCommands extends Command{
     }
 
     public Command pathPlannerToReef(Supplier<Pose2d> tagPose, Translation2d poseOffset, double angleOffset) {
-        return Commands.runOnce(
-            () -> {
+        return
             AutoBuilder.pathfindToPose(
                 new Pose2d(tagPose.get().getTranslation().plus(poseOffset.rotateBy(tagPose.get().getRotation())), tagPose.get().getRotation().rotateBy(new Rotation2d(angleOffset))),
                 new PathConstraints(3, 3, 360, 540),
-                0.0);
-            }
-        );
+                0.0
+            );
 
     }
 

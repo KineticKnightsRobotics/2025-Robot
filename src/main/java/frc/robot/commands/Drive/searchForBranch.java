@@ -43,10 +43,9 @@ public class searchForBranch extends Command {
      * @param leftBranch True = Left Branch, False = Right Branch
      * @return A command, stupid ahh
      */
-    public searchForBranch(Drive drive, coralAffector coral, boolean useLeftBranch) {
+    public searchForBranch(Drive drive, coralAffector coral) {
         drvSub = drive;
         crlSub = coral;
-        leftBranch = useLeftBranch;
         addRequirements(drvSub,crlSub);
     }
 
@@ -72,8 +71,8 @@ public class searchForBranch extends Command {
 
         //Determine X direction
         if (!crlSub.allignedWithPeg()) {
-            if (drvSub.getSensorDig()) {xSpeed = -DriveConstants.searchingSpeed;}
-            if (drvSub.getSensorNan()) {xSpeed =  DriveConstants.searchingSpeed;}
+            if (drvSub.getSensorDig()) {xSpeed =   DriveConstants.searchingSpeed;}
+            if (drvSub.getSensorNan()) {xSpeed =  -DriveConstants.searchingSpeed;}
         }
         else {
             xSpeed = 0;
@@ -81,11 +80,11 @@ public class searchForBranch extends Command {
 
 
         if (!(drvSub.getSensorDig() || drvSub.getSensorNan())) {
-            ySpeed = 0.25;
+            ySpeed = 0.025;
         }
 
         if ((drvSub.getSensorDig() || drvSub.getSensorNan()) && !(drvSub.getSensorDig() && drvSub.getSensorNan())) {
-            ySpeed = 0.05;
+            ySpeed = 0.025;
         }
 
         //Determine Y
@@ -104,12 +103,17 @@ public class searchForBranch extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        
+        drvSub.setControl(
+            speedBuilder
+                .withVelocityY(0.1)
+                .withVelocityX(0.0)
+                .withRotationalRate(0.0)
+        );
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return crlSub.allignedWithPeg() && (drvSub.getSensorDig() || drvSub.getSensorNan());
     }
 
 }

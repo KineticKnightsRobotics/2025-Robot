@@ -157,7 +157,7 @@ public class algaeAffector extends SubsystemBase {
         return Commands
             .run(
                 () -> {
-                    rollerMotor.set(0.8);
+                    rollerMotor.set(1.0);
                 },
                 this
             )
