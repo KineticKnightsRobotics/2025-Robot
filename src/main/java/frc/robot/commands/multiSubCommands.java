@@ -131,9 +131,10 @@ public class multiSubCommands extends Command{
                 new searchForBranch(driveSub, coralSub),
                 elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
             ),
-            new ParallelRaceGroup(
-                elevSub.elevatorToGoal(),
-                coralSub.spitCoral().withTimeout(1)
+            new WaitCommand(0.15),
+            new ParallelCommandGroup(
+                coralSub.spitCoral(),
+                elevSub.elevatorToGoal()
             )
         );
     }

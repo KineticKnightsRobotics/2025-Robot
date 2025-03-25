@@ -19,7 +19,7 @@ import frc.robot.Constants.CoralAffectorConstants;
 public class coralAffector extends SubsystemBase {
     
 
-    SparkMax rollerMotor;
+    SparkMax rollerMotor, rampMotor;
     SparkMaxConfig rollerMotorConfig;
     DigitalInput beamUpper, beamLower, proxSensor;
 
@@ -41,7 +41,6 @@ public class coralAffector extends SubsystemBase {
             .smartCurrentLimit(30)
             .closedLoopRampRate(0.000001)
             .idleMode(IdleMode.kBrake);
-
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 

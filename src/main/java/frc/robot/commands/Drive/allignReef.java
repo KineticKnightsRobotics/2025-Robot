@@ -77,14 +77,12 @@ public class allignReef extends Command {
             driveSubsystem.getPose().getRotation().getDegrees(), fieldCoordinate.getRotation().getDegrees()
         );
 
-        double[] AllignmentOutput = {outputX, outputY, outputR};
-        SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
+        //double[] AllignmentOutput = {outputX, outputY, outputR};
+        //SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
 
 
 
         error = driveSubsystem.getPose().getTranslation().getDistance(fieldCoordinate.getTranslation());
-        SmartDashboard.putNumber("AA_X", Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()));
-        SmartDashboard.putNumber("AA_Y",Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()));
 
 
 

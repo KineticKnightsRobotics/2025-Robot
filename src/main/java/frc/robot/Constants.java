@@ -100,13 +100,14 @@ public class Constants {
             public static double groundIntake = 17.0;
             public static double deAlgifying = 65.0;
             public static double carrying = 49;
-            public static double home = 110.0;
+            public static double home = 115.0;
             public static double coralIntaking = 97;
         }
     }
 
     public final class CoralAffectorConstants {
         public static int coralRollerID = 43;
+        public static int coralRampID = 44;
         public static int beamUpper = 9;
         public static int beamLower = 8;
         public static int proxSensor = 6;

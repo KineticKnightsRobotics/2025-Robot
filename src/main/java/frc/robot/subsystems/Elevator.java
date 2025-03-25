@@ -126,10 +126,10 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putBoolean("E_atGoal", elevatorAtGoal());
 
 
-        SmartDashboard.putNumber("E_AbsolutePosition", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
+        //SmartDashboard.putNumber("E_AbsolutePosition", elevatorEncoder.getAbsolutePosition().getValueAsDouble());
 
-        SmartDashboard.putNumber("E_digEncoder", digEncoder.getPosition());
-        SmartDashboard.putNumber("E_nanEncoder", nanEncoder.getPosition());
+        //SmartDashboard.putNumber("E_digEncoder", digEncoder.getPosition());
+        //SmartDashboard.putNumber("E_nanEncoder", nanEncoder.getPosition());
 
         SmartDashboard.putData(this);
     }
