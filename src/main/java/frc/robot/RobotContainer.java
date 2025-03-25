@@ -29,6 +29,7 @@ import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.commands.multiSubCommands;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.commands.Drive.AlignToReefHDC;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -313,6 +314,18 @@ public class RobotContainer {
             
         inRegularTeleop.and(dignanHasCoral.negate().and(dignanHasAlgae.negate()))
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
+        
+        /*
+         * TEST PANEL CONTROLS
+         */
+        test4
+            .whileTrue(
+                new AlignToReefHDC(
+                    driveSubsystem,
+                    new Translation2d(Units.inchesToMeters(15), 0), // 15 inches forward, 0 sideways
+                    Math.PI // 180 degrees rotation
+                )
+            );
     }
 
 
