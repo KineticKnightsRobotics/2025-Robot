@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.Vector;
@@ -42,6 +45,17 @@ public class Constants {
         public static double searchingSpeed = 0.075;
         public static int digProxSensor = 3;
         public static int nanProxSensor = 2;
+
+        // In Constants.java, add these to DriveConstants class:
+public static final PPHolonomicDriveController kHolonomicDriveController = new PPHolonomicDriveController(
+    // PID constants for translation
+    new PIDConstants(10, 0, 0),
+    // PID constants for rotation
+    new PIDConstants(7, 0, 0)
+);
+
+public static final double kHDCPositionTolerance = 0.05; // 5 centimeters
+public static final double kHDCRotationTolerance = 3.0; // 3 degrees
     }
 
     public final static class ElevatorConstants {
