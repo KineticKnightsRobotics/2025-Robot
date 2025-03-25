@@ -1,20 +1,9 @@
 package frc.robot.commands;
 
-import java.util.List;
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.path.Waypoint;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -115,7 +104,7 @@ public class multiSubCommands extends Command{
 
 
 
-    public Command autoAim_Test(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+    public Command autoAim(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
             elevSub.setElevatorGoal(Positions.L4),
             new ParallelCommandGroup(
@@ -130,28 +119,28 @@ public class multiSubCommands extends Command{
         );
     }
 
-    public Command teleAim_Test(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+    public Command teleAim(Translation2d desiredDisplacement, double _angleOffset, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
             //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
             new ParallelCommandGroup(
-                new allignReef(driveSub, desiredDisplacement, _angleOffset), //TODO: Uncomment at drive space for test!
-                elevSub.elevatorToHeight(Positions.primedHeight).until(() -> elevSub.elevatorAtGoal())
+                new allignReef(driveSub, desiredDisplacement, _angleOffset),
+                elevSub.elevatorToHeight(Positions.primedHeight).until(() -> elevSub.getElevatorPosition() > Positions.primedHeight-1.5)
             ),
-            elevSub.setElevatorGoal(Positions.L4),
-            new ParallelCommandGroup(
+            elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
+            new ParallelDeadlineGroup(
                 new searchForBranch(driveSub, coralSub),
-                elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal())
+                elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
             ),
-            new ParallelCommandGroup(
-                coralSub.spitCoral(),
-                elevSub.elevatorToGoal()
+            new ParallelRaceGroup(
+                elevSub.elevatorToGoal(),
+                coralSub.spitCoral().withTimeout(1)
             )
         );
     }
 
     public Command aimBarge() {
         return new SequentialCommandGroup(
-            //new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180), //TODO: Uncomment at drive space for test!
+            //new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180),
             elevSub.setElevatorGoal(Positions.L4),
             elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
             new ParallelCommandGroup(
@@ -160,15 +149,4 @@ public class multiSubCommands extends Command{
             )
         );
     }
-
-    public Command pathPlannerToReef(Supplier<Pose2d> tagPose, Translation2d poseOffset, double angleOffset) {
-        return
-            AutoBuilder.pathfindToPose(
-                new Pose2d(tagPose.get().getTranslation().plus(poseOffset.rotateBy(tagPose.get().getRotation())), tagPose.get().getRotation().rotateBy(new Rotation2d(angleOffset))),
-                new PathConstraints(3, 3, 360, 540),
-                0.0
-            );
-
-    }
-
 }

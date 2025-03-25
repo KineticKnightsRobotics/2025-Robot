@@ -10,7 +10,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -39,6 +38,8 @@ public class allignReef extends Command {
     private double outputX;
     private double outputY;
     private double outputR;
+
+    private double error;
 
     private final SwerveRequest.FieldCentric speedBuilder = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
@@ -81,8 +82,11 @@ public class allignReef extends Command {
 
 
 
+        error = driveSubsystem.getPose().getTranslation().getDistance(fieldCoordinate.getTranslation());
         SmartDashboard.putNumber("AA_X", Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()));
         SmartDashboard.putNumber("AA_Y",Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()));
+
+
 
         driveSubsystem.setControl(
             speedBuilder
@@ -94,10 +98,7 @@ public class allignReef extends Command {
 
     @Override
     public boolean isFinished() {
-        return 
-            Math.abs(driveSubsystem.getPose().getX() - fieldCoordinate.getX()) < 0.0254*6 &&
-            Math.abs(driveSubsystem.getPose().getY() - fieldCoordinate.getY()) < 0.0254*6
-        
-        ;
+        return (driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan()) && error < 0.10;
+        //return (driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan());
     }
 }

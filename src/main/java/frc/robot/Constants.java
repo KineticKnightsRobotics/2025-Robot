@@ -29,6 +29,8 @@ public class Constants {
                 public static double P = 0.1;
                 public static double I = 0.0;
                 public static double D = 0.0;
+                public static double maxRadiansPerSecond = Math.PI*3;
+                public static double maxRadiansPerSecondSquared = Math.PI*1.5;
             }
         }
     }
@@ -46,7 +48,8 @@ public class Constants {
         public static class ElevatorProfiledPID {
             public static double P = 0.08;
             public static double I = 0;
-            public static double D = 0.0;
+            public static double D = 0.008
+            ;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;
         }
@@ -71,7 +74,7 @@ public class Constants {
             public static double L1 = 14;
             public static double L2 = 17;
             public static double L3 = 33.5;
-            public static double L4 = 58;
+            public static double L4 = 57;
             public static double deAlgifyL2 = 11;
             public static double deAlgifyL3 = 28;
         }

@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.VisionConstants.AlignmentController.RotationController;
 import frc.robot.Constants.VisionConstants.AlignmentController.StrafeXController;
@@ -24,8 +23,8 @@ public class allign extends Command {
     
     private Drive driveSubsystem;
 
-    private final double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    private final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+    //private final double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    ///private final double maxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
     private Translation2d poseOffset;
     private Pose2d fieldCoordinate;

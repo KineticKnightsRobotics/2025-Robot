@@ -11,7 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -30,13 +28,9 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.commands.multiSubCommands;
-import frc.robot.commands.Drive.allign;
-import frc.robot.commands.Drive.allignReef;
-import frc.robot.commands.Drive.searchForBranch;
 import edu.wpi.first.wpilibj.DriverStation;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class RobotContainer {
     // private final Bling candleSubsystem = new Bling(); <-- This line should be removed
@@ -163,22 +157,22 @@ public class RobotContainer {
                 algaeSubsystem.spitAlgae()
             );
         //LEFT Reef
-        driverX
+        driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
+                multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
                     .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
             )
             .onFalse(
                 elevatorSubsystem.elevatorToHeight(Positions.home)
             );
         //RIGHT Reef
-        driverY
+        driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),-0.3),Math.PI,DriveConstants.searchingSpeed,search)
+                multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),-0.3),Math.PI,DriveConstants.searchingSpeed,search)
                     .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
 
             )
@@ -248,44 +242,7 @@ public class RobotContainer {
         /*
          * PROGRAMMER CONTROLS
          */
-        //test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        //test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        //test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
-        //test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(),new Translation2d(Units.inchesToMeters(17.6),0.25),180));
-
-
-        test1.whileTrue(multiSubCommand.pathPlannerToReef(()->driveSubsystem.getClosestReefFace(), new Translation2d(Units.inchesToMeters(17.6),0.25),Math.PI));
-        
-        test2.whileTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), Math.PI).andThen(elevatorSubsystem.setElevatorGoal(10)));
-
-        //test1.onTrue(new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.25), 180).andThen(elevatorSubsystem.setElevatorGoal(10)));
-        //test2.whileTrue(multiSubCommand.teleAim_Test(new Translation2d(Units.inchesToMeters(17.6),0.3),180,-DriveConstants.searchingSpeed,search));
-        //test3.whileTrue(multiSubCommand.aimBarge());
-
-
-        //test1.whileTrue(elevatorSubsystem.elevatorToGoal()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
-        //test2.whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.groundIntake, PivotPositions.carrying));
-        //test2.whileTrue(coralSubsystem.spitCoral());
-        test3.whileTrue(
-                new SequentialCommandGroup(
-                elevatorSubsystem.setElevatorGoal(Positions.primedHeight),
-                elevatorSubsystem.elevatorToGoal().until(()->elevatorSubsystem.elevatorAtGoal()),
-                new ParallelDeadlineGroup(
-                    new searchForBranch(driveSubsystem, coralSubsystem),
-                    elevatorSubsystem.elevatorToGoal()
-                ),
-                elevatorSubsystem.setElevatorGoal(Positions.L4),
-                elevatorSubsystem.elevatorToGoal().until(()->elevatorSubsystem.elevatorAtGoal()),
-                new ParallelCommandGroup(
-                    coralSubsystem.spitCoral(),
-                    elevatorSubsystem.elevatorToGoal()
-                )
-                )
-            ).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
-        test4.whileTrue(multiSubCommand.dealgify()).onFalse(elevatorSubsystem.elevatorToHeight(Positions.home));
-        test5.whileTrue(algaeSubsystem.setAlgaePosition(33));
 
 
         // dignanHasCoral
@@ -379,8 +336,8 @@ public class RobotContainer {
             )
         );
 
-        NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim_Test(-DriveConstants.searchingSpeed, search));
-        NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim_Test(DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim(-DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim(DriveConstants.searchingSpeed, search));
 
         NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4/2),elevatorSubsystem.elevatorToGoal()));
         NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));

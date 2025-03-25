@@ -1,12 +1,12 @@
 package frc.robot.commands.Drive;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import org.opencv.core.Mat;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.generated.TunerConstants;
@@ -32,9 +32,6 @@ public class searchForBranch extends Command {
     private coralAffector crlSub;
     private SwerveRequest.RobotCentric speedBuilder = new SwerveRequest.RobotCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private boolean leftBranch;
-
-    private Pose2d branchPose;
 
     /**
      * 
@@ -62,13 +59,7 @@ public class searchForBranch extends Command {
     @Override
     public void execute() {
         
-        //Transform2d poseError = drvSub.getState().Pose.minus(branchPose);
-
-        //double xError = poseError.getX();
-        //double yError = poseError.getY();
         double xSpeed = 0;
-        double ySpeed = 0;
-
         //Determine X direction
         if (!crlSub.allignedWithPeg()) {
             if (drvSub.getSensorDig()) {xSpeed =   DriveConstants.searchingSpeed;}
@@ -78,26 +69,11 @@ public class searchForBranch extends Command {
             xSpeed = 0;
         }
 
-
-        if (!(drvSub.getSensorDig() || drvSub.getSensorNan())) {
-            ySpeed = 0.025;
-        }
-
-        if ((drvSub.getSensorDig() || drvSub.getSensorNan()) && !(drvSub.getSensorDig() && drvSub.getSensorNan())) {
-            ySpeed = 0.025;
-        }
-
-        //Determine Y
-        if (crlSub.allignedWithPeg() && (drvSub.getSensorDig() || drvSub.getSensorNan())) {
-            ySpeed = 0;
-        }
-
-
         drvSub.setControl(
             speedBuilder
                 .withVelocityY(xSpeed * MaxSpeed)
-                .withVelocityX(ySpeed * MaxSpeed)
-                .withRotationalRate(0.0)
+                .withVelocityX(0.0 * MaxSpeed)
+                .withRotationalRate(0.0)//-Math.PI/8)
         );
     }
 
@@ -105,8 +81,8 @@ public class searchForBranch extends Command {
     public void end(boolean interrupted) {
         drvSub.setControl(
             speedBuilder
-                .withVelocityY(0.1)
-                .withVelocityX(0.0)
+                .withVelocityY(0.0)
+                .withVelocityX(0.25 * MaxSpeed)
                 .withRotationalRate(0.0)
         );
     }
