@@ -55,15 +55,8 @@ public class Bling extends SubsystemBase {
 
     @Override
     public void periodic() {
-        
-        // Use built-in animations rather than custom ones
-        if (m_currentAnimation != null) {
-            m_candleRight.animate(m_currentAnimation, ANIMATION_SLOT);
-            m_candleLeft.animate(m_currentAnimation, ANIMATION_SLOT);
-        }
-
+        // Removed animation calls to prevent unwanted reanimation
         SmartDashboard.putString("B_Current LED Animation", m_currentAnimationType.name());
-    
     }
 
     public void setAnimation(AnimationTypes animationType) {
@@ -153,6 +146,11 @@ public class Bling extends SubsystemBase {
             default:
                 m_currentAnimation = null;
                 break;
+        }
+        // Immediately trigger the new animation to avoid repeated setting (e.g., SetTwoSizeAnimation)
+        if (m_currentAnimation != null) {
+            m_candleRight.animate(m_currentAnimation, ANIMATION_SLOT);
+            m_candleLeft.animate(m_currentAnimation, ANIMATION_SLOT);
         }
     }
 
