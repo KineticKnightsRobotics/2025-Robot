@@ -16,6 +16,9 @@ public class Bling extends SubsystemBase {
     private final CANdle m_candleRight;
     private final int LedCount = 100;
 
+    private final int ANIMATION_SLOT = 0;
+
+
     public enum AnimationTypes {
         ColorFlow, Fire, Larson, Rainbow, RgbFade, SingleFade, Strobe, Twinkle, TwinkleOff,
         GamepieceAquired, Idle, ReadytoScore, 
@@ -29,6 +32,8 @@ public class Bling extends SubsystemBase {
     private AnimationTypes m_currentAnimationType;
 
     public Bling() {
+
+        
         m_candleRight = new CANdle(1, "rio");
         m_candleLeft = new CANdle(0, "rio");
 
@@ -43,23 +48,22 @@ public class Bling extends SubsystemBase {
         m_candleRight.configAllSettings(config, 100);
         m_candleLeft.configAllSettings(config, 100);
 
-
+        m_candleRight.clearAnimation(ANIMATION_SLOT);
+        m_candleLeft.clearAnimation(ANIMATION_SLOT);
         setAnimation(AnimationTypes.SingleFade);
     }
 
     @Override
     public void periodic() {
-        
-        // Use built-in animations rather than custom ones
-        if (m_currentAnimation != null) {
-            m_candleRight.animate(m_currentAnimation);
-            m_candleLeft.animate(m_currentAnimation);
-        }
-
+        // Removed animation calls to prevent unwanted reanimation
         SmartDashboard.putString("B_Current LED Animation", m_currentAnimationType.name());
     }
 
     public void setAnimation(AnimationTypes animationType) {
+
+        m_candleRight.clearAnimation(ANIMATION_SLOT);
+        m_candleLeft.clearAnimation(ANIMATION_SLOT);
+        
         m_currentAnimationType = animationType;
         switch (animationType) {
             case Idle:
@@ -142,6 +146,11 @@ public class Bling extends SubsystemBase {
             default:
                 m_currentAnimation = null;
                 break;
+        }
+        // Immediately trigger the new animation to avoid repeated setting (e.g., SetTwoSizeAnimation)
+        if (m_currentAnimation != null) {
+            m_candleRight.animate(m_currentAnimation, ANIMATION_SLOT);
+            m_candleLeft.animate(m_currentAnimation, ANIMATION_SLOT);
         }
     }
 

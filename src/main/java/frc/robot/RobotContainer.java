@@ -15,7 +15,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,6 +29,7 @@ import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.commands.multiSubCommands;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.commands.Drive.AlignToReefHDC;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -54,7 +54,7 @@ public class RobotContainer {
     public final Elevator elevatorSubsystem = new Elevator();
     public final coralAffector coralSubsystem = new coralAffector();
     public final algaeAffector algaeSubsystem = new algaeAffector();
-    //public final Climber climberSubsystem = new Climber();
+    public final Climber climberSubsystem = new Climber();
     public final Bling blingSubsystem = new Bling();
 
     public final multiSubCommands multiSubCommand = new multiSubCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
@@ -118,20 +118,22 @@ public class RobotContainer {
     public final Trigger elevatorAtGoal = new Trigger(() -> elevatorSubsystem.elevatorAtGoal());
     public final Trigger dignanHasCoral = new Trigger(() -> coralSubsystem.hasCoral());
     public final Trigger dignanHasAlgae = new Trigger(() -> algaeSubsystem.hasAlgae());
+
     public final Trigger dignanReefReady = new Trigger(() -> (elevatorSubsystem.elevatorAtGoal() && coralSubsystem.hasCoral() && coralSubsystem.allignedWithPeg()));
-    public final Trigger dignanIsInEndgame = new Trigger(()-> DriverStation.isFMSAttached() && DriverStation.getMatchTime() < 33);
-    //public final Trigger dignanIsAsleep = new Trigger(()-> DriverStation.isDisabled());
-   
 
-
-    /*
+    public final Trigger lastTwenty = new Trigger(() -> {
+        return DriverStation.getMatchTime() <= 20.0;
+    });    
+    public final Trigger inAuto = new Trigger(() -> DriverStation.isAutonomousEnabled());
+    public final Trigger inTeleop = new Trigger(() -> DriverStation.isTeleopEnabled());
+    public final Trigger inRegularTeleop = new Trigger(() -> 
+        DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() > 20.0);
     public final Trigger inEndgame = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 20.0 && DriverStation.getMatchTime() >10);
     public final Trigger lastTenSeconds = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 10.0 && DriverStation.getMatchTime () > 5);
     public final Trigger lastFiveSeconds = new Trigger(() -> 
         DriverStation.isTeleopEnabled() && DriverStation.getMatchTime() <= 5.0);
-    */
 
 
     public RobotContainer() {
@@ -255,20 +257,16 @@ public class RobotContainer {
         //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
             
 
-        dignanHasCoral
+        inRegularTeleop.and(dignanHasCoral)
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        dignanHasAlgae
+        inRegularTeleop.and(dignanHasAlgae)
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        dignanReefReady
+        inRegularTeleop.and(dignanReefReady)
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-
-        
-        
             
-        /*
         // Auto LED animations
         inAuto
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.AutoDefault));
@@ -316,7 +314,18 @@ public class RobotContainer {
             
         inRegularTeleop.and(dignanHasCoral.negate().and(dignanHasAlgae.negate()))
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        */
+        
+        /*
+         * TEST PANEL CONTROLS
+         */
+        test4
+            .whileTrue(
+                new AlignToReefHDC(
+                    driveSubsystem,
+                    new Translation2d(Units.inchesToMeters(15), 0), // 15 inches forward, 0 sideways
+                    Math.PI // 180 degrees rotation
+                )
+            );
     }
 
 
