@@ -1,10 +1,18 @@
 package frc.robot.commands.Drive;
 
+import static edu.wpi.first.units.Units.Centimeter;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,129 +21,110 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.Drive;
 
 public class AlignToReefHDC extends Command {
     
-    private final Drive mDrive;
-    private final Translation2d mTargetOffset;
-    private final double mAngleOffset;
+    private final Drive driveSubsystem;
+    private final Pose2d goalPose;
+    private final PPHolonomicDriveController driveController = DriveConstants.kHolonomicDriveController;
+private final SwerveRequest.ApplyRobotSpeeds speedRequest = new SwerveRequest.ApplyRobotSpeeds()
+    .withDriveRequestType(DriveRequestType.Velocity);  // Add this line to match Drive.java
+    private final Timer timer = new Timer();
+    private final Debouncer endTriggerDebouncer = new Debouncer(0.1); // 100ms debounce
     
-    private Pose2d mTargetPose;
-    private final Timer mTimer = new Timer();
-    private final Debouncer mEndTriggerDebouncer = new Debouncer(0.1); // 100ms debounce
-    
-    // Create error logging publishers
-    private final DoublePublisher mXErrorPublisher = NetworkTableInstance.getDefault()
-        .getTable("logging").getDoubleTopic("X Error").publish();
-    private final DoublePublisher mYErrorPublisher = NetworkTableInstance.getDefault()
-        .getTable("logging").getDoubleTopic("Y Error").publish();
-    
-    // Create SwerveRequest for robot-relative speeds
-    private final SwerveRequest.ApplyRobotSpeeds speedRequest = new SwerveRequest.ApplyRobotSpeeds()
-        .withDriveRequestType(DriveRequestType.Velocity);
+    private final DoublePublisher xErrLogger = NetworkTableInstance.getDefault().getTable("logging").getDoubleTopic("X Error").publish();
+    private final DoublePublisher yErrLogger = NetworkTableInstance.getDefault().getTable("logging").getDoubleTopic("Y Error").publish();
     
     /**
-     * Creates a command that aligns to the nearest reef using PathPlanner's HolonomicDriveController
+     * Creates a command to align to a reef with a holonomic drive controller.
      * 
-     * @param drive Drive subsystem
-     * @param offset Offset from the reef AprilTag in tag-relative coordinates
-     * @param angleOffset Angular offset in radians from the tag's orientation
+     * @param drive The drive subsystem
+     * @param displacement The displacement from the nearest reef face
+     * @param angle The angle offset from the reef face (in radians)
      */
-    public AlignToReefHDC(Drive drive, Translation2d offset, double angleOffset) {
-        this.mDrive = drive;
-        this.mTargetOffset = offset;
-        this.mAngleOffset = angleOffset;
+    public AlignToReefHDC(Drive drive, Translation2d displacement, double angle) {
+        driveSubsystem = drive;
         
-        addRequirements(drive);
+        // Calculate goal pose based on reef face and desired position
+        Pose2d reefFace = drive.getClosestReefFace();
+        Translation2d displacementRotated = displacement.rotateBy(reefFace.getRotation());
+        goalPose = new Pose2d(
+            reefFace.getTranslation().plus(displacementRotated),
+            reefFace.getRotation().rotateBy(new Rotation2d(angle))
+        );
+        
+        addRequirements(driveSubsystem);
     }
     
     @Override
     public void initialize() {
-        // Get the closest reef pose
-        Pose2d reefPose = mDrive.getClosestReefFace();
-        
-        // Calculate target pose with offset
-        Translation2d offsetRotated = mTargetOffset.rotateBy(reefPose.getRotation());
-        mTargetPose = new Pose2d(
-            reefPose.getTranslation().plus(offsetRotated),
-            reefPose.getRotation().rotateBy(new Rotation2d(mAngleOffset))
-        );
-        
-        mTimer.restart();
-        
-        SmartDashboard.putNumber("HDC Target X", mTargetPose.getX());
-        SmartDashboard.putNumber("HDC Target Y", mTargetPose.getY());
-        SmartDashboard.putNumber("HDC Target Angle", mTargetPose.getRotation().getDegrees());
+        timer.restart();
     }
     
     @Override
-    public void execute() {
-        // Create a trajectory state for the target
-        PathPlannerTrajectoryState targetState = new PathPlannerTrajectoryState();
-        targetState.pose = mTargetPose;
-        
-        // Calculate speeds using HolonomicDriveController
-        ChassisSpeeds speeds = DriveConstants.kHolonomicDriveController.calculateRobotRelativeSpeeds(
-            mDrive.getPose(), 
-            targetState
-        );
-        
-        // Apply speeds to the drivetrain using CTRE's setControl method
-        mDrive.setControl(speedRequest.withSpeeds(speeds));
-        
-        // Log error information
-        double xError = mDrive.getPose().getX() - mTargetPose.getX();
-        double yError = mDrive.getPose().getY() - mTargetPose.getY();
-        
-        mXErrorPublisher.accept(xError);
-        mYErrorPublisher.accept(yError);
-        
-        SmartDashboard.putNumber("HDC X Error", xError);
-        SmartDashboard.putNumber("HDC Y Error", yError);
-        SmartDashboard.putNumber("HDC Angle Error", 
-            mDrive.getPose().getRotation().minus(mTargetPose.getRotation()).getDegrees());
-    }
+public void execute() {
+    PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
+    goalState.pose = goalPose;
+    
+    ChassisSpeeds speeds = driveController.calculateRobotRelativeSpeeds(
+        driveSubsystem.getPose(), goalState
+    );
+    
+    driveSubsystem.setControl(speedRequest.withSpeeds(speeds));
+    
+    xErrLogger.accept(driveSubsystem.getPose().getX() - goalPose.getX());
+    yErrLogger.accept(driveSubsystem.getPose().getY() - goalPose.getY());
+}
     
     @Override
     public void end(boolean interrupted) {
-        // Stop the drivetrain using setControl with zero speeds
-        mDrive.setControl(speedRequest.withSpeeds(new ChassisSpeeds(0, 0, 0)));
+        timer.stop();
         
-        mTimer.stop();
-        double elapsed = mTimer.get();
+        // Stop the robot
+        driveSubsystem.setControl(speedRequest.withSpeeds(new ChassisSpeeds()));
         
-        // Calculate final errors
-        Pose2d diff = new Pose2d(
-            mDrive.getPose().getTranslation().minus(mTargetPose.getTranslation()),
-            mDrive.getPose().getRotation().minus(mTargetPose.getRotation())
+        // Log results
+        Pose2d diff = driveSubsystem.getPose().relativeTo(goalPose);
+        
+        System.out.println("Reef alignment took: " + timer.get() + " seconds, interrupted = " + interrupted
+            + "\nPosition offset: " + Centimeter.convertFrom(diff.getTranslation().getNorm(), Meters) + " cm"
+            + "\nRotation offset: " + diff.getRotation().getDegrees() + " deg"
+            + "\nVelocity: " + driveSubsystem.getState().Speeds.vxMetersPerSecond + ", " + driveSubsystem.getState().Speeds.vyMetersPerSecond + " m/s"
         );
-        
-        System.out.println("Reef alignment took: " + elapsed + " seconds, interrupted: " + interrupted
-            + "\nPosition error: " + diff.getTranslation().getNorm() * 100 + " cm"
-            + "\nRotation error: " + diff.getRotation().getDegrees() + " degrees");
     }
     
     @Override
     public boolean isFinished() {
-        // Position error
-        double positionError = mDrive.getPose().getTranslation()
-            .getDistance(mTargetPose.getTranslation());
-            
-        // Rotation error in degrees
-        double rotationError = Math.abs(mDrive.getPose().getRotation()
-            .minus(mTargetPose.getRotation()).getDegrees());
+        Pose2d diff = driveSubsystem.getPose().relativeTo(goalPose);
         
-        // Check if we've reached the target with acceptable tolerance
-        boolean atPosition = positionError < DriveConstants.kHDCPositionTolerance;
-        boolean atRotation = rotationError < DriveConstants.kHDCRotationTolerance;
+        // Check if rotation is within tolerance
+        boolean rotationAligned = MathUtil.isNear(
+            0.0, 
+            diff.getRotation().getRadians(), 
+            Math.toRadians(3.0), // 3 degree tolerance
+            0.0, 
+            Math.PI
+        );
         
-        // Also check if proximity sensors detect we're at a reef
-        boolean atReef = mDrive.getSensorDig() || mDrive.getSensorNan();
+        // Check if position is within tolerance
+        boolean positionAligned = diff.getTranslation().getNorm() < 0.05; // 5cm tolerance
         
-        return (atPosition && atRotation) || (atReef && positionError < 0.15);
+        // Check if robot is mostly stopped
+        double speed = Math.hypot(
+            driveSubsystem.getState().Speeds.vxMetersPerSecond,
+            driveSubsystem.getState().Speeds.vyMetersPerSecond
+        );
+        boolean speedSettled = speed < 0.1; // 10cm/s tolerance
+        
+        // Also check the proximity sensors to see if we've found a branch
+        boolean proximityDetected = driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan();
+        
+        // We're done if all conditions are met
+        return endTriggerDebouncer.calculate(
+            rotationAligned && positionAligned && speedSettled && proximityDetected
+        );
     }
 }
