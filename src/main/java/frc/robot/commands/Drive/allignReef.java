@@ -44,7 +44,7 @@ public class allignReef extends Command {
     private double error;
     
     // Debouncer for isFinished condition - 0.1 seconds
-    private final Debouncer finishedDebouncer = new Debouncer(0.1, DebounceType.kRising);
+    private final Debouncer finishedDebouncer = new Debouncer(0.1, DebounceType.kBoth);
 
     private final SwerveRequest.FieldCentric speedBuilder = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
