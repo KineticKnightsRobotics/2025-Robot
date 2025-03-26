@@ -17,6 +17,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -139,6 +140,7 @@ public class RobotContainer {
     public RobotContainer() {
         configureDefaultCommands();
         configureBindings();
+        configureLEDTriggers();
         configureNamedCommands();
         autoSelector = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Selector",autoSelector);
@@ -244,19 +246,57 @@ public class RobotContainer {
          * PROGRAMMER CONTROLS
          */
 
+        test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+
+        /*
+         * TEST PANEL CONTROLS
+         */
+        test4
+            .whileTrue(
+                new AlignToReefHDC(
+                    driveSubsystem,
+                    new Translation2d(Units.inchesToMeters(15), 0), // 15 inches forward, 0 sideways
+                    Math.PI // 180 degrees rotation
+                )
+            );
+    }
 
 
-        // dignanHasCoral
-        //     .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
-        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        // dignanHasAlgae
-        //     .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
-        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        // dignanReefReady
-        //     .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.ReadytoScore))
-        //     .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-            
 
+    public void configureDefaultCommands() {
+            driveSubsystem.setDefaultCommand(
+                driveSubsystem.applyRequest(
+                    () -> drive
+                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
+                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed)
+                        .withRotationalRate( ((driverController.getRawAxis(4)*driverController.getRawAxis(4)) * (driverController.getRawAxis(4)>0 ? -1 : 1)) * AngularRate)
+                    )
+            );
+    }
+
+    public void configureNamedCommands() {
+        NamedCommands.registerCommand("AquireCoral", 
+            new ParallelDeadlineGroup(
+                coralSubsystem.loadCoral(),
+                elevatorSubsystem.elevatorToHeight(Positions.intake)
+            )
+        );
+
+        NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim(-DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim(DriveConstants.searchingSpeed, search));
+
+
+        NamedCommands.registerCommand("SigmaScoreLeft",multiSubCommand.sigmaAuto(new Translation2d(Units.inchesToMeters(15),0.3), search));
+        NamedCommands.registerCommand("SigmaScoreRight", multiSubCommand.sigmaAuto(new Translation2d(Units.inchesToMeters(15),-0.3), search));
+
+        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.primedHeight),elevatorSubsystem.elevatorToGoal()));
+        NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));
+    }
+
+    public void configureLEDTriggers() {
         inRegularTeleop.and(dignanHasCoral)
             .onTrue(blingSubsystem.setLEDAnimation(AnimationTypes.GamepieceAquired))
             .onFalse(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
@@ -314,50 +354,11 @@ public class RobotContainer {
             
         inRegularTeleop.and(dignanHasCoral.negate().and(dignanHasAlgae.negate()))
             .whileTrue(blingSubsystem.setLEDAnimation(AnimationTypes.Idle));
-        
-        /*
-         * TEST PANEL CONTROLS
-         */
-        test4
-            .whileTrue(
-                new AlignToReefHDC(
-                    driveSubsystem,
-                    new Translation2d(Units.inchesToMeters(15), 0), // 15 inches forward, 0 sideways
-                    Math.PI // 180 degrees rotation
-                )
-            );
-    }
-
-
-
-    public void configureDefaultCommands() {
-            driveSubsystem.setDefaultCommand(
-                driveSubsystem.applyRequest(
-                    () -> drive
-                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
-                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed)
-                        .withRotationalRate( ((driverController.getRawAxis(4)*driverController.getRawAxis(4)) * (driverController.getRawAxis(4)>0 ? -1 : 1)) * AngularRate)
-                    )
-            );
-    }
-
-    public void configureNamedCommands() {
-        NamedCommands.registerCommand("AquireCoral", 
-            new ParallelDeadlineGroup(
-                coralSubsystem.loadCoral(),
-                elevatorSubsystem.elevatorToHeight(Positions.intake)
-            )
-        );
-
-        NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim(-DriveConstants.searchingSpeed, search));
-        NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim(DriveConstants.searchingSpeed, search));
-
-        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4/2),elevatorSubsystem.elevatorToGoal()));
-        NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));
     }
 
     public Command getAutonomousCommand() {
         //return new PrintCommand("No Auto LMAO");
         return autoSelector.getSelected();
     }
+
 }

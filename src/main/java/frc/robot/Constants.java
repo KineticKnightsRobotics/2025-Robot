@@ -42,7 +42,7 @@ public class Constants {
     }
 
     public final static class DriveConstants {
-        public static double searchingSpeed = 0.075;
+        public static double searchingSpeed = 0.175;
         public static int digProxSensor = 3;
         public static int nanProxSensor = 2;
 
@@ -62,7 +62,7 @@ public static final double kHDCRotationTolerance = 3.0; // 3 degrees
         public static class ElevatorProfiledPID {
             public static double P = 0.08;
             public static double I = 0;
-            public static double D = 0.008
+            public static double D = 0.000
             ;
             public static double MaxVelocity = 0;
             public static double MaxAcceleration = 0;

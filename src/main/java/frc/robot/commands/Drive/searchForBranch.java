@@ -72,7 +72,7 @@ public class searchForBranch extends Command {
         drvSub.setControl(
             speedBuilder
                 .withVelocityY(xSpeed * MaxSpeed)
-                .withVelocityX(0.0 * MaxSpeed)
+                .withVelocityX(0.05 * MaxSpeed)
                 .withRotationalRate(0.0)//-Math.PI/8)
         );
     }
@@ -82,7 +82,7 @@ public class searchForBranch extends Command {
         drvSub.setControl(
             speedBuilder
                 .withVelocityY(0.0)
-                .withVelocityX(0.25 * MaxSpeed)
+                .withVelocityX(0.0)
                 .withRotationalRate(0.0)
         );
     }

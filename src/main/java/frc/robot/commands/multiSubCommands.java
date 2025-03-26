@@ -71,11 +71,11 @@ public class multiSubCommands extends Command{
         return new SequentialCommandGroup(
             algaeSub.setAlgaePosition(PivotPositions.coralIntaking),
             new ParallelDeadlineGroup(
-                coralSub.loadCoral(),
-                elevSub.elevatorToHeight(Positions.intake)
+                coralSub.loadCoral()
+                //elevSub.elevatorToHeight(Positions.intake)
             ),
-            algaeSub.setAlgaePosition(PivotPositions.home),
-            elevSub.elevatorToHeight(Positions.home)
+            algaeSub.setAlgaePosition(PivotPositions.home)
+           // elevSub.elevatorToHeight(Positions.home)
         );
     }
 
@@ -107,15 +107,38 @@ public class multiSubCommands extends Command{
     public Command autoAim(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
             elevSub.setElevatorGoal(Positions.L4),
-            new ParallelCommandGroup(
-                searchForPeg(searchSpeed, 0.1, 0.0, speedRequest),
-                elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal())
+            elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
+            new ParallelDeadlineGroup(
+                new searchForBranch(driveSub, coralSub),
+                elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
             ),
+            new WaitCommand(0.15),
             new ParallelDeadlineGroup(
                 coralSub.spitCoral(),
                 elevSub.elevatorToGoal()
             )
             
+        );
+    }
+
+    public Command sigmaAuto(Translation2d desiredDisplacement, SwerveRequest.RobotCentric speedRequest) {
+        return new SequentialCommandGroup(
+            //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
+            new ParallelCommandGroup(
+                new allignReef(driveSub, desiredDisplacement, Math.PI),
+                elevSub.elevatorToHeight(Positions.primedHeight).until(() -> elevSub.getElevatorPosition() > Positions.primedHeight-1.5)
+            ),
+            elevSub.setElevatorGoal(Positions.L4),
+            //elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
+            new ParallelDeadlineGroup(
+                new searchForBranch(driveSub, coralSub),
+                elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
+            ),
+            elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
+            new ParallelCommandGroup(
+                coralSub.spitCoral(),
+                elevSub.elevatorToGoal()
+            )
         );
     }
 
