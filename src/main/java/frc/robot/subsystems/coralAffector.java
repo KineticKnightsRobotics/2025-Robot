@@ -20,12 +20,13 @@ public class coralAffector extends SubsystemBase {
     
 
     SparkMax rollerMotor, rampMotor;
-    SparkMaxConfig rollerMotorConfig;
+    SparkMaxConfig rollerMotorConfig, rampMotorConfig;
     DigitalInput beamUpper, beamLower, proxSensor;
 
 
     public coralAffector() {
         rollerMotor = new SparkMax(CoralAffectorConstants.coralRollerID, MotorType.kBrushless);
+        rampMotor = new SparkMax(CoralAffectorConstants.coralRampID, MotorType.kBrushless);
         beamUpper = new DigitalInput(CoralAffectorConstants.beamUpper);
         beamLower = new DigitalInput(CoralAffectorConstants.beamLower);
         proxSensor = new DigitalInput(CoralAffectorConstants.proxSensor);
@@ -42,6 +43,12 @@ public class coralAffector extends SubsystemBase {
             .closedLoopRampRate(0.000001)
             .idleMode(IdleMode.kBrake);
         rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        rampMotorConfig = new SparkMaxConfig();
+        rampMotorConfig
+            .inverted(false)
+            .smartCurrentLimit(10)
+            .idleMode(IdleMode.kBrake);
     }
 
 
@@ -82,7 +89,7 @@ public class coralAffector extends SubsystemBase {
     public Command loadCoral() {
         return new SequentialCommandGroup(
             Commands.run(
-                () -> {rollerMotor.set(0.8);},
+                () -> {rollerMotor.set(0.8);rampMotor.set(0.8);},
                 this).until(()->entranceBeambreak()),
             Commands.run(
                 () -> {rollerMotor.set(0.2);},
@@ -91,7 +98,7 @@ public class coralAffector extends SubsystemBase {
                 () -> {rollerMotor.set(-0.2);},
                 this).until(()->entranceBeambreak())
         ).finallyDo(
-            () -> {rollerMotor.set(0.0);}
+            () -> {rollerMotor.set(0.0);rampMotor.set(0.0);}
         );
     }
 
@@ -112,14 +119,13 @@ public class coralAffector extends SubsystemBase {
     public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> rollerMotor.set(0.75)
-
+            () -> {rollerMotor.set(0.75);}
         // End condition of linebreak true (piece is in)
         ).until(
             () -> !hasCoral()
         // Once the command is to be finished, stop the affector motor
         ).finallyDo(
-            () -> rollerMotor.set(0.0)
+            () -> {rollerMotor.set(0.0);}
         );
     }
 }
