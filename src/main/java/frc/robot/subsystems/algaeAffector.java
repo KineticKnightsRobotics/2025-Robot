@@ -65,7 +65,7 @@ public class algaeAffector extends SubsystemBase {
             pivotMotorConfig
                     .inverted(true)
                     .smartCurrentLimit(30)
-                    .closedLoopRampRate(1)
+                    .closedLoopRampRate(0.0001)
                     .idleMode(IdleMode.kBrake);
             pivotMotorConfig.absoluteEncoder
                 .zeroOffset(AlgaeAffectorConstants.encoderOffset)
@@ -86,7 +86,7 @@ public class algaeAffector extends SubsystemBase {
             rollerMotorConfig = new SparkMaxConfig();
             rollerMotorConfig
                 .inverted(false)
-                .smartCurrentLimit(40)
+                .smartCurrentLimit(60)
                 .closedLoopRampRate(0.0001)
                 .idleMode(IdleMode.kBrake);
             rollerMotor.configure(rollerMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

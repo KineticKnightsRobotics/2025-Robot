@@ -2,8 +2,11 @@ package frc.robot.commands;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -13,11 +16,13 @@ import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
+import pabeles.concurrency.IntOperatorTask.Max;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.Drive.allign;
 import frc.robot.commands.Drive.allignReef;
 import frc.robot.commands.Drive.searchForBranch;
+import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.util.Units;
 
 public class multiSubCommands extends Command{
@@ -50,6 +55,25 @@ public class multiSubCommands extends Command{
             );
     }
     */
+
+    public Command scoreCoralAutoProx(double height, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+        return
+            new SequentialCommandGroup(
+                //Set elev height
+                elevSub.setElevatorGoal(height),
+                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
+                elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
+                searchForPeg(searchSpeed,0.0,0.0,speedRequest),
+                //Continue moving elevator until coral has been spat out.
+                new ParallelDeadlineGroup(
+                    coralSub.spitCoral().withTimeout(1),
+                    elevSub.elevatorToGoal()
+                )
+                //Send the elevator back to home
+            );
+    }
+
+
     public Command scoreCoralAuto(double height) {
         return
             new SequentialCommandGroup(
@@ -87,19 +111,24 @@ public class multiSubCommands extends Command{
                     elevSub.elevatorToAlgae()
                 ),
                 algaeSub.setAlgaePosition(PivotPositions.home),
-                new WaitCommand(1).until(()->algaeSub.atPosition()),
+                new WaitCommand(0.5).until(()->algaeSub.atPosition()),
                 elevSub.elevatorToHeight(Positions.home)
             );
     }
 
+
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
         return
             driveSub.applyRequest(
                 () -> speedRequest
                     .withVelocityY(searchSpeed)
-                    .withVelocityX(ySpeed)
+                    .withVelocityX(0.0)
                     .withRotationalRate(rSpeed*0.2)
-            ).until(()-> coralSub.allignedWithPeg());
+            ).until(()-> coralSub.allignedWithPeg())
+            .andThen(
+                Commands.runOnce(() -> driveSub.setControl(speedRequest.withVelocityX(0.0).withVelocityY(0.0).withRotationalRate(0.0)))
+            );
     }
 
 
@@ -109,7 +138,7 @@ public class multiSubCommands extends Command{
             elevSub.setElevatorGoal(Positions.L4),
             elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
             new ParallelDeadlineGroup(
-                new searchForBranch(driveSub, coralSub),
+                searchForPeg(searchSpeed, 0.0, 0.0, speedRequest),
                 elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
             ),
             new WaitCommand(0.15),
@@ -135,7 +164,7 @@ public class multiSubCommands extends Command{
                 elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
             ),
             elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
-            new ParallelCommandGroup(
+            new ParallelDeadlineGroup(
                 coralSub.spitCoral(),
                 elevSub.elevatorToGoal()
             )
@@ -164,7 +193,7 @@ public class multiSubCommands extends Command{
 
     public Command aimBarge() {
         return new SequentialCommandGroup(
-            //new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180),
+            new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180),
             elevSub.setElevatorGoal(Positions.L4),
             elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
             new ParallelCommandGroup(

@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R_toR1_Event"
+            "pathName": "R_toR1_Prox"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "OptimizedScoreLeft"
+            "name": "ScoreL4ProxRight"
           }
         },
         {
@@ -44,13 +44,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R_StoR2_Event"
+            "pathName": "R_StoR2_Prox"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "OptimizedScoreRight"
+            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -58,15 +58,15 @@
           "data": {
             "commands": [
               {
-                "type": "path",
-                "data": {
-                  "pathName": "R_R2toS"
-                }
-              },
-              {
                 "type": "named",
                 "data": {
                   "name": "ElevatorDown"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_R2toS"
                 }
               }
             ]
@@ -81,13 +81,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R_StoR3_Event"
+            "pathName": "R_StoR3"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "OptimizedScoreLeft"
+            "name": "ScoreL4ProxRight"
           }
         },
         {
@@ -113,24 +113,6 @@
           "type": "named",
           "data": {
             "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R_StoR4_Event"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "OptimizedScoreRight"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Home"
           }
         }
       ]

@@ -50,7 +50,7 @@ public class RobotContainer {
     public Joystick opPanel = new Joystick(1);
     public Joystick testPanel = new Joystick(2);
 
-    //private final Telemetry logger = new Telemetry(MaxSpeed);
+    private final Telemetry logger = new Telemetry(MaxSpeed);
     public final Drive driveSubsystem = TunerConstants.createDrivetrain();
     public final Elevator elevatorSubsystem = new Elevator();
     public final coralAffector coralSubsystem = new coralAffector();
@@ -150,6 +150,7 @@ public class RobotContainer {
 
         //driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
 
+        SmartDashboard.putData(multiSubCommand.aimBarge());
 
         /*
          * DRIVER CONTROLS
@@ -246,14 +247,15 @@ public class RobotContainer {
          * PROGRAMMER CONTROLS
          */
 
-        test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        //test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        ///test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        //test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
 
         /*
          * TEST PANEL CONTROLS
          */
+        /*
         test4
             .whileTrue(
                 new AlignToReefHDC(
@@ -262,6 +264,7 @@ public class RobotContainer {
                     Math.PI // 180 degrees rotation
                 )
             );
+            */
     }
 
 
@@ -294,6 +297,13 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.primedHeight),elevatorSubsystem.elevatorToGoal()));
         NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));
+
+        NamedCommands.registerCommand("ScoreL4", multiSubCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
+
+        NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
+        NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
     }
 
     public void configureLEDTriggers() {

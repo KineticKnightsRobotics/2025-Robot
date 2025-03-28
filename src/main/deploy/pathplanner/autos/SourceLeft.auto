@@ -1,0 +1,97 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_toR1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_R1toS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_StoR2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_R2toS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_StoR3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_R3toS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L_StoR4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}
