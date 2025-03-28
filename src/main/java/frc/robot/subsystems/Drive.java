@@ -61,7 +61,7 @@ public class Drive extends TunerSwerveDrivetrain implements Subsystem {
     private Vision kLimelightDig = new Vision("limelight-dig");
     private Vision kLimelightNan = new Vision("limelight-nan");
 
-    private ReefSelector reefSelector = new ReefSelector();
+    public ReefSelector reefSelector = new ReefSelector();
 
     private DigitalInput digProx = new DigitalInput(DriveConstants.digProxSensor);
     private DigitalInput nanProx = new DigitalInput(DriveConstants.nanProxSensor);

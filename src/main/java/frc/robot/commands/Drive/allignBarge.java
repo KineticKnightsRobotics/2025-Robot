@@ -18,8 +18,9 @@ import frc.robot.Constants.VisionConstants.AlignmentController.StrafeXController
 import frc.robot.Constants.VisionConstants.AlignmentController.StrafeYController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drive;
+import frc.robot.util.ReefSelector;
 
-public class allign extends Command {
+public class allignBarge extends Command {
     
     private Drive driveSubsystem;
 
@@ -31,6 +32,8 @@ public class allign extends Command {
     private double angleOffset;
     private Pose2d tagPose;
 
+    private double error;
+
     private PIDController xController = new PIDController(StrafeXController.P,StrafeXController.I,StrafeXController.D);
     private PIDController yController = new PIDController(StrafeYController.P,StrafeYController.I,StrafeYController.D);
     private PIDController rController = new PIDController(RotationController.P,RotationController.I,RotationController.D);
@@ -40,15 +43,13 @@ public class allign extends Command {
 
 
 
-    public allign(
+    public allignBarge(
         Drive kSubsystem,
-        Pose2d pose,
         Translation2d displacement,
         double _angleOffset
     ) {
         addRequirements(kSubsystem);
         driveSubsystem = kSubsystem;
-        tagPose = pose;
         poseOffset = displacement;
         angleOffset = _angleOffset;
 
@@ -57,6 +58,7 @@ public class allign extends Command {
 
     @Override
     public void initialize() {
+        tagPose = driveSubsystem.getBargePose();
         Translation2d displacementRotated = poseOffset.rotateBy(tagPose.getRotation());
         fieldCoordinate = new Pose2d(tagPose.getTranslation().plus(displacementRotated), tagPose.getRotation().rotateBy(new Rotation2d(angleOffset)));
     }
@@ -74,8 +76,14 @@ public class allign extends Command {
             driveSubsystem.getPose().getRotation().getDegrees(), fieldCoordinate.getRotation().getDegrees()
         );
 
+        if (driveSubsystem.reefSelector.redAlliance) {
+            outputX *= -1; outputY *= -1; //outputR *= -1;
+        }
+
         //double[] AllignmentOutput = {outputX, outputY, outputR};
         //SmartDashboard.putNumberArray("Allignment PID Outputs", AllignmentOutput);
+
+        error = driveSubsystem.getPose().getTranslation().getDistance(fieldCoordinate.getTranslation());
 
         driveSubsystem.setControl(
             speedBuilder
@@ -88,10 +96,6 @@ public class allign extends Command {
     @Override
     public boolean isFinished() {
         Transform2d TargetError = fieldCoordinate.minus(driveSubsystem.getPose());
-        return 
-            Math.abs(TargetError.getX()) < 0.0254 &&
-            Math.abs(TargetError.getY()) < 0.0254 
-        
-        ;
+        return driveSubsystem.getSensorNan() && error < 0.10;
     }
 }

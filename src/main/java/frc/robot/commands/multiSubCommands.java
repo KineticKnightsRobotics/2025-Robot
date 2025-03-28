@@ -19,7 +19,7 @@ import frc.robot.subsystems.coralAffector;
 import pabeles.concurrency.IntOperatorTask.Max;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.commands.Drive.allign;
+import frc.robot.commands.Drive.allignBarge;
 import frc.robot.commands.Drive.allignReef;
 import frc.robot.commands.Drive.searchForBranch;
 import frc.robot.generated.TunerConstants;
@@ -122,7 +122,7 @@ public class multiSubCommands extends Command{
         return
             driveSub.applyRequest(
                 () -> speedRequest
-                    .withVelocityY(searchSpeed)
+                    .withVelocityY(searchSpeed * 1.75)
                     .withVelocityX(0.0)
                     .withRotationalRate(rSpeed*0.2)
             ).until(()-> coralSub.allignedWithPeg())
@@ -193,7 +193,7 @@ public class multiSubCommands extends Command{
 
     public Command aimBarge() {
         return new SequentialCommandGroup(
-            new allign(driveSub, driveSub.getBargePose(), new Translation2d(Units.inchesToMeters(30),0.0), 180),
+            //new allignBarge(driveSub, new Translation2d(Units.inchesToMeters(30),0.0), Math.PI),
             elevSub.setElevatorGoal(Positions.L4),
             elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
             new ParallelCommandGroup(

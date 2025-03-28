@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "ScoreL4ProxRight"
+            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -36,15 +36,28 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "AquireCoral"
+            "waitTime": 0.5
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "R_StoR2_Prox"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_StoR2_Prox"
+                }
+              }
+            ]
           }
         },
         {
@@ -73,15 +86,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R_StoR3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_StoR3_Prox"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
+              }
+            ]
           }
         },
         {
@@ -107,12 +127,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AquireCoral"
           }
         }
       ]

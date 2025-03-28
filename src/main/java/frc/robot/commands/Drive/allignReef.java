@@ -96,6 +96,10 @@ public class allignReef extends Command {
         SmartDashboard.putNumber("Alignment/OutputY", outputY);
         SmartDashboard.putNumber("Alignment/OutputR", outputR);
 
+        if (driveSubsystem.reefSelector.redAlliance) {
+            outputX *= -1; outputY *= -1; //outputR *= -1;
+        }
+
         driveSubsystem.setControl(
             speedBuilder
                 .withVelocityX(outputX)

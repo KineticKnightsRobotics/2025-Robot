@@ -7,6 +7,8 @@ import org.opencv.core.Mat;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.generated.TunerConstants;
@@ -89,7 +91,7 @@ public class searchForBranch extends Command {
 
     @Override
     public boolean isFinished() {
-        return crlSub.allignedWithPeg() && (drvSub.getSensorDig() || drvSub.getSensorNan());
+        return crlSub.allignedWithPeg(); //&& (drvSub.getSensorDig() || drvSub.getSensorNan());
     }
 
 }

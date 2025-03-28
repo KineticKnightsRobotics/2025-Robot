@@ -219,6 +219,11 @@ public class Elevator extends SubsystemBase {
                 },
                 this
                 )
+                .finallyDo(
+                    ()-> {
+                        //digElevatorMotor.set(0.0);nanElevatorMotor.set(0.0);
+                    }
+                )
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         );
     }

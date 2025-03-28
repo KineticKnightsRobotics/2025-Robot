@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -31,6 +32,7 @@ import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.commands.multiSubCommands;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.commands.Drive.AlignToReefHDC;
+import frc.robot.commands.Drive.allignReef;
 //import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -150,7 +152,8 @@ public class RobotContainer {
 
         //driverStart.onTrue(driveSubsystem.runOnce(() -> driveSubsystem.seedFieldCentric()));
 
-        SmartDashboard.putData(multiSubCommand.aimBarge());
+        //SmartDashboard.putData("Barge",multiSubCommand.aimBarge());
+        //SmartDashboard.putData("Coral",multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),0.3),Math.PI,-DriveConstants.searchingSpeed,search));
 
         /*
          * DRIVER CONTROLS
@@ -160,6 +163,10 @@ public class RobotContainer {
             .whileTrue(
                 algaeSubsystem.spitAlgae()
             );
+
+        driverB.whileTrue(
+            coralSubsystem.spitCoral()
+        ); 
         //LEFT Reef
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
@@ -197,7 +204,7 @@ public class RobotContainer {
                 multiSubCommand.dealgify()
             )
             .onFalse(
-                new SequentialCommandGroup(algaeSubsystem.setAlgaePosition(PivotPositions.home),new WaitCommand(1).until(()->algaeSubsystem.atPosition()),elevatorSubsystem.elevatorToHeight(Positions.home))
+                new SequentialCommandGroup(algaeSubsystem.setAlgaePosition(PivotPositions.home),elevatorSubsystem.elevatorToHeight(Positions.home))
             );
 
         driverLT
@@ -209,7 +216,9 @@ public class RobotContainer {
             .whileTrue(
                 multiSubCommand.intakeCoral()
             )
-            .onFalse(elevatorSubsystem.elevatorToHeight(Positions.home).alongWith(algaeSubsystem.setAlgaePosition(PivotPositions.home)));
+            .onFalse(
+                algaeSubsystem.setAlgaePosition(PivotPositions.home)
+            );
         /*
          * OPERATOR CONTROLS
          */

@@ -1,0 +1,130 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R_toR1_Prox"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4ProxLeft"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_R1toS"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorDown"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R_StoR2_Prox"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4ProxLeft"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorDown"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_R2toS"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R_StoR3_Prox"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4ProxRight"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_R3toS"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorDown"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}
