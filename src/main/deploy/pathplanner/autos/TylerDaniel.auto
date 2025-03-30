@@ -58,15 +58,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorDown"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "R_R2toS"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorDown"
                 }
               }
             ]
@@ -113,12 +113,6 @@
           "type": "named",
           "data": {
             "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0
           }
         }
       ]

@@ -122,9 +122,9 @@ public class multiSubCommands extends Command{
         return
             driveSub.applyRequest(
                 () -> speedRequest
-                    .withVelocityY(searchSpeed * 1.75)
+                    .withVelocityY(searchSpeed*MaxSpeed)
                     .withVelocityX(0.0)
-                    .withRotationalRate(rSpeed*0.2)
+                    .withRotationalRate(0.0)
             ).until(()-> coralSub.allignedWithPeg())
             .andThen(
                 Commands.runOnce(() -> driveSub.setControl(speedRequest.withVelocityX(0.0).withVelocityY(0.0).withRotationalRate(0.0)))

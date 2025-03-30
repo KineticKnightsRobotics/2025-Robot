@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 5.282319078947368,
+        "x": 5.291940789473683,
         "y": 3.072450657894737
       },
       "prevControl": {
-        "x": 5.4922610544772885,
+        "x": 5.501882765003604,
         "y": 2.936714270324585
       },
       "nextControl": null,
@@ -32,10 +32,10 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.8,
+      "minWaypointRelativePos": 0.7,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 1.0,
         "maxAcceleration": 6.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -56,7 +56,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 121.47683934958394
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "Source Auto Right",

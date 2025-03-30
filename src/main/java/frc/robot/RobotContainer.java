@@ -57,7 +57,7 @@ public class RobotContainer {
     public final Elevator elevatorSubsystem = new Elevator();
     public final coralAffector coralSubsystem = new coralAffector();
     public final algaeAffector algaeSubsystem = new algaeAffector();
-    public final Climber climberSubsystem = new Climber();
+    //public final Climber climberSubsystem = new Climber();
     public final Bling blingSubsystem = new Bling();
 
     public final multiSubCommands multiSubCommand = new multiSubCommands(driveSubsystem, elevatorSubsystem, coralSubsystem, algaeSubsystem);
@@ -171,9 +171,10 @@ public class RobotContainer {
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
+                multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
                 //multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
-                    .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
+                //multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
+                //    .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
             )
             .onFalse(
                 elevatorSubsystem.elevatorToHeight(Positions.home)
@@ -183,8 +184,7 @@ public class RobotContainer {
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 //multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),-0.3),Math.PI,DriveConstants.searchingSpeed,search)
-                    .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
+                multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
 
             )
             .onFalse(
@@ -193,7 +193,10 @@ public class RobotContainer {
 
         driverLB
             .whileTrue(
-                multiSubCommand.aimBarge()
+                new ParallelCommandGroup(
+                    elevatorSubsystem.elevatorToGoal(),
+                    algaeSubsystem.setAlgaePosition(PivotPositions.home)
+                )
             )
             .onFalse(
                 elevatorSubsystem.elevatorToHeight(Positions.home)
@@ -292,8 +295,8 @@ public class RobotContainer {
     public void configureNamedCommands() {
         NamedCommands.registerCommand("AquireCoral", 
             new ParallelDeadlineGroup(
-                coralSubsystem.loadCoral(),
-                elevatorSubsystem.elevatorToHeight(Positions.intake)
+                coralSubsystem.loadCoral()
+               // elevatorSubsystem.elevatorToHeight(Positions.intake)
             )
         );
 
@@ -309,9 +312,9 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("ScoreL4", multiSubCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
 
-        NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeedAuto, search));
         //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
-        NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeedAuto, search));
         //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
     }
 

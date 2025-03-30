@@ -5,8 +5,11 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.generated.TunerConstants;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Translation2d;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 
 public class Constants {
     
@@ -42,25 +45,27 @@ public class Constants {
     }
 
     public final static class DriveConstants {
-        public static double searchingSpeed = 0.15;
+        private static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+        public static double searchingSpeed = 0.125;
+        public static double searchingSpeedAuto = 0.3 / MaxSpeed;
         public static int digProxSensor = 3;
         public static int nanProxSensor = 2;
 
         // In Constants.java, add these to DriveConstants class:
-public static final PPHolonomicDriveController kHolonomicDriveController = new PPHolonomicDriveController(
-    // PID constants for translation
-    new PIDConstants(10, 0, 0),
-    // PID constants for rotation
-    new PIDConstants(7, 0, 0)
-);
+        public static final PPHolonomicDriveController kHolonomicDriveController = new PPHolonomicDriveController(
+            // PID constants for translation
+            new PIDConstants(10, 0, 0),
+            // PID constants for rotation
+            new PIDConstants(7, 0, 0)
+        );
 
-public static final double kHDCPositionTolerance = 0.05; // 5 centimeters
-public static final double kHDCRotationTolerance = 3.0; // 3 degrees
+        public static final double kHDCPositionTolerance = 0.05; // 5 centimeters
+        public static final double kHDCRotationTolerance = 3.0; // 3 degrees
     }
 
     public final static class ElevatorConstants {
         public static class ElevatorProfiledPID {
-            public static double P = 0.08;
+            public static double P = 0.05;
             public static double I = 0;
             public static double D = 0.000
             ;
@@ -83,11 +88,11 @@ public static final double kHDCRotationTolerance = 3.0; // 3 degrees
 
         public static class Positions {
             public static double home = minChassisHeight+1;
-            public static double intake = home+0.5;
+            public static double intake = minChassisHeight;
             public static double primedHeight = 11;
             public static double L1 = 14;
             public static double L2 = 17;
-            public static double L3 = 33.5;
+            public static double L3 = 32.5;
             public static double L4 = 57;
             public static double deAlgifyL2 = 11;
             public static double deAlgifyL3 = 28;
