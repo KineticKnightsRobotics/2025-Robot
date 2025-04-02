@@ -21,7 +21,9 @@ public class coralAffector extends SubsystemBase {
 
     SparkMax rollerMotor, rampMotor;
     SparkMaxConfig rollerMotorConfig, rampMotorConfig;
-    DigitalInput beamUpper, beamLower, proxSensor;
+    DigitalInput beamUpper, beamLower, proxSensor, rampSensor;
+
+    public boolean dDribble = false;
 
 
     public coralAffector() {
@@ -30,6 +32,7 @@ public class coralAffector extends SubsystemBase {
         beamUpper = new DigitalInput(CoralAffectorConstants.beamUpper);
         beamLower = new DigitalInput(CoralAffectorConstants.beamLower);
         proxSensor = new DigitalInput(CoralAffectorConstants.proxSensor);
+        rampSensor = new DigitalInput(CoralAffectorConstants.rampSensor);
     }
 
 
@@ -48,6 +51,7 @@ public class coralAffector extends SubsystemBase {
         rampMotorConfig
             .inverted(false)
             .smartCurrentLimit(10)
+            .closedLoopRampRate(0.00001)
             .idleMode(IdleMode.kBrake);
     }
 
@@ -58,6 +62,7 @@ public class coralAffector extends SubsystemBase {
         SmartDashboard.putBoolean("C_Coral Upper Beambreak", !beamUpper.get());
         SmartDashboard.putBoolean("C_Coral Lower Beambreak", !beamLower.get());
         SmartDashboard.putBoolean("C_AllignedWithPeg", allignedWithPeg());
+        SmartDashboard.putBoolean("C_Coral on Ramp", rampHasCoral());
         SmartDashboard.putData(this);
     }
 
@@ -85,11 +90,15 @@ public class coralAffector extends SubsystemBase {
         return proxSensor.get();
     }
 
+    public boolean rampHasCoral() {
+        return rampSensor.get();
+    }
+
 
     public Command loadCoral() {
         return new SequentialCommandGroup(
             Commands.run(
-                () -> {rollerMotor.set(0.8);rampMotor.set(0.8);},
+                () -> {rollerMotor.set(0.8);rampMotor.set(1.0);},
                 this).until(()->entranceBeambreak()),
             Commands.run(
                 () -> {rollerMotor.set(0.2);},
@@ -100,6 +109,26 @@ public class coralAffector extends SubsystemBase {
         ).finallyDo(
             () -> {rollerMotor.set(0.0);rampMotor.set(0.0);}
         );
+    }
+
+    public Command loadCoralAuto() {
+        return new SequentialCommandGroup(
+            Commands.run(
+                () -> {rollerMotor.set(0.8);},
+                this).until(()->entranceBeambreak()),
+            Commands.run(
+                () -> {rollerMotor.set(0.2);},
+                this).until(()->(!entranceBeambreak() && exitBeambreak())),
+            Commands.run(
+                () -> {rollerMotor.set(-0.2);},
+                this).until(()->entranceBeambreak())
+        ).finallyDo(
+            () -> {rollerMotor.set(0.0);}
+        );
+    }
+
+    public Command setRampSpeed(double speed) {
+        return Commands.runOnce(()-> rampMotor.set(speed));
     }
 
     /*
@@ -119,7 +148,7 @@ public class coralAffector extends SubsystemBase {
     public Command spitCoral() {
         // Set the speed of the affector motor > 0 to run it
         return Commands.run(
-            () -> {rollerMotor.set(0.50);}
+            () -> {rollerMotor.set((dDribble? 0.1 : 0.50));}
         // End condition of linebreak true (piece is in)
         ).until(
             () -> !hasCoral()

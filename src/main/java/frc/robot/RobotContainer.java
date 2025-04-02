@@ -19,10 +19,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.DriveConstants;
@@ -171,25 +173,22 @@ public class RobotContainer {
         driverY
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
-                //multiSubCommand.searchForPeg(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                //multiSubCommand.teleAim(new Translation2d(Units.inchesToMeters(15),0.3),Math.PI,-DriveConstants.searchingSpeed,search)
-                //    .andThen(blingSubsystem.setLEDAnimation(AnimationTypes.Rainbow))
-            )
-            .onFalse(
-                elevatorSubsystem.elevatorToHeight(Positions.home)
+                multiSubCommand.searchForPegTele(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
+                //multiSubCommand.searchForPegAuto(-1, search)
             );
+            //.onFalse(
+                //elevatorSubsystem.elevatorToHeight(Positions.home)
+            //);
         //RIGHT Reef
         driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                //multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search,true)
-                multiSubCommand.searchForPeg(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
-
-            )
-            .onFalse(
-                elevatorSubsystem.elevatorToHeight(Positions.home)
+                multiSubCommand.searchForPegTele(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
+                //multiSubCommand.searchForPegAuto(1, search)
             );
+            //.onFalse(
+                //elevatorSubsystem.elevatorToHeight(Positions.home)
+            //);
 
         driverLB
             .whileTrue(
@@ -227,22 +226,34 @@ public class RobotContainer {
          */
         op1
             .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4)
+                new ParallelCommandGroup(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L4),
+                    Commands.runOnce(()-> {coralSubsystem.dDribble = false;})
+                )
             );
 
         op6
             .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L3)
+                new ParallelCommandGroup(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L3),
+                    Commands.runOnce(()-> {coralSubsystem.dDribble = false;})
+                )            
             );
 
         op11
             .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L2)
+                new ParallelCommandGroup(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L2),
+                    Commands.runOnce(()-> {coralSubsystem.dDribble = false;})
+                )            
             );
 
-        op12
+        op14
             .onTrue(
-                elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L1)
+                new ParallelCommandGroup(
+                    elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.L1),
+                    Commands.runOnce(()-> {coralSubsystem.dDribble = true;})
+                )
             );
 
         op2
@@ -262,7 +273,12 @@ public class RobotContainer {
         //test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
         ///test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         //test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));\
+
+
+
+        op9.whileTrue(multiSubCommand.searchForPegAuto(-1,search));
+        op10.whileTrue(multiSubCommand.intakeCoral().until(()->coralSubsystem.rampHasCoral()));
 
         /*
          * TEST PANEL CONTROLS
@@ -285,8 +301,8 @@ public class RobotContainer {
             driveSubsystem.setDefaultCommand(
                 driveSubsystem.applyRequest(
                     () -> drive
-                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
-                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed)
+                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0)) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
+                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0))
                         .withRotationalRate( ((driverController.getRawAxis(4)*driverController.getRawAxis(4)) * (driverController.getRawAxis(4)>0 ? -1 : 1)) * AngularRate)
                     )
             );
@@ -295,26 +311,25 @@ public class RobotContainer {
     public void configureNamedCommands() {
         NamedCommands.registerCommand("AquireCoral", 
             new ParallelDeadlineGroup(
-                coralSubsystem.loadCoral()
+                coralSubsystem.loadCoralAuto()
                // elevatorSubsystem.elevatorToHeight(Positions.intake)
             )
-        );
+        ); 
+        NamedCommands.registerCommand("LoadRamp",coralSubsystem.loadCoralAuto().until(()->coralSubsystem.rampHasCoral()));
 
-        NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim(-DriveConstants.searchingSpeed, search));
-        NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim(DriveConstants.searchingSpeed, search));
+        NamedCommands.registerCommand("StartRamp", coralSubsystem.setRampSpeed(1.0));
 
+        //NamedCommands.registerCommand("OptimizedScoreLeft", multiSubCommand.autoAim(-DriveConstants.searchingSpeed, search));
+        //NamedCommands.registerCommand("OptimizedScoreRight", multiSubCommand.autoAim(DriveConstants.searchingSpeed, search));
 
-        NamedCommands.registerCommand("SigmaScoreLeft",multiSubCommand.sigmaAuto(new Translation2d(Units.inchesToMeters(15),0.3), search));
-        NamedCommands.registerCommand("SigmaScoreRight", multiSubCommand.sigmaAuto(new Translation2d(Units.inchesToMeters(15),-0.3), search));
-
-        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.primedHeight),elevatorSubsystem.elevatorToGoal()));
+        NamedCommands.registerCommand("ElevatorUp", new SequentialCommandGroup(elevatorSubsystem.setElevatorGoal(ElevatorConstants.Positions.primedHeight),elevatorSubsystem.elevatorToGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
         NamedCommands.registerCommand("ElevatorDown", elevatorSubsystem.elevatorToHeight(Positions.home));
 
-        NamedCommands.registerCommand("ScoreL4", multiSubCommand.scoreCoralAuto(ElevatorConstants.Positions.L4));
+        NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeedAuto, search));        //NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(1, search));
 
-        NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, DriveConstants.searchingSpeedAuto, search));
         //NamedCommands.registerCommand("ScoreL4ProxLeft", teleopCommand.searchForPeg(-DriveConstants.searchingSpeed, 0.05, 0.0, search,false));
-        NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeedAuto, search));
+        NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(ElevatorConstants.Positions.L4, -DriveConstants.searchingSpeedAuto, search));        //NamedCommands.registerCommand("ScoreL4ProxLeft", multiSubCommand.scoreCoralAutoProx(1, search));
+        //NamedCommands.registerCommand("ScoreL4ProxRight", multiSubCommand.scoreCoralAutoProx(-1, search));
         //NamedCommands.registerCommand("ScoreL4ProxRight", teleopCommand.searchForPeg(DriveConstants.searchingSpeed, 0.05, 0.0, search, false));
     }
 

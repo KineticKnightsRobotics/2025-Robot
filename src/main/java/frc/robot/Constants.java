@@ -48,6 +48,10 @@ public class Constants {
         private static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
         public static double searchingSpeed = 0.125;
         public static double searchingSpeedAuto = 0.3 / MaxSpeed;
+        public static double searchingSpeedAutoSeek = 1.5;
+        public static double searchingSpeedAutoFine = 0.3; 
+
+
         public static int digProxSensor = 3;
         public static int nanProxSensor = 2;
 
@@ -130,6 +134,7 @@ public class Constants {
         public static int beamUpper = 9;
         public static int beamLower = 8;
         public static int proxSensor = 6;
+        public static int rampSensor = 0;
     }
 
     public final class ClimberConstants {

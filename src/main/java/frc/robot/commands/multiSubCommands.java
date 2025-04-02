@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.Constants.ElevatorConstants.Positions;
 import frc.robot.subsystems.Drive;
@@ -39,57 +40,6 @@ public class multiSubCommands extends Command{
         coralSub = coral;
         algaeSub = algae;
     }
-    
-    /*
-    public Command scoreCoralAuto(double height) {
-        return
-            new SequentialCommandGroup(
-                elevSub.setElevatorGoal(height),
-                elevSub.moveElevator()
-                    .until(() -> elevSub.elevatorAtGoal()),
-                new ParallelRaceGroup(
-                    elevSub.moveElevator(),
-                    coralSub.spitCoral().withTimeout(1)
-                ),
-                elevSub.homeElevator()
-            );
-    }
-    */
-
-    public Command scoreCoralAutoProx(double height, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
-        return
-            new SequentialCommandGroup(
-                //Set elev height
-                elevSub.setElevatorGoal(height),
-                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
-                elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
-                searchForPeg(searchSpeed,0.0,0.0,speedRequest),
-                //Continue moving elevator until coral has been spat out.
-                new ParallelDeadlineGroup(
-                    coralSub.spitCoral().withTimeout(1),
-                    elevSub.elevatorToGoal()
-                )
-                //Send the elevator back to home
-            );
-    }
-
-
-    public Command scoreCoralAuto(double height) {
-        return
-            new SequentialCommandGroup(
-                //Set elev height
-                elevSub.setElevatorGoal(height),
-                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
-                elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
-                //Continue moving elevator until coral has been spat out.
-                new ParallelDeadlineGroup(
-                    coralSub.spitCoral().withTimeout(1),
-                    elevSub.elevatorToGoal()
-                ),
-                //Send the elevator back to home
-                elevSub.elevatorToGoal().until(()-> elevSub.getElevatorPosition() < 10)
-            );
-    }
 
     public Command intakeCoral() {
         return new SequentialCommandGroup(
@@ -118,7 +68,7 @@ public class multiSubCommands extends Command{
 
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    public Command searchForPeg(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
+    public Command searchForPegTele(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
         return
             driveSub.applyRequest(
                 () -> speedRequest
@@ -130,26 +80,54 @@ public class multiSubCommands extends Command{
                 Commands.runOnce(() -> driveSub.setControl(speedRequest.withVelocityX(0.0).withVelocityY(0.0).withRotationalRate(0.0)))
             );
     }
-
-
-
-    public Command autoAim(double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
-        return new SequentialCommandGroup(
-            elevSub.setElevatorGoal(Positions.L4),
-            elevSub.elevatorToGoal().until(()->elevSub.elevatorAtGoal()),
-            new ParallelDeadlineGroup(
-                searchForPeg(searchSpeed, 0.0, 0.0, speedRequest),
-                elevSub.elevatorToGoal()//.until(()->(elevSub.getElevatorGoal() > 56))
-            ),
-            new WaitCommand(0.15),
-            new ParallelDeadlineGroup(
-                coralSub.spitCoral(),
-                elevSub.elevatorToGoal()
-            )
-            
-        );
+    public Command searchForPegAuto(double direction, SwerveRequest.RobotCentric speedRequest) {
+        return 
+            new SequentialCommandGroup(
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityY(DriveConstants.searchingSpeedAutoSeek * direction)
+                        .withVelocityX(0.0)
+                        .withRotationalRate(0.0)
+                ).until(()-> coralSub.allignedWithPeg()),
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityY(DriveConstants.searchingSpeedAutoSeek * direction)
+                        .withVelocityX(0.0)
+                        .withRotationalRate(0.0)
+                ).until(()-> !coralSub.allignedWithPeg()),
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityY(DriveConstants.searchingSpeedAutoFine * direction * -1)
+                        .withVelocityX(0.0)
+                        .withRotationalRate(0.0)
+                ).until(()-> coralSub.allignedWithPeg()),
+                driveSub.applyRequest(
+                    () -> speedRequest
+                        .withVelocityY(0.0)
+                        .withVelocityX(0.0)
+                        .withRotationalRate(0.0)
+                )
+            );
     }
 
+    public Command scoreCoralAutoProx(double height, double searchSpeed, SwerveRequest.RobotCentric speedRequest) {
+        return
+            new SequentialCommandGroup(
+                //Set elev height
+                elevSub.setElevatorGoal(height),
+                //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
+                elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
+                searchForPegTele(searchSpeed,0.0,0.0,speedRequest),
+                //Continue moving elevator until coral has been spat out.
+                new ParallelDeadlineGroup(
+                    coralSub.spitCoral().withTimeout(1),
+                    elevSub.elevatorToGoal()
+                )
+                //Send the elevator back to home
+            );
+    }
+
+    /*
     public Command sigmaAuto(Translation2d desiredDisplacement, SwerveRequest.RobotCentric speedRequest) {
         return new SequentialCommandGroup(
             //elevSub.setElevatorGoal(ElevatorConstants.Positions.primedHeight),
@@ -190,6 +168,7 @@ public class multiSubCommands extends Command{
             )
         );
     }
+    
 
     public Command aimBarge() {
         return new SequentialCommandGroup(
@@ -202,4 +181,5 @@ public class multiSubCommands extends Command{
             )
         );
     }
+    */
 }

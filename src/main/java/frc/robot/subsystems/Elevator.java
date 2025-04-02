@@ -164,8 +164,8 @@ public class Elevator extends SubsystemBase {
             () -> {
                 //Clamp new incoming position incase it is ever out of the physical bounds of the elevator.
                 goalPosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.1, ElevatorConstants.maxChassisHeight+2.5);
-            },
-            this
+            }//,
+            //this
         );
     }
 
@@ -179,8 +179,8 @@ public class Elevator extends SubsystemBase {
             () -> {
                 //Clamp new incoming position incase it is ever out of the physical bounds of the elevator.
                 algaePosition = MathUtil.clamp(position, ElevatorConstants.minChassisHeight+0.5, ElevatorConstants.maxChassisHeight-0.1);
-            },
-            this
+            }//,
+            //this
         );
     }
     

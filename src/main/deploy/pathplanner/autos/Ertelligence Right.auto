@@ -7,7 +7,19 @@
         {
           "type": "named",
           "data": {
-            "name": "SigmaScoreRight"
+            "name": "StartRamp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "R_toR1_Prox"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -25,6 +37,44 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LoadRamp"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_StoR2_Prox"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
               }
             ]
           }
@@ -32,19 +82,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R_StoR2_Sigma"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "SigmaScoreRight"
+            "name": "ScoreL4ProxLeft"
           }
         },
         {
@@ -62,6 +100,44 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "LoadRamp"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "R_StoR3_Prox"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "AquireCoral"
+                }
               }
             ]
           }
@@ -69,19 +145,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R_StoR2_Sigma"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "SigmaScoreLeft"
+            "name": "ScoreL4ProxRight"
           }
         },
         {
@@ -101,24 +165,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AquireCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "R_StoR4_Sigma"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "SigmaScoreRight"
           }
         }
       ]
