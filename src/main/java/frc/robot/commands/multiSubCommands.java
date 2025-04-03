@@ -117,7 +117,10 @@ public class multiSubCommands extends Command{
                 elevSub.setElevatorGoal(height),
                 //Move elevator until its reached its goal. Once its at its goal, we are in the right position to score a coral.
                 elevSub.elevatorToGoal().until(()-> elevSub.elevatorAtGoal()),
-                searchForPegTele(searchSpeed,0.0,0.0,speedRequest),
+                new ParallelDeadlineGroup(
+                    searchForPegTele(searchSpeed,0.0,0.0,speedRequest),
+                    elevSub.elevatorToGoal()
+                ),
                 //Continue moving elevator until coral has been spat out.
                 new ParallelDeadlineGroup(
                     coralSub.spitCoral().withTimeout(1),
