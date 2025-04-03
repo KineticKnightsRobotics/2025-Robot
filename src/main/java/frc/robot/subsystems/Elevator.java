@@ -283,7 +283,7 @@ public class Elevator extends SubsystemBase {
                     nanElevatorMotor.set(output);
                 },
                 this
-            )
+            ).until(()->getElevatorPosition() < 4)
             .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     }
 

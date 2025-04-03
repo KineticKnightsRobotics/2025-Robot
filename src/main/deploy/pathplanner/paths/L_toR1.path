@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.167251712328767,
-        "y": 6.128595890410959
+        "x": 7.091200657894737,
+        "y": 5.9878289473684205
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.993113737213701,
-        "y": 5.757726695598219
+        "x": 6.871143704435342,
+        "y": 5.869191106718104
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.364169520547945,
-        "y": 4.9716181506849315
+        "x": 5.3015625,
+        "y": 4.996792763157894
       },
       "prevControl": {
-        "x": 5.8884520626244425,
-        "y": 5.169534625963188
+        "x": 5.521083985770011,
+        "y": 5.116418501547785
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,11 +32,11 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.8,
+      "minWaypointRelativePos": 0.7,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
-        "maxVelocity": 2.5,
-        "maxAcceleration": 4.0,
+        "maxVelocity": 1.0,
+        "maxAcceleration": 6.5,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -62,7 +62,7 @@
   "folder": "Source Auto Left",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -126.65150829833777
   },
   "useDefaultConstraints": true
 }
