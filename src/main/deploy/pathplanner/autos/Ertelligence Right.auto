@@ -5,12 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "StartRamp"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "R_toR1_Prox"
@@ -37,12 +31,6 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
               }
             ]
           }
@@ -54,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LoadRamp"
+                  "name": "AquireCoral"
                 }
               }
             ]
@@ -68,12 +56,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "R_StoR2_Prox"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
                 }
               }
             ]
@@ -100,12 +82,6 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
               }
             ]
           }
@@ -117,7 +93,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LoadRamp"
+                  "name": "AquireCoral"
                 }
               }
             ]
@@ -131,12 +107,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "R_StoR3_Prox"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
                 }
               }
             ]
@@ -165,6 +135,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AquireCoral"
           }
         }
       ]

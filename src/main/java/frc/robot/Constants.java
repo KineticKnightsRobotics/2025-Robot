@@ -46,14 +46,14 @@ public class Constants {
 
     public final static class DriveConstants {
         private static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-        public static double searchingSpeed = 0.125;
+        public static double searchingSpeed = 0.075;
         public static double searchingSpeedAuto = 0.3 / MaxSpeed;
         public static double searchingSpeedAutoSeek = 1.5;
         public static double searchingSpeedAutoFine = 0.3; 
 
 
-        public static int digProxSensor = 3;
-        public static int nanProxSensor = 2;
+        public static int digProxSensor = 20;
+        public static int nanProxSensor = 21;
 
         // In Constants.java, add these to DriveConstants class:
         public static final PPHolonomicDriveController kHolonomicDriveController = new PPHolonomicDriveController(

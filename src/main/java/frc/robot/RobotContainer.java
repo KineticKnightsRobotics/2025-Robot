@@ -175,6 +175,7 @@ public class RobotContainer {
             .whileTrue(
                 multiSubCommand.searchForPegTele(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
                 //multiSubCommand.searchForPegAuto(-1, search)
+                //new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.165),Units.degreesToRadians(180))
             );
             //.onFalse(
                 //elevatorSubsystem.elevatorToHeight(Positions.home)
@@ -183,6 +184,7 @@ public class RobotContainer {
         driverX
             //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
+                //new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.165),Units.degreesToRadians(180))
                 multiSubCommand.searchForPegTele(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
                 //multiSubCommand.searchForPegAuto(1, search)
             );

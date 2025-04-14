@@ -23,22 +23,58 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "C_AlignWithAlgae1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "C_BackUp"
+                  "pathName": "C_ToBarge1"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "ElevatorDown"
+                  "name": null
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C_Barge1ToAlgae2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "C_Algae2ToBarge2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
           }
         }
       ]

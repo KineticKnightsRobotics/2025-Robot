@@ -110,7 +110,7 @@ public class allignReef extends Command {
 
     @Override
     public boolean isFinished() {
-        return (driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan()) && error < 0.10;
+        return /*(driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan()) &&*/ error < 0.10;
         
         //boolean sensorsActivated = driveSubsystem.getSensorDig() || driveSubsystem.getSensorNan();
         //boolean withinErrorTolerance = error < 0.10;

@@ -4,6 +4,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -66,7 +68,7 @@ public class multiSubCommands extends Command{
             );
     }
 
-
+    private Debouncer debouncer = new Debouncer(0.04, DebounceType.kBoth);
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     public Command searchForPegTele(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
         return
@@ -75,7 +77,14 @@ public class multiSubCommands extends Command{
                     .withVelocityY(searchSpeed*MaxSpeed)
                     .withVelocityX(0.0)
                     .withRotationalRate(0.0)
-            ).until(()-> coralSub.allignedWithPeg())
+            ).until(()-> debouncer.calculate(coralSub.allignedWithPeg()))
+            .andThen(new WaitCommand(0.05))
+            .andThen(
+                ()-> speedRequest
+                    .withVelocityY(searchSpeed * -1)
+                    .withVelocityX(0.0)
+                    .withRotationalRate(0.0)
+            ).until(()-> debouncer.calculate(coralSub.allignedWithPeg()))
             .andThen(
                 Commands.runOnce(() -> driveSub.setControl(speedRequest.withVelocityX(0.0).withVelocityY(0.0).withRotationalRate(0.0)))
             );

@@ -13,7 +13,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import frc.robot.Constants.CoralAffectorConstants;
 
 public class coralAffector extends SubsystemBase {
@@ -22,6 +26,12 @@ public class coralAffector extends SubsystemBase {
     SparkMax rollerMotor, rampMotor;
     SparkMaxConfig rollerMotorConfig, rampMotorConfig;
     DigitalInput beamUpper, beamLower, proxSensor, rampSensor;
+    //AnalogInput ultrasonicSensor;
+    Ultrasonic ultrasonicSensor;
+
+    //double voltage_scale_factor = 5/RobotController.getVoltage5V();
+    
+    private Debouncer debouncer = new Debouncer(0.04,DebounceType.kRising);
 
     public boolean dDribble = false;
 
@@ -33,6 +43,9 @@ public class coralAffector extends SubsystemBase {
         beamLower = new DigitalInput(CoralAffectorConstants.beamLower);
         proxSensor = new DigitalInput(CoralAffectorConstants.proxSensor);
         rampSensor = new DigitalInput(CoralAffectorConstants.rampSensor);
+        //ultrasonicSensor = new Ultrasonic(1,2);
+        //ultrasonicSensor.setAutomaticMode(true);
+        //ultrasonicSensor.
     }
 
 
@@ -63,7 +76,11 @@ public class coralAffector extends SubsystemBase {
         SmartDashboard.putBoolean("C_Coral Lower Beambreak", !beamLower.get());
         SmartDashboard.putBoolean("C_AllignedWithPeg", allignedWithPeg());
         SmartDashboard.putBoolean("C_Coral on Ramp", rampHasCoral());
+
+        //SmartDashboard.putNumber("C_Ultrasensor Output", ultrasonicSensor.getRangeInches());
         SmartDashboard.putData(this);
+
+        //ultrasonicSensor.ping();
     }
 
     /**
@@ -85,9 +102,15 @@ public class coralAffector extends SubsystemBase {
     public boolean hasCoral() {
         return entranceBeambreak() || exitBeambreak();
     }
+
+    //public double getVoltageScaleFactor() {
+   // }
     
     public boolean allignedWithPeg() {
-        return proxSensor.get();
+        return debouncer.calculate(proxSensor.get());
+        //return proxSensor.get();
+        //in inches
+        //return ((ultrasonicSensor.getRangeInches() > 12 && ultrasonicSensor.getRangeInches()< 22));
     }
 
     public boolean rampHasCoral() {

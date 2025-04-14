@@ -31,12 +31,6 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
               }
             ]
           }
@@ -48,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LoadRamp"
+                  "name": "AquireCoral"
                 }
               }
             ]
@@ -62,12 +56,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "L_StoR2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
                 }
               }
             ]
@@ -94,12 +82,6 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
               }
             ]
           }
@@ -111,7 +93,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LoadRamp"
+                  "name": "AquireCoral"
                 }
               }
             ]
@@ -125,12 +107,6 @@
                 "type": "path",
                 "data": {
                   "pathName": "L_StoR3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
                 }
               }
             ]
@@ -157,12 +133,6 @@
                 "data": {
                   "name": "ElevatorDown"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
               }
             ]
           }
@@ -174,7 +144,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "LoadRamp"
+                  "name": "AquireCoral"
                 }
               }
             ]
