@@ -164,42 +164,22 @@ public class RobotContainer {
                 algaeSubsystem.spitAlgae()
             );
         driverB
-            .whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.icecream,PivotPositions.home))
-            .onFalse(
-                algaeSubsystem.setAlgaePosition(PivotPositions.home)
-            );
-
-
-
-        //driverB
-        //    .whileTrue(
-        //        coralSubsystem.spitCoral()
-        //  ); 
+            .whileTrue(
+                coralSubsystem.spitCoral()
+          ); 
 
         //LEFT Reef
         driverY
-            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
                 multiSubCommand.searchForPegTele(-DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
                 .andThen(coralSubsystem.spitCoral())
-                //multiSubCommand.searchForPegAuto(-1, search)
-                //new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),0.165),Units.degreesToRadians(180))
             );
-            //.onFalse(
-                //elevatorSubsystem.elevatorToHeight(Positions.home)
-            //);
-        //RIGHT Reef
+
         driverX
-            //.whileTrue(new allign(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.2),driveSubsystem.getLimelightTarget(),Units.degreesToRadians(180)));
             .whileTrue(
-                //new allignReef(driveSubsystem, new Translation2d(Units.inchesToMeters(17.6),-0.165),Units.degreesToRadians(180))
                 multiSubCommand.searchForPegTele(DriveConstants.searchingSpeed,-driverController.getRawAxis(0)*MaxSpeed,-driverController.getRawAxis(4)*AngularRate, search)
                 .andThen(coralSubsystem.spitCoral())
-                //multiSubCommand.searchForPegAuto(1, search)
             );
-            //.onFalse(
-                //elevatorSubsystem.elevatorToHeight(Positions.home)
-            //);
 
         driverLB
             .whileTrue(
@@ -232,25 +212,6 @@ public class RobotContainer {
             .onFalse(
                 algaeSubsystem.setAlgaePosition(PivotPositions.home)
             );
-        driverPadUp
-            .whileTrue(
-                climberSubsystem.setClimberSpeed(0.25)
-            )
-            .onFalse(
-                climberSubsystem.setClimberSpeed(0.0)
-            );
-        /*
-        driverPadDown
-            .whileTrue(algaeSubsystem.intakeAlgae(PivotPositions.icecream,PivotPositions.home))
-            .onFalse(
-                algaeSubsystem.setAlgaePosition(PivotPositions.home)
-            );
-        */
-        driverPadDown
-            .whileTrue(
-                coralSubsystem.spitCoral()
-            ); 
-
         /*
          * OPERATOR CONTROLS
          */
@@ -300,45 +261,11 @@ public class RobotContainer {
                 elevatorSubsystem.setElevatorDealgify(ElevatorConstants.Positions.iceCream)
             );
 
-        op4
-            .onTrue(
-                climberSubsystem.releaseRamp()
-            );
-
-        op5
-            .whileTrue(
-                climberSubsystem.setClimberSpeed(1.0)
-            );
-
         
 
         /*
          * PROGRAMMER CONTROLS
          */
-
-        //test1.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        ///test2.whileTrue(driveSubsystem.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-        //test3.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        //test4.whileTrue(driveSubsystem.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));\
-
-
-
-        //op9.whileTrue(multiSubCommand.searchForPegAuto(-1,search));
-        //op10.whileTrue(multiSubCommand.intakeCoral().until(()->coralSubsystem.rampHasCoral()));
-
-        /*
-         * TEST PANEL CONTROLS
-         */
-        /*
-        test4
-            .whileTrue(
-                new AlignToReefHDC(
-                    driveSubsystem,
-                    new Translation2d(Units.inchesToMeters(15), 0), // 15 inches forward, 0 sideways
-                    Math.PI // 180 degrees rotation
-                )
-            );
-            */
     }
 
 
@@ -347,9 +274,9 @@ public class RobotContainer {
             driveSubsystem.setDefaultCommand(
                 driveSubsystem.applyRequest(
                     () -> drive
-                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0)) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
-                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0))
-                        .withRotationalRate( ((driverController.getRawAxis(4)*driverController.getRawAxis(4)) * (driverController.getRawAxis(4)>0 ? -1 : 1)) * AngularRate)
+                        .withVelocityX(      ((driverController.getRawAxis(1)*driverController.getRawAxis(1)) * (driverController.getRawAxis(1)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0) * 0.25) //Square joystick values for finer control with small inputs while still keeping full tilt = full speed
+                        .withVelocityY(      ((driverController.getRawAxis(0)*driverController.getRawAxis(0)) * (driverController.getRawAxis(0)>0 ? -1 : 1)) * MaxSpeed * (driverLB.getAsBoolean() ? 0.3 : 1.0) * 0.25)
+                        .withRotationalRate( ((driverController.getRawAxis(4)*driverController.getRawAxis(4)) * (driverController.getRawAxis(4)>0 ? -1 : 1)) * AngularRate * 0.5)
                     )
             );
     }
