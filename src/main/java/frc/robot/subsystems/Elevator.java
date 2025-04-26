@@ -284,7 +284,13 @@ public class Elevator extends SubsystemBase {
                 },
                 this
             ).until(()->getElevatorPosition() < 4)
-            .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+            .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+            .andThen(
+                ()-> {
+                    digElevatorMotor.set(0.0);
+                    nanElevatorMotor.set(0.0); //TODO: might break the code!
+                }
+            );
     }
 
     public Command zeroElevatorPosition() {

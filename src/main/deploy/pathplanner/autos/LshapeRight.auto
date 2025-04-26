@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "C_toR1"
+            "pathName": "Lshape_R1"
           }
         },
         {
@@ -23,58 +17,46 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "C_AlignWithAlgae1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": null
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "C_ToBarge1"
+                  "name": "ElevatorDown"
                 }
               },
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": null
+                  "pathName": "Lshape_toS1"
                 }
               }
             ]
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "C_Barge1ToAlgae2"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": null
+            "name": "AquireCoral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "C_Algae2ToBarge2"
+            "pathName": "Lshape_S1ToR2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": null
+            "name": "ScoreL4ProxRight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorDown"
           }
         }
       ]

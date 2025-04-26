@@ -169,4 +169,20 @@ public class algaeAffector extends SubsystemBase {
                 }
             );
     }
+
+    public Command autoAlgae() {
+        return Commands
+        .run(
+            () -> {
+                rollerMotor.set(1.0);
+            },
+            this
+        )
+        .until(()-> !hasAlgae())
+        .finallyDo(
+            () -> {
+                rollerMotor.set(0.0);
+            }
+        );
+    }
 }

@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,8 +26,10 @@ public class Climber extends SubsystemBase {
     RelativeEncoder nanEncoder;
     SparkMaxConfig nanMotorConfig;
 
-    SparkMax winchMotor;
-    SparkMaxConfig winchConfig;
+    Servo digServo;
+    Servo nanServo;
+
+
 
     public Climber() {
         digMotor = new SparkMax(ClimberConstants.digMotorID, MotorType.kBrushless);
@@ -35,8 +38,14 @@ public class Climber extends SubsystemBase {
         nanMotor = new SparkMax(ClimberConstants.nanMotorID, MotorType.kBrushless);
         nanMotorConfig = new SparkMaxConfig();
         nanEncoder = nanMotor.getEncoder();
-        winchMotor = new SparkMax(ClimberConstants.winchID, MotorType.kBrushless);
-        winchConfig = new SparkMaxConfig();
+
+        digServo = new Servo(9);
+        nanServo = new Servo(8);
+
+        digServo.set(ClimberConstants.servoRestingDig);
+        nanServo.set(ClimberConstants.servoRestingNan);
+
+
         configureDevices();
     }
 
@@ -53,17 +62,14 @@ public class Climber extends SubsystemBase {
             .idleMode(IdleMode.kBrake);
         nanMotor.configure(digMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        winchConfig
-            .smartCurrentLimit(10)
-            .inverted(false)
-            .idleMode(IdleMode.kBrake);
-        winchMotor.configure(winchConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("C_digPosition", digEncoder.getPosition());
-        SmartDashboard.putNumber("C_nanPosition", nanEncoder.getPosition());
+        SmartDashboard.putNumber("Cl_digPosition", digEncoder.getPosition());
+        SmartDashboard.putNumber("Cl_nanPosition", nanEncoder.getPosition());
+        SmartDashboard.putNumber("Cl_digServo", digServo.getPosition());
+        SmartDashboard.putNumber("Cl_nanServo",nanServo.getPosition());
         SmartDashboard.putData(this);
     }
 
@@ -84,17 +90,15 @@ public class Climber extends SubsystemBase {
         );
     }
 
-    public Command setWinchSpeed(double speed) {
+    public Command releaseRamp() {
         return Commands
-            .run(
-                () -> {
-                    winchMotor.set(speed);;
-                },
-                this
-            ).finallyDo(
-                () -> {
-                    winchMotor.set(0.0);
-                }
-            );
+        .runOnce(
+            ()-> {
+                digServo.set(ClimberConstants.servoReleaseDig);
+                nanServo.set(ClimberConstants.servoReleaseNan);
+            },
+        this
+        );
     }
+
 }

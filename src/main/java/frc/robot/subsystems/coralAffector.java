@@ -46,6 +46,7 @@ public class coralAffector extends SubsystemBase {
         //ultrasonicSensor = new Ultrasonic(1,2);
         //ultrasonicSensor.setAutomaticMode(true);
         //ultrasonicSensor.
+        configDevices();
     }
 
 
@@ -54,7 +55,7 @@ public class coralAffector extends SubsystemBase {
         // Effector motor
         rollerMotorConfig = new SparkMaxConfig();
         rollerMotorConfig
-            .inverted(true)
+            .inverted(false)
             .smartCurrentLimit(30)
             .closedLoopRampRate(0.000001)
             .idleMode(IdleMode.kBrake);

@@ -5,123 +5,15 @@
     "data": {
       "commands": [
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "L_toR1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxRight"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L_R1toS"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorDown"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "LoadRamp"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L_StoR2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL4ProxRight"
-          }
-        },
-        {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L_R2toS"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorDown"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "LoadRamp"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "parallel",
-          "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L_StoR3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AquireCoral"
-                }
-              }
-            ]
+            "pathName": "C_toR1"
           }
         },
         {
@@ -137,7 +29,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L_R3toS"
+                  "pathName": "C_AlignWithAlgae1"
                 }
               },
               {
@@ -150,22 +42,96 @@
           }
         },
         {
-          "type": "race",
+          "type": "named",
+          "data": {
+            "name": "DealgifyLow"
+          }
+        },
+        {
+          "type": "deadline",
           "data": {
             "commands": [
               {
+                "type": "path",
+                "data": {
+                  "pathName": "C_ToBarge1"
+                }
+              },
+              {
                 "type": "named",
                 "data": {
-                  "name": "AquireCoral"
+                  "name": "ElevatorToL4"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootAlgae"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "C_Barge1ToAlgae2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorDown"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DealgifyHigh"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "C_Algae2ToBarge2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ElevatorToL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootAlgae"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorDown"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

@@ -8,27 +8,32 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.485913110453859,
-        "y": 3.9988288038704916
+        "x": 6.350328947368421,
+        "y": 4.448355263157895
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.581907894736841,
-        "y": 4.890953947368421
+        "x": 7.37985197368421,
+        "y": 5.121875
       },
       "prevControl": {
-        "x": 7.332394750116119,
-        "y": 4.875359375829625
+        "x": 7.130338829063488,
+        "y": 5.106280428461204
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 39.410723870985194
+    }
+  ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
@@ -45,7 +50,14 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "ShootAlgae",
+      "waypointRelativePos": 0.700534759358289,
+      "endWaypointRelativePos": 1.0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 6.5,
@@ -56,7 +68,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 38.48019824834303
   },
   "reversed": false,
   "folder": "center Paths",

@@ -6,12 +6,9 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.AlgaeAffectorConstants.PivotPositions;
 import frc.robot.Constants.ElevatorConstants.Positions;
@@ -19,14 +16,9 @@ import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.algaeAffector;
 import frc.robot.subsystems.coralAffector;
-import pabeles.concurrency.IntOperatorTask.Max;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.commands.Drive.allignBarge;
-import frc.robot.commands.Drive.allignReef;
-import frc.robot.commands.Drive.searchForBranch;
 import frc.robot.generated.TunerConstants;
-import edu.wpi.first.math.util.Units;
 
 public class multiSubCommands extends Command{
 
@@ -46,6 +38,7 @@ public class multiSubCommands extends Command{
     public Command intakeCoral() {
         return new SequentialCommandGroup(
             algaeSub.setAlgaePosition(PivotPositions.coralIntaking),
+            new WaitCommand(0.1),
             new ParallelDeadlineGroup(
                 coralSub.loadCoral()
                 //elevSub.elevatorToHeight(Positions.intake)
@@ -68,6 +61,21 @@ public class multiSubCommands extends Command{
             );
     }
 
+    public Command dealgifyAuto(double dealgifyLevel) { 
+        return
+            new SequentialCommandGroup(
+                elevSub.setElevatorDealgify(dealgifyLevel),
+                elevSub.elevatorToAlgae().until(()-> dealgifyLevel - elevSub.getElevatorPosition() > 1.5),
+                new ParallelDeadlineGroup(
+                    algaeSub.intakeAlgae(PivotPositions.deAlgifying, PivotPositions.home),
+                    elevSub.elevatorToAlgae()
+                ),
+                algaeSub.setAlgaePosition(PivotPositions.home),
+                new WaitCommand(0.5).until(()->algaeSub.atPosition()),
+                elevSub.elevatorToHeight(Positions.home)
+            );
+    }
+
     private Debouncer debouncer = new Debouncer(0.04, DebounceType.kBoth);
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     public Command searchForPegTele(double searchSpeed, double ySpeed, double rSpeed, SwerveRequest.RobotCentric speedRequest){
@@ -78,7 +86,7 @@ public class multiSubCommands extends Command{
                     .withVelocityX(0.0)
                     .withRotationalRate(0.0)
             ).until(()-> debouncer.calculate(coralSub.allignedWithPeg()))
-            .andThen(new WaitCommand(0.05))
+            .andThen(new WaitCommand(/*0.05*/0.001))
             .andThen(
                 ()-> speedRequest
                     .withVelocityY(searchSpeed * -1)

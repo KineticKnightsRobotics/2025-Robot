@@ -98,6 +98,7 @@ public class Constants {
             public static double L2 = 17;
             public static double L3 = 32.5;
             public static double L4 = 57;
+            public static double iceCream = home;
             public static double deAlgifyL2 = 11;
             public static double deAlgifyL3 = 28;
         }
@@ -122,9 +123,10 @@ public class Constants {
         public static class PivotPositions {
             public static double groundIntake = 17.0;
             public static double deAlgifying = 65.0;
+            public static double icecream = 48;
             public static double carrying = 49;
             public static double home = 115.0;
-            public static double coralIntaking = 97;
+            public static double coralIntaking = 93;//97;
         }
     }
 
@@ -140,6 +142,11 @@ public class Constants {
     public final class ClimberConstants {
         public static int digMotorID = 51;
         public static int nanMotorID = 52;
-        public static int winchID = 53;
+        public static int digServoID = 9;
+        public static int nanServoID = 8;
+        public static double servoRestingDig = 0;
+        public static double servoReleaseDig = 1;
+        public static double servoRestingNan = 1;
+        public static double servoReleaseNan = 0;
     }
 }

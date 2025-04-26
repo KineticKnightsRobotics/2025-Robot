@@ -3,11 +3,12 @@
   "robotLength": 0.889,
   "holonomicMode": true,
   "pathFolders": [
-    "center Paths",
+    "L shape Right side",
     "Sigma Paths Right",
     "Source Auto Left",
     "Source Auto Right",
-    "Source Auto Right EventFlags"
+    "Source Auto Right EventFlags",
+    "center Paths"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.2,
